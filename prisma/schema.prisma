@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./artistic_jobs.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Employee {
+  id          Int     @id @default(autoincrement())
+  name        String
+  jobcode     Int
+  hours       Int
+  min         Int
+  labor_cost  Real
+  entry_time  Text
+  entered_by  Text
+}
+
+model Job {
+  id          Int     @id @default(autoincrement())
+  job_number  Int
+  title       String
+  description String
+  entered_by  Text
+}
+
+model Wood {
+  id         Int      @id @default(autoincrement())
+  name       Text
+  quantity   Int
+  thickness  Real
+  length     Real
+  width      Real
+  foot       Real
+  tbf        Real
+  wood_cost  Real
+  replace    Real
+  entered_by Text
+}
