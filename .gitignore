@@ -1,0 +1,9 @@
+# Node / NPM
+node_modules/
+
+# local
+.env.local
+.env
+.DS_Store
+.next
+.vscode
