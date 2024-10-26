@@ -67,5 +67,11 @@ model JobLumberCost {
 
 model JobLaborCodes {
   id          Int     @id @default(autoincrement())
+  job_code    String
   description String
+}
+
+model WoodTypes {
+  id          Int     @id @default(autoincrement())
+  wood_type   String
 }

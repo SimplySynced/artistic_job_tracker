@@ -52,7 +52,7 @@ export default function CustomersTableItem({ customer, onCheckboxChange, isSelec
             </div>
           </div>
         </EditJob>
-        <Link href={`/job/${customer.id}`}>
+        <Link href={`/jobs/${customer.id}`}>
           <button className="btn bg-green-500 hover:bg-green-600 text-white m-2">View Job</button>
         </Link>
         <button className="btn bg-red-500 text-white hover:bg-red-600 m-2">
