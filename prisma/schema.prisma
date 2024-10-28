@@ -74,5 +74,5 @@ model JobLaborCodes {
 model WoodTypes {
   id          Int     @id @default(autoincrement())
   wood_type   String
-  enabled     Int     @default 1
+  enabled     Boolean @default(true)
 }

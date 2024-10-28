@@ -1,9 +1,6 @@
 import Sidebar from '@/components/Sidebar'
-import Header from '@/components/ui/header'
-import { SelectedItemsProvider } from '@/app/selected-items-context'
 import { Inter } from 'next/font/google'
 import Theme from './theme-provider'
-import AppProvider from './app-provider'
 import '@/styles/globals.css'
 
 const inter = Inter({
@@ -26,26 +23,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>{/* suppressHydrationWarning: https://github.com/vercel/next.js/issues/44343 */}
       <body className="font-inter antialiased bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400">
         <Theme>
-          <AppProvider>
-            <div className="flex h-[100dvh] overflow-hidden">
-
-              {/* Sidebar */}
-              <Sidebar />
-
-              {/* Content area */}
-              <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-
-                {/*  Site header */}
-                <Header />
-
-                <main className="grow [&>*:first-child]:scroll-mt-16">
-                  {children}
-                </main>
-
-              </div>
-
-            </div>
-          </AppProvider>
+          <Sidebar children={children} />
         </Theme>
       </body>
     </html>
