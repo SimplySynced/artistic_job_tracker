@@ -186,9 +186,12 @@ export default function SidebarComponent({
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="min-w-52 bg-white" sideOffset={16}>
-                            <DropdownMenuItem>Account</DropdownMenuItem>
-                            <DropdownMenuItem>Team</DropdownMenuItem>
-                            <DropdownMenuItem>Log Out</DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href='#' className="no-underline flex items-center gap-2">
+                                    <LogOut />
+                                    Log Out
+                                </Link>
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </SidebarFooter>
