@@ -171,11 +171,11 @@ export default function SidebarComponent({
                     <DropdownMenu>
                         <DropdownMenuTrigger className="w-full py-2">
                             <div
-                                className='flex items-center justify-start group-data-[collapsible=icon]:justify-center gap-2'
+                                className='focus:outline-none flex items-center justify-start group-data-[collapsible=icon]:justify-center gap-2'
                             >
                                 <Avatar>
-                                    <AvatarImage src="https://github.com/shadcn.png" />
-                                    <AvatarFallback>UN</AvatarFallback>
+                                    <AvatarImage src="https://api.dicebear.com/9.x/identicon/svg" />
+                                    <AvatarFallback className="bg-gray-200 blur-md w-full h-full" />
                                 </Avatar>
                                 <div className="flex flex-col justify-center items-start group-data-[collapsible=icon]:hidden">
                                     <span>Michelle</span>
