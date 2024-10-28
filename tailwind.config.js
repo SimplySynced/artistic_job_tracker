@@ -1,14 +1,10 @@
-import plugin from 'tailwindcss/plugin'
+import plugin from 'tailwindcss/plugin';
 /**import formsPlugin from 'tailwindcss/forms' */
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    './app/**/*.{js,ts,jsx,tsx}',
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
-  ],
-  darkMode: 'class',
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: ['class', 'class'],
   theme: {
     extend: {
       boxShadow: {
@@ -93,6 +89,16 @@ export default {
           900: '#4F3D0E',
           950: '#342809',
         },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
       },
       fontFamily: {
         inter: ['var(--font-inter)', 'sans-serif'],
@@ -118,7 +124,12 @@ export default {
     // add custom variant for expanding sidebar
     plugin(({ addVariant, e }) => {
       addVariant('sidebar-expanded', ({ modifySelectors, separator }) => {
-        modifySelectors(({ className }) => `.sidebar-expanded .${e(`sidebar-expanded${separator}${className}`)}`);
+        modifySelectors(
+          ({ className }) =>
+            `.sidebar-expanded .${e(
+              `sidebar-expanded${separator}${className}`,
+            )}`,
+        );
       });
     }),
   ],
