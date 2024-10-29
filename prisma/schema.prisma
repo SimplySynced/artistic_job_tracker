@@ -67,8 +67,9 @@ model JobLumberCost {
 
 model JobLaborCodes {
   id          Int     @id @default(autoincrement())
-  job_code    String
+  job_code    Int
   description String
+  enabled     Boolean @default(true)
 }
 
 model WoodTypes {
