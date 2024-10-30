@@ -16,6 +16,8 @@ import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
+import { EmployeeTable } from "./table"
+
 export default function EmployeeManagement() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -262,77 +264,19 @@ export default function EmployeeManagement() {
   );
 
   return (
-    <div className="px-4 md:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
-        <Button onClick={handleAddNew} className="bg-neutral-900 text-white">
-          Add Employee
-        </Button>
       </div>
 
       {/* Desktop view */}
       <div className="hidden md:block overflow-x-auto">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Name</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Nick Name</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Location</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate B</TableHead>
-              {/* <TableHead className="w-[100px] text-center font-semibold">Added By</TableHead>
-              <TableHead className="w-[100px] text-center font-semibold">Updated By</TableHead> */}
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {employees.map((employee) => (
-              <TableRow key={employee.id} className="hover:bg-neutral-100 bg-white">
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">
-                    {employee.first_name} {employee.last_name}
-                  </div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.nick_name}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.location}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate)}
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate_b ?? employee.pay_rate)}
-                </TableCell>
-                {/* <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.added_by}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.updated_by}</div>
-                </TableCell> */}
-                <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(employee)}
-                      className="size-8 text-white bg-sky-500 hover:bg-sky-600"
-                    >
-                      <LuPencilLine />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleDelete(employee.id!)}
-                      className="size-8 text-white bg-red-500 hover:bg-red-600"
-                    >
-                      <LuTrash2 />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <EmployeeTable
+          data={employees}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddNew={handleAddNew}
+        />
       </div>
 
       {/* Mobile view */}
