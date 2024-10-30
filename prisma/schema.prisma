@@ -21,6 +21,7 @@ model Employee {
   location    String
   pay_rate    Float
   pay_rate_b  Float
+  total_pay   Float   @default(0)
   added_by    String
   updated_by  String
 }
@@ -72,8 +73,15 @@ model JobLaborCodes {
   enabled     Boolean @default(true)
 }
 
+model Locations {
+  id          Int     @id @default(autoincrement())
+  location    String
+  enabled     Boolean @default(true)
+}
+
 model WoodTypes {
   id          Int     @id @default(autoincrement())
   wood_type   String
   enabled     Boolean @default(true)
 }
+

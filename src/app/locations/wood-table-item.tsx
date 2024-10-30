@@ -20,7 +20,7 @@ export default function CustomersTableItem({ customer, onCheckboxChange, isSelec
     });
 
     if (response.ok) {
-      setWoodTypes((prev) => prev.filter((wood) => wood.id !== id));
+      alert("Added Woodtype")
     } else {
       alert("Failed to delete wood type. Please try again.");
     }

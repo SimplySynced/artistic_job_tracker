@@ -219,7 +219,7 @@ export default function EmployeeManagement() {
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-medium">{employee.first_name} {employee.last_name}</h3>
-            <p className="text-sm text-gray-500">{employee.nick_name}</p>
+            <p className="text-sm text-white-500">{employee.nick_name}</p>
           </div>
           <div className="flex space-x-2">
             <Button
@@ -344,7 +344,7 @@ export default function EmployeeManagement() {
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 bg-white/30" aria-hidden="true" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
               <h2 className="text-lg md:text-xl font-bold mt-0">
