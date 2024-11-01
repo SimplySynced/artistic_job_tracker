@@ -13,17 +13,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Employee {
+model Employees {
   id          Int     @id @default(autoincrement())
   first_name  String
-  last_name   String
-  nick_name   String
-  location    String
-  pay_rate    Float
-  pay_rate_b  Float
-  total_pay   Float   @default(0)
-  added_by    String
-  updated_by  String
+  last_name   String?
+  nick_name   String?
+  location    String?
+  pay_rate    Float?
+  pay_rate_b  Float?
+  added_by    String?
+  updated_by  String?
 }
 
 model TimeSheet {
@@ -35,14 +34,17 @@ model TimeSheet {
   job_hours   Int
   job_minutes Int
   pay_rate    Float
+  total_pay   Float
   added_by    String
   added_date  String
 }
 
 model Jobs {
   id                Int     @id @default(autoincrement())
-  job_location      String
-  job_description   String
+  job_code          Int
+  job_name          String
+  job_location      String  @default("Avenel")
+  job_description   String?
 }
 
 model JobLumberCost {
@@ -64,6 +66,8 @@ model JobLumberCost {
   tbf               Float
   entered_by        String
   entered_date      String
+  updated_by        String?
+  updated_date      String?
 }
 
 model JobLaborCodes {

@@ -26,7 +26,6 @@ export default function EmployeeManagement() {
     nick_name: '',
     location: '',
     pay_rate: '',
-    pay_rate_b: '',
     added_by: '',
     updated_by: ''
   });
@@ -38,7 +37,6 @@ export default function EmployeeManagement() {
     nick_name: '',
     location: '',
     pay_rate: '',
-    pay_rate_b: '',
     added_by: '',
     updated_by: ''
   };
@@ -68,7 +66,6 @@ export default function EmployeeManagement() {
       const numericData = {
         ...data,
         pay_rate: parseFloat(data.pay_rate),
-        pay_rate_b: data.pay_rate_b ? parseFloat(data.pay_rate_b) : parseFloat(data.pay_rate),
       };
 
       EmployeeSchema.parse(numericData);
@@ -108,7 +105,6 @@ export default function EmployeeManagement() {
     setFormData({
       ...employee,
       pay_rate: employee.pay_rate.toString(),
-      pay_rate_b: employee.pay_rate_b?.toString() ?? employee.pay_rate.toString(),
     });
     setIsModalOpen(true);
   };
@@ -144,7 +140,6 @@ export default function EmployeeManagement() {
       const submissionData = {
         ...formData,
         pay_rate: parseFloat(formData.pay_rate),
-        pay_rate_b: formData.pay_rate_b ? parseFloat(formData.pay_rate_b) : parseFloat(formData.pay_rate),
         updated_by: currentUser,
         added_by: editingEmployee ? formData.added_by : currentUser,
       };
@@ -249,10 +244,6 @@ export default function EmployeeManagement() {
             <p className='text-sm'>{formatCurrency(employee.pay_rate)}</p>
           </div>
           <div>
-            <h3 className="text-gray-500 font-medium">Pay Rate B</h3>
-            <p className='text-sm'>{formatCurrency(employee.pay_rate_b ?? employee.pay_rate)}</p>
-          </div>
-          <div>
             <h3 className="text-gray-500 font-medium">Added By</h3>
             <p className='text-sm'>{employee.added_by}</p>
           </div>
@@ -279,7 +270,6 @@ export default function EmployeeManagement() {
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Nick Name</TableHead>
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Location</TableHead>
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate B</TableHead>
               {/* <TableHead className="w-[100px] text-center font-semibold">Added By</TableHead>
               <TableHead className="w-[100px] text-center font-semibold">Updated By</TableHead> */}
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Actions</TableHead>
@@ -301,9 +291,6 @@ export default function EmployeeManagement() {
                 </TableCell>
                 <TableCell className="font-medium text-center">
                   {formatCurrency(employee.pay_rate)}
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate_b ?? employee.pay_rate)}
                 </TableCell>
                 {/* <TableCell className="font-medium text-center">
                   <div className="truncate">{employee.added_by}</div>

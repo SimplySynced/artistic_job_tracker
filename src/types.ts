@@ -9,7 +9,6 @@ export const EmployeeSchema = z.object({
     nick_name: z.string().min(1, "Nick name is required"),
     location: z.string().min(1, "Location is required"),
     pay_rate: z.number().positive("Pay rate must be positive"),
-    pay_rate_b: z.number().optional(),
     added_by: z.string(),
     updated_by: z.string(),
 });
@@ -25,7 +24,22 @@ export type EmployeeFormData = {
     nick_name: string;
     location: string;
     pay_rate: string;
-    pay_rate_b: string;
     added_by: string;
     updated_by: string;
+};
+
+// Zod schema for Locations
+export const LocationSchema = z.object({
+    location: z.string().min(1, "Location name is required"),
+    enabled: z.boolean()
+});
+
+// TypeScript types derived from Zod schema
+export type Location = z.infer<typeof LocationSchema>;
+export type NewLocation = Omit<Location, 'id'>;
+
+// Form data type (string values for input fields)
+export type LocationFormData = {
+    location: string;
+    enabled: boolean;
 };
