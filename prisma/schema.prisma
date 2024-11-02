@@ -35,7 +35,7 @@ model TimeSheet {
   pay_rate    Float
   total_pay   Float
   added_by    String
-  added_date  Stringyarn
+  added_date  String
 }
 
 model Jobs {

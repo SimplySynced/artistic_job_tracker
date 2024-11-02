@@ -46,7 +46,6 @@ export default function EmployeeManagement() {
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
       const validatedData = z.array(EmployeeSchema).parse(data);
-      console.log(validatedData);
       setEmployees(validatedData);
     } catch (error) {
       toast({

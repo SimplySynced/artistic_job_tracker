@@ -5,10 +5,10 @@ import { z } from 'zod';
 export const EmployeeSchema = z.object({
     id: z.number().optional(), // Optional for new employees
     first_name: z.string().min(1, "First name is required"),
-    last_name: z.string().min(1, "Last name is required"),
-    nick_name: z.string().min(1, "Nick name is required"),
-    location: z.string().min(1, "Location is required"),
-    pay_rate: z.number().positive("Pay rate must be positive"),
+    last_name: z.string(),
+    nick_name: z.string(),
+    location: z.string(),
+    pay_rate: z.number().nonnegative("Pay rate must be positive"),
     added_by: z.string(),
     updated_by: z.string(),
 });
