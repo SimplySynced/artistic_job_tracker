@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const employees = await prisma.employee.findMany({
+    const employees = await prisma.employees.findMany({
       orderBy: {
         last_name: 'asc'
       }
@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const employee = await prisma.employee.create({
+    const employee = await prisma.employees.create({
       data: {
         ...data,
         added_by: data.added_by || 'system', // Default value

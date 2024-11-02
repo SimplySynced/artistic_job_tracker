@@ -19,16 +19,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const employee = await prisma.employee.create({
+    const location = await prisma.locations.create({
       data: {
         ...data,
-        added_by: data.added_by || 'system', // Default value
-        updated_by: data.updated_by || 'system', // Default value
-        pay_rate_b: data.pay_rate_b || data.pay_rate, // Default to pay_rate if not provided
+        location: data.location || 'Avenel', /// Default to pay_rate if not provided
       },
     });
-    return NextResponse.json(employee);
+    return NextResponse.json(location);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create location' }, { status: 500 });
   }
 }

@@ -1,20 +1,15 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
+
+import { EmployeeTable } from "./table"
 
 export default function EmployeeManagement() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -214,7 +209,7 @@ export default function EmployeeManagement() {
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-medium">{employee.first_name} {employee.last_name}</h3>
-            <p className="text-sm text-white-500">{employee.nick_name}</p>
+            <p className="text-sm text-gray-500">{employee.nick_name}</p>
           </div>
           <div className="flex space-x-2">
             <Button
@@ -253,73 +248,19 @@ export default function EmployeeManagement() {
   );
 
   return (
-    <div className="px-4 md:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
-        <Button onClick={handleAddNew} className="bg-neutral-900 text-white">
-          Add Employee
-        </Button>
       </div>
 
       {/* Desktop view */}
       <div className="hidden md:block overflow-x-auto">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Name</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Nick Name</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Location</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate</TableHead>
-              {/* <TableHead className="w-[100px] text-center font-semibold">Added By</TableHead>
-              <TableHead className="w-[100px] text-center font-semibold">Updated By</TableHead> */}
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {employees.map((employee) => (
-              <TableRow key={employee.id} className="hover:bg-neutral-100 bg-white">
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">
-                    {employee.first_name} {employee.last_name}
-                  </div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.nick_name}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.location}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate)}
-                </TableCell>
-                {/* <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.added_by}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.updated_by}</div>
-                </TableCell> */}
-                <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(employee)}
-                      className="size-8 text-white bg-sky-500 hover:bg-sky-600"
-                    >
-                      <LuPencilLine />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleDelete(employee.id!)}
-                      className="size-8 text-white bg-red-500 hover:bg-red-600"
-                    >
-                      <LuTrash2 />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <EmployeeTable
+          data={employees}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddNew={handleAddNew}
+        />
       </div>
 
       {/* Mobile view */}
@@ -331,7 +272,7 @@ export default function EmployeeManagement() {
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-white/30" aria-hidden="true" />
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
               <h2 className="text-lg md:text-xl font-bold mt-0">
@@ -344,7 +285,6 @@ export default function EmployeeManagement() {
                   { name: 'nick_name', label: 'Nick Name', type: 'text' },
                   { name: 'location', label: 'Location', type: 'text' },
                   { name: 'pay_rate', label: 'Pay Rate', type: 'number', step: '0.01' },
-                  { name: 'pay_rate_b', label: 'Pay Rate B', type: 'number', step: '0.01' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -357,7 +297,7 @@ export default function EmployeeManagement() {
                       step={field.step}
                       value={formData[field.name as keyof EmployeeFormData]}
                       onChange={handleInputChange}
-                      required={field.name !== 'pay_rate_b'}
+                      required
                       className={`w-full ${formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}`}
                     />
                     {formErrors[field.name as keyof EmployeeFormData] && (

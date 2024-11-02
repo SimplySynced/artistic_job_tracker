@@ -30,8 +30,8 @@ export type EmployeeFormData = {
 
 // Zod schema for Locations
 export const LocationSchema = z.object({
+    id: z.number().optional(),
     location: z.string().min(1, "Location name is required"),
-    enabled: z.boolean()
 });
 
 // TypeScript types derived from Zod schema
@@ -41,5 +41,4 @@ export type NewLocation = Omit<Location, 'id'>;
 // Form data type (string values for input fields)
 export type LocationFormData = {
     location: string;
-    enabled: boolean;
 };

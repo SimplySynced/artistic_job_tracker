@@ -17,19 +17,16 @@ import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
 export default function LocationManagement() {
-  const [Location, setLocation] = useState<Location[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [formData, setFormData] = useState<LocationFormData>({
     location: '',
-    enabled: true,
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LocationFormData, string>>>({});
 
   const initialFormData: LocationFormData = {
     location: '',
-    enabled: true,
-
   };
 
   useEffect(() => {
@@ -42,7 +39,8 @@ export default function LocationManagement() {
       if (!response.ok) throw new Error('Failed to fetch locations');
       const data = await response.json();
       const validatedData = z.array(LocationSchema).parse(data);
-      setLocation(validatedData);
+      setLocations(validatedData);
+      console.log(validatedData)
     } catch (error) {
       toast({
         title: "Error",
@@ -130,17 +128,14 @@ export default function LocationManagement() {
       const currentUser = 'system'; // Replace with actual user authentication
       const submissionData = {
         ...formData,
-        pay_rate: parseFloat(formData.pay_rate),
-        pay_rate_b: formData.pay_rate_b ? parseFloat(formData.pay_rate_b) : parseFloat(formData.pay_rate),
-        updated_by: currentUser,
-        added_by: editingEmployee ? formData.added_by : currentUser,
+        location: formData.location,
       };
 
-      const url = editingEmployee
-        ? `/api/employees/${editingEmployee.id}`
-        : '/api/employees';
+      const url = editingLocation
+        ? `/api/locations/${editingLocation.id}`
+        : '/api/locations';
 
-      const method = editingEmployee ? 'PUT' : 'POST';
+      const method = editingLocation ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -150,14 +145,14 @@ export default function LocationManagement() {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) throw new Error('Failed to save employee');
+      if (!response.ok) throw new Error('Failed to save location');
 
       await fetchLocations();
       handleModalClose();
 
       toast({
         title: "Success",
-        description: `Employee ${editingEmployee ? 'updated' : 'added'} successfully`,
+        description: `Employee ${editingLocation ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
@@ -168,11 +163,11 @@ export default function LocationManagement() {
     }
   };
 
-  const handleDelete = async (employeeId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this employee?')) return;
+  const handleDelete = async (locationId: number): Promise<void> => {
+    if (!confirm('Are you sure you want to delete this location?')) return;
 
     try {
-      const response = await fetch(`/api/employees/${employeeId}`, {
+      const response = await fetch(`/api/locations/${locationId}`, {
         method: 'DELETE',
       });
 
@@ -192,33 +187,25 @@ export default function LocationManagement() {
     }
   };
 
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
   // New function to render employee card for mobile view
-  const LocationCard = ({ employee }: { employee: Location }) => (
+  const LocationCard = ({ location }: { location: Location }) => (
     <div className="bg-white rounded-lg shadow p-4 mb-4">
       <div className="space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium">{employee.first_name} {employee.last_name}</h3>
-            <p className="text-sm text-white-500">{employee.nick_name}</p>
+            <h3 className="font-medium">{location.location}</h3>
           </div>
           <div className="flex space-x-2">
             <Button
               variant="outline"
-              onClick={() => handleEdit(employee)}
+              onClick={() => handleEdit(location)}
               className="bg-sky-500 text-white text-xs px-3 py-1"
             >
               <LuPencilLine />
             </Button>
             <Button
               variant="destructive"
-              onClick={() => handleDelete(employee.id!)}
+              onClick={() => handleDelete(location.id!)}
               className="bg-red-500 text-white text-xs px-3 py-1"
             >
               <LuTrash2 />
@@ -229,19 +216,7 @@ export default function LocationManagement() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <h3 className="text-gray-500 font-medium">Location</h3>
-            <p className='text-sm'>{employee.location}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Pay Rate</h3>
-            <p className='text-sm'>{formatCurrency(employee.pay_rate)}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Pay Rate B</h3>
-            <p className='text-sm'>{formatCurrency(employee.pay_rate_b ?? employee.pay_rate)}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Added By</h3>
-            <p className='text-sm'>{employee.added_by}</p>
+            <p className='text-sm'>{location.location}</p>
           </div>
         </div>
       </div>
@@ -251,9 +226,9 @@ export default function LocationManagement() {
   return (
     <div className="px-4 md:px-8 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Locations</h1>
         <Button onClick={handleAddNew} className="bg-neutral-900 text-white">
-          Add Employee
+          Add Location
         </Button>
       </div>
 
@@ -262,54 +237,30 @@ export default function LocationManagement() {
         <Table className="min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Name</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Nick Name</TableHead>
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Location</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate</TableHead>
-              <TableHead className="bg-neutral-900 text-white text-center font-semibold">Pay Rate B</TableHead>
-              {/* <TableHead className="w-[100px] text-center font-semibold">Added By</TableHead>
-              <TableHead className="w-[100px] text-center font-semibold">Updated By</TableHead> */}
               <TableHead className="bg-neutral-900 text-white text-center font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {employees.map((employee) => (
-              <TableRow key={employee.id} className="hover:bg-neutral-100 bg-white">
+            {locations.map((location) => (
+              <TableRow key={location.id} className="hover:bg-neutral-100 bg-white">
                 <TableCell className="font-medium text-center">
                   <div className="truncate">
-                    {employee.first_name} {employee.last_name}
+                    {location.location}
                   </div>
                 </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.nick_name}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.location}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate)}
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  {formatCurrency(employee.pay_rate_b ?? employee.pay_rate)}
-                </TableCell>
-                {/* <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.added_by}</div>
-                </TableCell>
-                <TableCell className="font-medium text-center">
-                  <div className="truncate">{employee.updated_by}</div>
-                </TableCell> */}
                 <TableCell>
                   <div className="flex justify-center gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => handleEdit(employee)}
+                      onClick={() => handleEdit(location)}
                       className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                     >
                       <LuPencilLine />
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => handleDelete(employee.id!)}
+                      onClick={() => handleDelete(location.id!)}
                       className="size-8 text-white bg-red-500 hover:bg-red-600"
                     >
                       <LuTrash2 />
@@ -324,8 +275,8 @@ export default function LocationManagement() {
 
       {/* Mobile view */}
       <div className="md:hidden space-y-4">
-        {employees.map((employee) => (
-          <EmployeeCard key={employee.id} employee={employee} />
+        {locations.map((location) => (
+          <LocationCard key={location.id} location={location} />
         ))}
       </div>
 
@@ -335,34 +286,27 @@ export default function LocationManagement() {
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
               <h2 className="text-lg md:text-xl font-bold mt-0">
-                {editingEmployee ? 'Edit Employee' : 'Add Employee'}
+                {editingLocation ? 'Edit Location' : 'Add Location'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'first_name', label: 'First Name', type: 'text' },
-                  { name: 'last_name', label: 'Last Name', type: 'text' },
-                  { name: 'nick_name', label: 'Nick Name', type: 'text' },
                   { name: 'location', label: 'Location', type: 'text' },
-                  { name: 'pay_rate', label: 'Pay Rate', type: 'number', step: '0.01' },
-                  { name: 'pay_rate_b', label: 'Pay Rate B', type: 'number', step: '0.01' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
                       {field.label}
-                      {field.name !== 'pay_rate_b' && <span className="text-red-500">*</span>}
+                      {field.name && <span className="text-red-500">*</span>}
                     </label>
                     <Input
                       name={field.name}
                       type={field.type}
-                      step={field.step}
-                      value={formData[field.name as keyof EmployeeFormData]}
+                      value={formData[field.name as keyof LocationFormData]}
                       onChange={handleInputChange}
-                      required={field.name !== 'pay_rate_b'}
-                      className={`w-full ${formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}`}
+                      className={`w-full ${formErrors[field.name as keyof LocationFormData] ? 'border-red-500' : ''}`}
                     />
-                    {formErrors[field.name as keyof EmployeeFormData] && (
+                    {formErrors[field.name as keyof LocationFormData] && (
                       <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof EmployeeFormData]}
+                        {formErrors[field.name as keyof LocationFormData]}
                       </p>
                     )}
                   </div>
@@ -380,7 +324,7 @@ export default function LocationManagement() {
                     type="submit"
                     className="bg-neutral-900 text-white w-full md:w-auto"
                   >
-                    {editingEmployee ? 'Update' : 'Save'}
+                    {editingLocation ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
