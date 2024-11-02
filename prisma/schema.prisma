@@ -20,7 +20,6 @@ model Employees {
   nick_name   String?
   location    String?
   pay_rate    Float?
-  pay_rate_b  Float?
   added_by    String?
   updated_by  String?
 }
@@ -36,7 +35,7 @@ model TimeSheet {
   pay_rate    Float
   total_pay   Float
   added_by    String
-  added_date  String
+  added_date  Stringyarn
 }
 
 model Jobs {

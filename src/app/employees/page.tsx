@@ -46,6 +46,7 @@ export default function EmployeeManagement() {
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
       const validatedData = z.array(EmployeeSchema).parse(data);
+      console.log(validatedData);
       setEmployees(validatedData);
     } catch (error) {
       toast({
@@ -289,7 +290,7 @@ export default function EmployeeManagement() {
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
                       {field.label}
-                      {field.name !== 'pay_rate_b' && <span className="text-red-500">*</span>}
+                      {field.name && <span className="text-red-500">*</span>}
                     </label>
                     <Input
                       name={field.name}
