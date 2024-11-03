@@ -16,7 +16,7 @@ import {
     Trash2,
 } from "lucide-react"
 
-import { FaUser, FaTasks, FaCogs, FaFileCode } from "react-icons/fa";
+import { FaUser, FaTasks, FaCogs, FaFileCode, FaBuilding } from "react-icons/fa";
 import { GiWoodBeam } from "react-icons/gi";
 
 import {
@@ -74,8 +74,13 @@ const data = {
                 },
                 {
                     title: "Labor Codes",
-                    url: "/settings/notifications",
+                    url: "/laborcodes",
                     icon: FaFileCode,
+                },
+                {
+                    title: "Locations",
+                    url: "/locations",
+                    icon: FaBuilding,
                 },
             ],
         },

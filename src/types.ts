@@ -42,3 +42,35 @@ export type NewLocation = Omit<Location, 'id'>;
 export type LocationFormData = {
     location: string;
 };
+
+// Zod schema for Woods
+export const WoodSchema = z.object({
+    id: z.number().optional(),
+    wood_type: z.string().min(1, "Location name is required"),
+});
+
+// TypeScript types derived from Zod schema
+export type Wood = z.infer<typeof WoodSchema>;
+export type NewWood = Omit<Wood, 'id'>;
+
+// Form data type (string values for input fields)
+export type WoodFormData = {
+    wood_type: string;
+};
+
+// Zod schema for Labor Codes
+export const LaborCodeSchema = z.object({
+    id: z.number().optional(),
+    job_code: z.string().min(1, "Job Code is required"),
+    description: z.string().min(1, "Description is required"),
+});
+
+// TypeScript types derived from Zod schema
+export type LaborCode = z.infer<typeof LaborCodeSchema>;
+export type NewLaborCode = Omit<LaborCode, 'id'>;
+
+// Form data type (string values for input fields)
+export type LaborCodeFormData = {
+    job_code: string;
+    description: string;
+};
