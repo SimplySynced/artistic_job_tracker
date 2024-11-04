@@ -70,10 +70,10 @@ model JobLumberCost {
 }
 
 model JobLaborCodes {
-  id          Int     @id @default(autoincrement())
-  job_code    Int
-  description String
-  enabled     Boolean @default(true)
+  id                Int     @id @default(autoincrement())
+  job_labor_code    Int
+  description       String
+  enabled           Boolean @default(true)
 }
 
 model Locations {

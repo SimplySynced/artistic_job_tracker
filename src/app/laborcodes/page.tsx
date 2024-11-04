@@ -1,0 +1,308 @@
+'use client'
+import React, { useEffect, useState } from 'react';
+import { Dialog } from '@/components/ui/dialog';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
+import { LaborCode, LaborCodeFormData, LaborCodeSchema } from '@/types';
+import { z } from 'zod';
+import { LuPencilLine, LuTrash2 } from "react-icons/lu";
+
+import { LaborCodeTable } from "./table"
+import { Description } from '@radix-ui/react-toast';
+
+export default function WoodManagement() {
+  const [laborcodes, setWoods] = useState<LaborCode[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
+  const [formData, setFormData] = useState<LaborCodeFormData>({
+    job_labor_code: '',
+    description: '',
+  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof LaborCodeFormData, string>>>({});
+
+  const initialFormData: LaborCodeFormData = {
+    job_labor_code: '',
+    description: '',
+  };
+
+  useEffect(() => {
+    fetchLaborCodes();
+  }, []);
+
+  const fetchLaborCodes = async (): Promise<void> => {
+    try {
+      const response = await fetch('/api/laborcodes');
+      if (!response.ok) throw new Error('Failed to fetch labor codes');
+      const data = await response.json();
+      const validatedData = z.array(LaborCodeSchema).parse(data);
+      setWoods(validatedData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const validateForm = (data: LaborCodeFormData): boolean => {
+    try {
+      const stringData = {
+        ...data,
+        job_labor_code: parseFloat(data.job_labor_code),
+        description: data.description,
+      };
+
+      LaborCodeSchema.parse(stringData);
+      setFormErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Partial<Record<keyof LaborCodeFormData, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            errors[err.path[0] as keyof LaborCodeFormData] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      }
+      return false;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    if (formErrors[name as keyof LaborCodeFormData]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+  };
+
+  const handleEdit = (job_labor_code: LaborCode): void => {
+    setEditingLaborCode(job_labor_code);
+    setFormData({
+      ...job_labor_code,
+      job_labor_code: job_labor_code.job_labor_code.toString(),
+      description: job_labor_code.description.toString(),      
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleAddNew = (): void => {
+    setEditingLaborCode(null);
+    setFormData(initialFormData);
+    setFormErrors({});
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = (): void => {
+    setIsModalOpen(false);
+    setEditingLaborCode(null);
+    setFormData(initialFormData);
+    setFormErrors({});
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+
+    if (!validateForm(formData)) {
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const currentUser = 'system'; // Replace with actual user authentication
+      const submissionData = {
+        ...formData,
+        job_labor_code: parseFloat(formData.job_labor_code),
+        description: formData.description,
+      };
+
+      const url = editingLaborCode
+        ? `/api/laborcodes/${editingLaborCode.id}`
+        : '/api/laborcodes';
+
+      const method = editingLaborCode ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) throw new Error('Failed to save wood');
+
+      await fetchLaborCodes();
+      handleModalClose();
+
+      toast({
+        title: "Success",
+        description: `Lab Code ${editingLaborCode ? 'updated' : 'added'} successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (laborcodedId: number): Promise<void> => {
+    if (!confirm('Are you sure you want to delete this wood type?')) return;
+
+    try {
+      const response = await fetch(`/api/laborcodes/${laborcodedId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete labor code');
+
+      await fetchLaborCodes();
+      toast({
+        title: "Success",
+        description: "Wood type deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // New function to render employee card for mobile view
+  const LaborCodeCard = ({ laborcodes }: { laborcodes: LaborCode }) => (
+    <div className="bg-white rounded-lg shadow p-4 mb-4">
+      <div className="space-y-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-medium">{laborcodes.job_labor_code} </h3>
+          </div>
+          <div>
+            <h3 className="font-medium">{laborcodes.description} </h3>
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => handleEdit(laborcodes)}
+              className="bg-sky-500 text-white text-xs px-3 py-1"
+            >
+              <LuPencilLine />
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete(laborcodes.id!)}
+              className="bg-red-500 text-white text-xs px-3 py-1"
+            >
+              <LuTrash2 />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <h3 className="text-gray-500 font-medium">Labor Code</h3>
+            <p className='text-sm'>{laborcodes.job_labor_code}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
+      </div>
+
+      {/* Desktop view */}
+      <div className="hidden md:block overflow-x-auto">
+        <LaborCodeTable
+          data={laborcodes}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddNew={handleAddNew}
+        />
+      </div>
+
+      {/* Mobile view */}
+      <div className="md:hidden space-y-4">
+        {laborcodes.map((laborcode) => (
+          <LaborCodeCard key={laborcode.id} laborcodes={laborcode} />
+        ))}
+      </div>
+
+      {isModalOpen && (
+        <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
+              <h2 className="text-lg md:text-xl font-bold mt-0">
+                {editingLaborCode ? 'Edit Labor Codes' : 'Add Labor Codes'}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {[
+                  { name: 'job_labor_code', label: 'Labor Code', type: 'number' },
+                  { name: 'description', label: 'Descriptions', type: 'text' },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-medium mb-1">
+                      {field.label}
+                      {field.name && <span className="text-red-500">*</span>}
+                    </label>
+                    <Input
+                      name={field.name}
+                      type={field.type}
+                      value={formData[field.name as keyof LaborCodeFormData]}
+                      onChange={handleInputChange}
+                      required
+                      className={`w-full ${formErrors[field.name as keyof LaborCodeFormData] ? 'border-red-500' : ''}`}
+                    />
+                    {formErrors[field.name as keyof LaborCodeFormData] && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {formErrors[field.name as keyof LaborCodeFormData]}
+                      </p>
+                    )}
+                  </div>
+                ))}
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleModalClose}
+                    className="w-full md:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-neutral-900 text-white w-full md:w-auto"
+                  >
+                    {editingLaborCode ? 'Update' : 'Save'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </Dialog>
+      )}
+    </div>
+  );
+}

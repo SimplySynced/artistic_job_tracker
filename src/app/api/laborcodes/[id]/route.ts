@@ -9,16 +9,15 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        const wood = await prisma.woodTypes.update({
+        const job_labor_code = await prisma.jobLaborCodes.update({
             where: { id: parseInt(params.id) },
             data: {
                 ...data,
-                updated_by: data.updated_by || 'system', // Default value
             },
         });
-        return NextResponse.json(wood);
+        return NextResponse.json(job_labor_code);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update wood type' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to update job labor code' }, { status: 500 });
     }
 }
 
@@ -27,11 +26,11 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.woodTypes.delete({
+        await prisma.jobLaborCodes.delete({
             where: { id: parseInt(params.id) },
         });
-        return NextResponse.json({ message: 'Wood Type deleted successfully' });
+        return NextResponse.json({ message: 'Labor code deleted successfully' });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to delete wood type' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete labor code' }, { status: 500 });
     }
 }

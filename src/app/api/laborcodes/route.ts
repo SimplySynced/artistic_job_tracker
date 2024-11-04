@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const wood_types = await prisma.jobLaborCodes.findMany({
+    const job_labor_code = await prisma.jobLaborCodes.findMany({
       orderBy: {
-        job_code: 'asc'
+        job_labor_code: 'asc'
       }
     });
-    return NextResponse.json(wood_types);
+    return NextResponse.json(job_labor_code);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch labor codes' }, { status: 500 });
   }
@@ -19,14 +19,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const wood_type = await prisma.woodTypes.create({
+    const job_labor_code = await prisma.jobLaborCodes.create({
       data: {
         ...data, // Default to pay_rate if not provided
-        wood_type: data.wood_type || 'NEW WOOD'
+        job_labor_code: data.job_labor_code || 'NEW LABOR CODE'
       },
     });
-    return NextResponse.json(wood_type);
+    return NextResponse.json(job_labor_code);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create wood type' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create labor code' }, { status: 500 });
   }
 }

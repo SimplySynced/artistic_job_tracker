@@ -61,7 +61,7 @@ export type WoodFormData = {
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
     id: z.number().optional(),
-    job_code: z.string().min(1, "Job Code is required"),
+    job_labor_code: z.number().min(1, "Job Code is required"),
     description: z.string().min(1, "Description is required"),
 });
 
@@ -71,6 +71,6 @@ export type NewLaborCode = Omit<LaborCode, 'id'>;
 
 // Form data type (string values for input fields)
 export type LaborCodeFormData = {
-    job_code: string;
+    job_labor_code: string;
     description: string;
 };
