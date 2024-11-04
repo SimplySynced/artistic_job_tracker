@@ -5,73 +5,68 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
+import { Job, JobFormData, JobSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
-import { EmployeeTable } from "./table"
+import { JobTable } from "./table"
 
-export default function EmployeeManagement() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+export default function JobsManagement() {
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [formData, setFormData] = useState<EmployeeFormData>({
-    first_name: '',
-    last_name: '',
-    nick_name: '',
-    location: '',
-    pay_rate: '',
-    added_by: '',
-    updated_by: ''
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [formData, setFormData] = useState<JobFormData>({
+    job_code: '',
+    job_location: '',
+    job_customer: '',
+    job_address: ''
   });
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof JobFormData, string>>>({});
 
-  const initialFormData: EmployeeFormData = {
-    first_name: '',
-    last_name: '',
-    nick_name: '',
-    location: '',
-    pay_rate: '',
-    added_by: '',
-    updated_by: ''
+  const initialFormData: JobFormData = {
+    job_code: '',
+    job_location: '',
+    job_customer: '',
+    job_address: ''
   };
 
   useEffect(() => {
-    fetchEmployees();
+    fetchJobs();
   }, []);
 
-  const fetchEmployees = async (): Promise<void> => {
+  const fetchJobs = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/employees');
-      if (!response.ok) throw new Error('Failed to fetch employees');
+      const response = await fetch('/api/jobs');
+      if (!response.ok) throw new Error('Failed to fetch jobs');
       const data = await response.json();
-      const validatedData = z.array(EmployeeSchema).parse(data);
-      setEmployees(validatedData);
+      console.log(data)
+      const validatedData = z.array(JobSchema).parse(data);
+      setJobs(validatedData);
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch employees",
+        description: error instanceof Error ? error.message : "Failed to fetch jobs",
         variant: "destructive",
       });
     }
   };
 
-  const validateForm = (data: EmployeeFormData): boolean => {
+  const validateForm = (data: JobFormData): boolean => {
     try {
       const numericData = {
         ...data,
-        pay_rate: parseFloat(data.pay_rate),
+        job_code: parseFloat(data.job_code),
       };
 
-      EmployeeSchema.parse(numericData);
+      JobSchema.parse(numericData);
       setFormErrors({});
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors: Partial<Record<keyof EmployeeFormData, string>> = {};
+        const errors: Partial<Record<keyof JobFormData, string>> = {};
         error.errors.forEach((err) => {
           if (err.path) {
-            errors[err.path[0] as keyof EmployeeFormData] = err.message;
+            errors[err.path[0] as keyof JobFormData] = err.message;
           }
         });
         setFormErrors(errors);
@@ -87,7 +82,7 @@ export default function EmployeeManagement() {
       [name]: value
     }));
 
-    if (formErrors[name as keyof EmployeeFormData]) {
+    if (formErrors[name as keyof JobFormData]) {
       setFormErrors(prev => ({
         ...prev,
         [name]: undefined
@@ -95,17 +90,17 @@ export default function EmployeeManagement() {
     }
   };
 
-  const handleEdit = (employee: Employee): void => {
-    setEditingEmployee(employee);
+  const handleEdit = (job: Job): void => {
+    setEditingJob(job);
     setFormData({
-      ...employee,
-      pay_rate: employee.pay_rate.toString(),
+      ...job,
+      job_code: job.job_code.toString(),
     });
     setIsModalOpen(true);
   };
 
   const handleAddNew = (): void => {
-    setEditingEmployee(null);
+    setEditingJob(null);
     setFormData(initialFormData);
     setFormErrors({});
     setIsModalOpen(true);
@@ -113,7 +108,7 @@ export default function EmployeeManagement() {
 
   const handleModalClose = (): void => {
     setIsModalOpen(false);
-    setEditingEmployee(null);
+    setEditingJob(null);
     setFormData(initialFormData);
     setFormErrors({});
   };
@@ -134,16 +129,14 @@ export default function EmployeeManagement() {
       const currentUser = 'system'; // Replace with actual user authentication
       const submissionData = {
         ...formData,
-        pay_rate: parseFloat(formData.pay_rate),
-        updated_by: currentUser,
-        added_by: editingEmployee ? formData.added_by : currentUser,
+        job_code: parseFloat(formData.job_code),
       };
 
-      const url = editingEmployee
-        ? `/api/employees/${editingEmployee.id}`
-        : '/api/employees';
+      const url = editingJob
+        ? `/api/jobs/${editingJob.id}`
+        : '/api/jobs';
 
-      const method = editingEmployee ? 'PUT' : 'POST';
+      const method = editingJob ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -153,14 +146,14 @@ export default function EmployeeManagement() {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) throw new Error('Failed to save employee');
+      if (!response.ok) throw new Error('Failed to save job');
 
-      await fetchEmployees();
+      await fetchJobs();
       handleModalClose();
 
       toast({
         title: "Success",
-        description: `Employee ${editingEmployee ? 'updated' : 'added'} successfully`,
+        description: `JOb ${editingJob ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
@@ -171,20 +164,20 @@ export default function EmployeeManagement() {
     }
   };
 
-  const handleDelete = async (employeeId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this employee?')) return;
+  const handleDelete = async (jobId: number): Promise<void> => {
+    if (!confirm('Are you sure you want to delete this job?')) return;
 
     try {
-      const response = await fetch(`/api/employees/${employeeId}`, {
+      const response = await fetch(`/api/jobs/${jobId}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) throw new Error('Failed to delete employee');
 
-      await fetchEmployees();
+      await fetchJobs();
       toast({
         title: "Success",
-        description: "Employee deleted successfully",
+        description: "Job deleted successfully",
       });
     } catch (error) {
       toast({
@@ -195,33 +188,26 @@ export default function EmployeeManagement() {
     }
   };
 
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
   // New function to render employee card for mobile view
-  const EmployeeCard = ({ employee }: { employee: Employee }) => (
+  const JobCard = ({ job }: { job: Job }) => (
     <div className="bg-white rounded-lg shadow p-4 mb-4">
       <div className="space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium">{employee.first_name} {employee.last_name}</h3>
-            <p className="text-sm text-gray-500">{employee.nick_name}</p>
+            <h3 className="font-medium">{job.job_code} {job.job_customer}</h3>
+            <p className="text-sm text-gray-500">{job.job_location}</p>
           </div>
           <div className="flex space-x-2">
             <Button
               variant="outline"
-              onClick={() => handleEdit(employee)}
+              onClick={() => handleEdit(job)}
               className="bg-sky-500 text-white text-xs px-3 py-1"
             >
               <LuPencilLine />
             </Button>
             <Button
               variant="destructive"
-              onClick={() => handleDelete(employee.id!)}
+              onClick={() => handleDelete(job.id!)}
               className="bg-red-500 text-white text-xs px-3 py-1"
             >
               <LuTrash2 />
@@ -232,15 +218,7 @@ export default function EmployeeManagement() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <h3 className="text-gray-500 font-medium">Location</h3>
-            <p className='text-sm'>{employee.location}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Pay Rate</h3>
-            <p className='text-sm'>{formatCurrency(employee.pay_rate)}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Added By</h3>
-            <p className='text-sm'>{employee.added_by}</p>
+            <p className='text-sm'>{job.job_address}</p>
           </div>
         </div>
       </div>
@@ -250,13 +228,13 @@ export default function EmployeeManagement() {
   return (
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Jobs</h1>
       </div>
 
       {/* Desktop view */}
       <div className="hidden md:block overflow-x-auto">
-        <EmployeeTable
-          data={employees}
+        <JobTable
+          data={jobs}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAddNew={handleAddNew}
@@ -265,8 +243,8 @@ export default function EmployeeManagement() {
 
       {/* Mobile view */}
       <div className="md:hidden space-y-4">
-        {employees.map((employee) => (
-          <EmployeeCard key={employee.id} employee={employee} />
+        {jobs.map((job) => (
+          <JobCard key={job.id} job={job} />
         ))}
       </div>
 
@@ -276,15 +254,14 @@ export default function EmployeeManagement() {
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
               <h2 className="text-lg md:text-xl font-bold mt-0">
-                {editingEmployee ? 'Edit Employee' : 'Add Employee'}
+                {editingJob ? 'Edit Job' : 'Add Job'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'first_name', label: 'First Name', type: 'text' },
-                  { name: 'last_name', label: 'Last Name', type: 'text' },
-                  { name: 'nick_name', label: 'Nick Name', type: 'text' },
-                  { name: 'location', label: 'Location', type: 'text' },
-                  { name: 'pay_rate', label: 'Pay Rate', type: 'number', step: '0.01' },
+                  { name: 'job_code', label: 'Job Code', type: 'number' },
+                  { name: 'job_location', label: 'Location', type: 'text' },
+                  { name: 'job_customer', label: 'Customer', type: 'text' },
+                  { name: 'job_address', label: 'Address', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -294,15 +271,14 @@ export default function EmployeeManagement() {
                     <Input
                       name={field.name}
                       type={field.type}
-                      step={field.step}
-                      value={formData[field.name as keyof EmployeeFormData]}
+                      value={formData[field.name as keyof JobFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}`}
+                      className={`w-full ${formErrors[field.name as keyof JobFormData] ? 'border-red-500' : ''}`}
                     />
-                    {formErrors[field.name as keyof EmployeeFormData] && (
+                    {formErrors[field.name as keyof JobFormData] && (
                       <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof EmployeeFormData]}
+                        {formErrors[field.name as keyof JobFormData]}
                       </p>
                     )}
                   </div>
@@ -320,7 +296,7 @@ export default function EmployeeManagement() {
                     type="submit"
                     className="bg-neutral-900 text-white w-full md:w-auto"
                   >
-                    {editingEmployee ? 'Update' : 'Save'}
+                    {editingJob ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>

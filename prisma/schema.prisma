@@ -41,9 +41,9 @@ model TimeSheet {
 model Jobs {
   id                Int     @id @default(autoincrement())
   job_code          Int
-  job_name          String
   job_location      String  @default("Avenel")
-  job_description   String?
+  job_customer      String
+  job_address       String?
 }
 
 model JobLumberCost {

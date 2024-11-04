@@ -28,6 +28,29 @@ export type EmployeeFormData = {
     updated_by: string;
 };
 
+
+// Zod schema for Jobs
+export const JobSchema = z.object({
+    id: z.number().optional(),
+    job_code: z.number().min(1, "Job Code is required"),
+    job_location: z.string().min(1, "Job Location is required"),
+    job_customer: z.string().min(1, "Customer name required"),
+    job_address: z.string(),
+});
+
+// TypeScript types derived from Zod schema
+export type Job = z.infer<typeof JobSchema>;
+export type NewJobCode = Omit<Job, 'id'>;
+
+// Form data type (string values for input fields)
+export type JobFormData = {
+    job_code: string,
+    job_location: string,
+    job_customer: string,
+    job_address: string,
+};
+
+
 // Zod schema for Locations
 export const LocationSchema = z.object({
     id: z.number().optional(),
@@ -42,6 +65,7 @@ export type NewLocation = Omit<Location, 'id'>;
 export type LocationFormData = {
     location: string;
 };
+
 
 // Zod schema for Woods
 export const WoodSchema = z.object({
@@ -58,10 +82,11 @@ export type WoodFormData = {
     wood_type: string;
 };
 
+
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
     id: z.number().optional(),
-    job_labor_code: z.number().min(1, "Job Code is required"),
+    job_labor_code: z.number().min(1, "Labor Code is required"),
     description: z.string().min(1, "Description is required"),
 });
 

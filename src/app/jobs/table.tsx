@@ -17,7 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus, Paperclip } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -33,27 +33,24 @@ type ColumnMeta = {
     label: string
 }
 
-type Employee = {
+type Job = {
     id: number
-    first_name: string
-    last_name: string
-    nick_name: string | null
-    location: string
-    pay_rate: number
-    added_by: string
-    updated_by: string
+    job_code: string,
+    job_location: string,
+    job_customer: string,
+    job_address: string | null,
 }
 
-export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
+export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
     const [columnVisibility, setColumnVisibility] = React.useState({})
 
-    const columns: ColumnDef<Employee, any>[] = [
+    const columns: ColumnDef<Job, any>[] = [
         {
-            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-            id: 'fullName',
+            accessorFn: (row) => `${row.job_code}`,
+            id: 'job_code',
             header: ({ column }) => {
                 return (
                     <Button
@@ -61,35 +58,17 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Name
+                        Job Code
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Name'
+                label: 'Job Code'
             } as ColumnMeta
         },
         {
-            accessorKey: 'nick_name',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Nickname
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                )
-            },
-            meta: {
-                label: 'Nickname'
-            } as ColumnMeta
-        },
-        {
-            accessorKey: 'location',
+            accessorKey: 'job_location',
             header: ({ column }) => {
                 return (
                     <Button
@@ -107,7 +86,7 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
             } as ColumnMeta
         },
         {
-            accessorKey: 'pay_rate',
+            accessorKey: 'job_customer',
             header: ({ column }) => {
                 return (
                     <Button
@@ -115,22 +94,32 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Pay Rate
+                        Customer
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Pay Rate'
-            } as ColumnMeta,
-            cell: ({ row }) => {
-                const pay_rate = parseFloat(row.getValue('pay_rate'))
-                const formatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                }).format(pay_rate)
-                return formatted
+                label: 'Customer'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'job_address',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Address
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
             },
+            meta: {
+                label: 'Address'
+            } as ColumnMeta
         },
         {
             id: 'actions',
@@ -142,6 +131,13 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
                 const employee = row.original
                 return (
                     <div className="flex justify-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => onEdit(employee)}
+                            className="size-8 text-white bg-green-500 hover:bg-green-600"
+                        >
+                            <Paperclip className="h-4 w-4" />
+                        </Button>
                         <Button
                             variant="outline"
                             onClick={() => onEdit(employee)}
@@ -217,7 +213,7 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
                     </DropdownMenu>
                     <Button onClick={onAddNew} className="ml-4 bg-neutral-900 text-white">
                         <Plus className="h-4 w-4" />
-                        Add Employee
+                        Add Job
                     </Button>
                 </div>
             </div>

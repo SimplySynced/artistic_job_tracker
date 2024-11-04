@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
+import { LuPaperclip, LuPencilLine, LuTrash2 } from "react-icons/lu";
 
 import { EmployeeTable } from "./table"
 
@@ -212,6 +212,13 @@ export default function EmployeeManagement() {
             <p className="text-sm text-gray-500">{employee.nick_name}</p>
           </div>
           <div className="flex space-x-2">
+          <Button
+              variant="outline"
+              onClick={() => handleEdit(employee)}
+              className="bg-sky-500 text-white text-xs px-3 py-1"
+            >
+              <LuPaperclip />
+            </Button>
             <Button
               variant="outline"
               onClick={() => handleEdit(employee)}

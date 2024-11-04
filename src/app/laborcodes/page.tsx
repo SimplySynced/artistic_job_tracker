@@ -12,8 +12,8 @@ import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 import { LaborCodeTable } from "./table"
 import { Description } from '@radix-ui/react-toast';
 
-export default function WoodManagement() {
-  const [laborcodes, setWoods] = useState<LaborCode[]>([]);
+export default function LaborCodesManagement() {
+  const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
   const [formData, setFormData] = useState<LaborCodeFormData>({
@@ -37,7 +37,7 @@ export default function WoodManagement() {
       if (!response.ok) throw new Error('Failed to fetch labor codes');
       const data = await response.json();
       const validatedData = z.array(LaborCodeSchema).parse(data);
-      setWoods(validatedData);
+      setLaborCodes(validatedData);
     } catch (error) {
       toast({
         title: "Error",
@@ -92,7 +92,7 @@ export default function WoodManagement() {
     setFormData({
       ...job_labor_code,
       job_labor_code: job_labor_code.job_labor_code.toString(),
-      description: job_labor_code.description.toString(),      
+      description: job_labor_code.description.toString(),
     });
     setIsModalOpen(true);
   };

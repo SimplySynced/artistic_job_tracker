@@ -17,7 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, Paperclip, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -44,7 +44,7 @@ type Employee = {
     updated_by: string
 }
 
-export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
+export function EmployeeTable({ data, onView, onEdit, onDelete, onAddNew }: any) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
@@ -142,6 +142,13 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
                 const employee = row.original
                 return (
                     <div className="flex justify-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => onView(employee)}
+                            className="size-8 text-white bg-green-500 hover:bg-green-600"
+                        >
+                            <Paperclip className="h-4 w-4" />
+                        </Button>
                         <Button
                             variant="outline"
                             onClick={() => onEdit(employee)}
