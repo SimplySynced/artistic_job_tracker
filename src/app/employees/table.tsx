@@ -292,25 +292,25 @@ export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
             <Button
                 onClick={() => table.firstPage()}
                 disabled={!table.getCanPreviousPage()}
-                >
+            >
                 {'<<'}
             </Button>
             <Button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                >
+            >
                 {'<'}
             </Button>
             <Button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                >
+            >
                 {'>'}
             </Button>
             <Button
                 onClick={() => table.lastPage()}
                 disabled={!table.getCanNextPage()}
-                >
+            >
                 {'>>'}
             </Button>
         </div>

@@ -41,9 +41,9 @@ export default function EmployeeManagement() {
   }, []);
 
   const router = useRouter();
-  
+
   const navigateToTimesheet = (id: number) => {
-      router.push(`/timesheet/${id}`);
+    router.push(`/timesheet/${id}`);
   };
 
   const fetchEmployees = async (): Promise<void> => {
@@ -218,7 +218,7 @@ export default function EmployeeManagement() {
             <p className="text-sm text-gray-500">{employee.nick_name}</p>
           </div>
           <div className="flex space-x-2">
-          <Button
+            <Button
               variant="outline"
               onClick={() => navigateToTimesheet(employee.id!)}
               className="bg-sky-500 text-white text-xs px-3 py-1"
@@ -261,7 +261,6 @@ export default function EmployeeManagement() {
   );
 
   return (
-
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
