@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input'
 import {
     Table,
@@ -17,7 +18,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, Paperclip, PencilLine, Trash2, Plus } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, Clock, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -27,6 +28,7 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
+    getPaginationRowModel
 } from '@tanstack/react-table'
 
 type ColumnMeta = {
@@ -44,11 +46,17 @@ type Employee = {
     updated_by: string
 }
 
-export function EmployeeTable({ data, onView, onEdit, onDelete, onAddNew }: any) {
+export function EmployeeTable({ data, onEdit, onDelete, onAddNew }: any) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
     const [columnVisibility, setColumnVisibility] = React.useState({})
+
+    const router = useRouter();
+
+    const navigateToTimesheet = (id: number) => {
+        router.push(`/timesheet/${id}`);
+    };
 
     const columns: ColumnDef<Employee, any>[] = [
         {
@@ -144,10 +152,10 @@ export function EmployeeTable({ data, onView, onEdit, onDelete, onAddNew }: any)
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => onView(employee)}
+                            onClick={() => navigateToTimesheet(employee.id)}
                             className="size-8 text-white bg-green-500 hover:bg-green-600"
                         >
-                            <Paperclip className="h-4 w-4" />
+                            <Clock className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
@@ -179,6 +187,7 @@ export function EmployeeTable({ data, onView, onEdit, onDelete, onAddNew }: any)
         onColumnFiltersChange: setColumnFilters,
         onGlobalFilterChange: setGlobalFilter,
         onColumnVisibilityChange: setColumnVisibility,
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
@@ -280,6 +289,30 @@ export function EmployeeTable({ data, onView, onEdit, onDelete, onAddNew }: any)
                     </TableBody>
                 </Table>
             </div>
+            <Button
+                onClick={() => table.firstPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<<'}
+            </Button>
+            <Button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<'}
+            </Button>
+            <Button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>'}
+            </Button>
+            <Button
+                onClick={() => table.lastPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>>'}
+            </Button>
         </div>
     )
 }

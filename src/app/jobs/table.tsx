@@ -27,6 +27,7 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
+    getPaginationRowModel
 } from '@tanstack/react-table'
 
 type ColumnMeta = {
@@ -40,6 +41,7 @@ type Job = {
     job_customer: string,
     job_address: string | null,
 }
+
 
 export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
     const [sorting, setSorting] = React.useState<SortingState>([])
@@ -168,6 +170,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
         onColumnFiltersChange: setColumnFilters,
         onGlobalFilterChange: setGlobalFilter,
         onColumnVisibilityChange: setColumnVisibility,
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
@@ -269,6 +272,30 @@ export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
                     </TableBody>
                 </Table>
             </div>
+            <Button
+                onClick={() => table.firstPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<<'}
+            </Button>
+            <Button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<'}
+            </Button>
+            <Button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>'}
+            </Button>
+            <Button
+                onClick={() => table.lastPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>>'}
+            </Button>
         </div>
     )
 }

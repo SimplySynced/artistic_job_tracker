@@ -24,7 +24,7 @@ model Employees {
   updated_by  String?
 }
 
-model TimeSheet {
+model TimeSheets {
   id          Int     @id @default(autoincrement())
   employee_id Int
   date_worked String

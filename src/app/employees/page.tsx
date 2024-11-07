@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
-import { LuPaperclip, LuPencilLine, LuTrash2 } from "react-icons/lu";
-
+import { LuClock, LuPencilLine, LuTrash2 } from "react-icons/lu";
+import { useRouter } from 'next/navigation';
 import { EmployeeTable } from "./table"
 
 export default function EmployeeManagement() {
@@ -39,6 +39,12 @@ export default function EmployeeManagement() {
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  const router = useRouter();
+  
+  const navigateToTimesheet = (id: number) => {
+      router.push(`/timesheet/${id}`);
+  };
 
   const fetchEmployees = async (): Promise<void> => {
     try {
@@ -214,10 +220,10 @@ export default function EmployeeManagement() {
           <div className="flex space-x-2">
           <Button
               variant="outline"
-              onClick={() => handleEdit(employee)}
+              onClick={() => navigateToTimesheet(employee.id!)}
               className="bg-sky-500 text-white text-xs px-3 py-1"
             >
-              <LuPaperclip />
+              <LuClock />
             </Button>
             <Button
               variant="outline"
@@ -255,6 +261,7 @@ export default function EmployeeManagement() {
   );
 
   return (
+
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>

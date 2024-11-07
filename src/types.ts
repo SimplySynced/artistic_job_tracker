@@ -28,6 +28,38 @@ export type EmployeeFormData = {
     updated_by: string;
 };
 
+// Zod schema for runtime validation
+export const TimeSheetSchema = z.object({
+    id: z.number().optional(),
+    employee_id: z.number(),
+    date_worked: z.string(),
+    job_number: z.number(),
+    job_code: z.number(),
+    job_hours: z.number(),
+    job_minutes: z.number(),
+    pay_rate: z.number().nonnegative(),
+    total_pay: z.number(),
+    added_by: z.string(),
+    added_date: z.string(),
+});
+
+// TypeScript types derived from Zod schema
+export type TimeSheet = z.infer<typeof TimeSheetSchema>;
+export type NewTimeSheet = Omit<TimeSheet, 'id'>;
+
+// Form data type (string values for input fields)
+export type TimeSheetFormData = {
+    employee_id: string;
+    date_worked: string;
+    job_number: string;
+    job_code: string;
+    job_hours: string;
+    job_minutes: string;
+    pay_rate: string;
+    total_pay: string;
+    added_by: string;
+    added_date: string;
+};
 
 // Zod schema for Jobs
 export const JobSchema = z.object({
