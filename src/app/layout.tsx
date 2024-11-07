@@ -1,6 +1,7 @@
 import Sidebar from '@/components/Sidebar'
 import { Inter } from 'next/font/google'
 import Theme from './theme-provider'
+import logo from "../../public/images/logo_drop_shadow.png"
 import '@/styles/globals.css'
 
 const inter = Inter({
@@ -23,7 +24,9 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>{/* suppressHydrationWarning: https://github.com/vercel/next.js/issues/44343 */}
       <body className="font-inter antialiased bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400">
         <Theme>
-          <Sidebar children={children} />
+          <Sidebar logo={logo} >
+            {children}
+          </Sidebar>
         </Theme>
       </body>
     </html>
