@@ -6,28 +6,9 @@ import Logo from "../../public/images/logo_drop_shadow.png"
 import { FaUser, FaTasks, FaCogs, FaFileCode, FaBuilding } from "react-icons/fa";
 import { GiWoodBeam } from "react-icons/gi";
 import {
-    AudioWaveform,
-    BadgeCheck,
-    Bell,
-    BookOpen,
-    Bot,
     ChevronRight,
     ChevronsUpDown,
-    Command,
-    CreditCard,
-    Folder,
-    Forward,
-    Frame,
-    GalleryVerticalEnd,
     LogOut,
-    Map,
-    MoreHorizontal,
-    PieChart,
-    Plus,
-    Settings2,
-    Sparkles,
-    SquareTerminal,
-    Trash2,
 } from "lucide-react"
 
 import {
@@ -36,14 +17,6 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar"
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
@@ -51,24 +24,17 @@ import {
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator"
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarGroup,
     SidebarGroupLabel,
-    SidebarHeader,
     SidebarInset,
     SidebarMenu,
-    SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
@@ -80,7 +46,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "@/components/Link"
 import { Button } from "./ui/button";
-// This is sample data.
+
 const data = {
     user: {
         name: "Michelle",
