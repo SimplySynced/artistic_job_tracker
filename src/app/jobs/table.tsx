@@ -35,13 +35,12 @@ type ColumnMeta = {
 }
 
 type Job = {
-    id: number
+    id: number,
     job_code: string,
     job_location: string,
     job_customer: string,
     job_address: string | null,
 }
-
 
 export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
     const [sorting, setSorting] = React.useState<SortingState>([])

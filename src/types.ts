@@ -35,8 +35,8 @@ export const TimeSheetSchema = z.object({
     date_worked: z.string(),
     job_number: z.number(),
     job_code: z.number(),
-    job_hours: z.number(),
-    job_minutes: z.number(),
+    begin_time: z.string(),
+    end_time: z.string(),
     pay_rate: z.number().nonnegative(),
     total_pay: z.number(),
     added_by: z.string(),
@@ -53,8 +53,8 @@ export type TimeSheetFormData = {
     date_worked: string;
     job_number: string;
     job_code: string;
-    job_hours: string;
-    job_minutes: string;
+    begin_time: string;
+    end_time: string;
     pay_rate: string;
     total_pay: string;
     added_by: string;

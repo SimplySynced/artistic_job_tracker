@@ -1,22 +1,43 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { TimeSheet } from '../../../../types';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
     try {
-      const timeSheet = await prisma.timeSheets.findMany({
-        orderBy: {
-          date_worked: 'asc'
-        }
-      });
-      return NextResponse.json(timeSheet);
+        const timeSheet = await prisma.timeSheets.findMany({
+            where: {
+                employee_id: parseInt(params.id),
+            },
+            orderBy: {
+                date_worked: 'desc'
+            }
+        });
+        return NextResponse.json(timeSheet);
     } catch (error) {
-      return NextResponse.json({ error: 'Failed to fetch timesheet' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch timesheet' }, { status: 500 });
     }
-  }
-  
+}
+
+export async function POST(
+    request: Request,
+) {
+    try {
+        const data = await request.json();
+        const newEntry = await prisma.timeSheets.create({
+            data: {
+                ...data, // Default to pay_rate if not provided
+            },
+        });
+        console.log(newEntry)
+        return NextResponse.json(newEntry);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
+    }
+}
 
 export async function PUT(
     request: Request,
@@ -28,7 +49,6 @@ export async function PUT(
             where: { id: parseInt(params.id) },
             data: {
                 ...data,
-                updated_by: data.updated_by || 'system', // Default value
             },
         });
         return NextResponse.json(employee);

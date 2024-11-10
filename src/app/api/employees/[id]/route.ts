@@ -9,7 +9,7 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        const employee = await prisma.employee.update({
+        const employee = await prisma.employees.update({
             where: { id: parseInt(params.id) },
             data: {
                 ...data,
@@ -27,7 +27,7 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.employee.delete({
+        await prisma.employees.delete({
             where: { id: parseInt(params.id) },
         });
         return NextResponse.json({ message: 'Employee deleted successfully' });
