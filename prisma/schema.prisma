@@ -30,10 +30,9 @@ model TimeSheets {
   date_worked String
   job_number  Int
   job_code    Int
-  job_hours   Int
-  job_minutes Int
+  begin_time  String? @default("")
+  end_time    String? @default("")
   pay_rate    Float
-  total_pay   Float
   added_by    String
   added_date  String
 }

@@ -27,6 +27,7 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
+    getPaginationRowModel,
 } from '@tanstack/react-table'
 
 type ColumnMeta = {
@@ -35,16 +36,17 @@ type ColumnMeta = {
 
 type TimeSheet = {
     id: number
-    employee_id: String;
-    date_worked: String;
-    job_number: String;
-    job_code: String;
-    job_hours: String;
-    job_minutes: String;
-    pay_rate: String;
-    total_pay: String;
-    added_by: String;
-    added_date: String;
+    employee_id: string,
+    date_worked: string,
+    job_number: string,
+    job_code: string,
+    job_hours: string,
+    job_minutes: string,
+    begin_time: string,
+    end_time: string,
+    pay_rate: string,
+    added_by: string,
+    added_date: string,
 }
 
 export function TimeSheetTable({ data, onEdit, onDelete, onAddNew }: any) {
@@ -71,6 +73,122 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew }: any) {
             },
             meta: {
                 label: 'Date Worked'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'job_number',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Job Number
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Job Number'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'job_code',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Code
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Code'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'begin_time',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Begin Time
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Begin Time'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'end_time',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        End Time
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'End Time'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'pay_rate',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Pay Rate
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Pay Rate'
+            } as ColumnMeta,
+            cell: ({ row }) => {
+                const pay_rate = parseFloat(row.getValue('pay_rate'))
+                const formatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                }).format(pay_rate)
+                return formatted
+            },
+        },
+        {
+            accessorKey: 'added_by',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Added By
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Added By'
             } as ColumnMeta
         },
         {
@@ -113,6 +231,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew }: any) {
         onColumnFiltersChange: setColumnFilters,
         onGlobalFilterChange: setGlobalFilter,
         onColumnVisibilityChange: setColumnVisibility,
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
@@ -158,7 +277,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew }: any) {
                     </DropdownMenu>
                     <Button onClick={onAddNew} className="ml-4 bg-neutral-900 text-white">
                         <Plus className="h-4 w-4" />
-                        Add Wood Type
+                        Add Time Entry
                     </Button>
                 </div>
             </div>
@@ -214,6 +333,30 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew }: any) {
                     </TableBody>
                 </Table>
             </div>
+            <Button
+                onClick={() => table.firstPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<<'}
+            </Button>
+            <Button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                >
+                {'<'}
+            </Button>
+            <Button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>'}
+            </Button>
+            <Button
+                onClick={() => table.lastPage()}
+                disabled={!table.getCanNextPage()}
+                >
+                {'>>'}
+            </Button>
         </div>
     )
 }

@@ -20,8 +20,8 @@ export default function TimeManagement({ params }:any) {
     date_worked: '',
     job_number: '',
     job_code: '',
-    job_hours: '',
-    job_minutes: '',
+    begin_time: '',
+    end_time: '',
     pay_rate: '',
     total_pay: '',
     added_by: '',
@@ -34,8 +34,8 @@ export default function TimeManagement({ params }:any) {
     date_worked: '',
     job_number: '',
     job_code: '',
-    job_hours: '',
-    job_minutes: '',
+    begin_time: '',
+    end_time: '',
     pay_rate: '',
     total_pay: '',
     added_by: '',
@@ -46,19 +46,20 @@ export default function TimeManagement({ params }:any) {
     fetchTimeSheets();
   }, []);
 
-  const id = params;
+  const id = params.id;
 
   const fetchTimeSheets = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/timesheets/${id}`);
+      const response = await fetch(`/api/timesheet/${id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
-      const validatedData = z.array(TimeSheetSchema).parse(data);
-      setTimeSheets(validatedData);
+      console.log(data);
+      //const validatedData = z.array(TimeSheetSchema).parse(data);
+      setTimeSheets(data);
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch woods",
+        description: error instanceof Error ? error.message : "Failed to fetch timesheet",
         variant: "destructive",
       });
     }
@@ -66,11 +67,16 @@ export default function TimeManagement({ params }:any) {
 
   const validateForm = (data: TimeSheetFormData): boolean => {
     try {
-      const stringData = {
+      const numericData = {
         ...data,
+        employee_id: parseFloat(data.employee_id),
+        job_number: parseFloat(data.job_number),
+        job_code: parseFloat(data.job_code),
+        pay_rate: parseFloat(data.pay_rate),
+        total_pay: parseFloat(data.total_pay),
       };
 
-      TimeSheetSchema.parse(stringData);
+      TimeSheetSchema.parse(numericData);
       setFormErrors({});
       return true;
     } catch (error) {
@@ -109,8 +115,6 @@ export default function TimeManagement({ params }:any) {
       employee_id: timesheet.employee_id.toString(),
       job_number: timesheet.job_number.toString(),
       job_code: timesheet.job_code.toString(),
-      job_hours: timesheet.job_hours.toString(),
-      job_minutes: timesheet.job_minutes.toString(),
       pay_rate: timesheet.pay_rate.toString(),
       total_pay: timesheet.total_pay.toString(),
     });
@@ -150,8 +154,8 @@ export default function TimeManagement({ params }:any) {
       };
 
       const url = editingTimeSheet
-        ? `/api/timesheets/${editingTimeSheet.id}`
-        : '/api/timesheets';
+        ? `/api/timesheet/${editingTimeSheet.id}`
+        : `/api/timesheet/${params.id}`;
 
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
@@ -163,14 +167,14 @@ export default function TimeManagement({ params }:any) {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) throw new Error('Failed to save wood');
+      if (!response.ok) throw new Error('Failed to save timesheet');
 
       await fetchTimeSheets();
       handleModalClose();
 
       toast({
         title: "Success",
-        description: `Wood type ${editingTimeSheet ? 'updated' : 'added'} successfully`,
+        description: `Timesheet has been ${editingTimeSheet ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
@@ -182,19 +186,19 @@ export default function TimeManagement({ params }:any) {
   };
 
   const handleDelete = async (timesheetId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this wood type?')) return;
+    if (!confirm('Are you sure you want to delete this timesheet entry?')) return;
 
     try {
       const response = await fetch(`/api/timesheets/${timesheetId}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete wood');
+      if (!response.ok) throw new Error('Failed to delete timesheet entry');
 
       await fetchTimeSheets();
       toast({
         title: "Success",
-        description: "Wood type deleted successfully",
+        description: "Timesheet entry deleted successfully",
       });
     } catch (error) {
       toast({
@@ -244,7 +248,7 @@ export default function TimeManagement({ params }:any) {
   return (
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Wood Types</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Timesheet</h1>
       </div>
 
       {/* Desktop view */}
@@ -274,14 +278,14 @@ export default function TimeManagement({ params }:any) {
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'employee_id', label: 'Employee ID', type: 'number' },
+                  { name: 'employee_id', label: 'Employee ID', type: 'text' },
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
-                  { name: 'job_number', label: 'Job Number', type: 'number' },
-                  { name: 'job_code', label: 'Code', type: 'number' },
-                  { name: 'job_hours', label: 'Hours', type: 'number' },
-                  { name: 'job_mins', label: 'Mins', type: 'number' },
-                  { name: 'pay_rate', label: 'Pay Rate', type: 'number' },
-                  { name: 'total_pay', label: 'Total Pay', type: 'number' },
+                  { name: 'job_number', label: 'Job Number', type: 'text' },
+                  { name: 'job_code', label: 'Code', type: 'text' },
+                  { name: 'job_hours', label: 'Hours', type: 'text' },
+                  { name: 'job_mins', label: 'Mins', type: 'text' },
+                  { name: 'pay_rate', label: 'Pay Rate', type: 'text' },
+                  { name: 'total_pay', label: 'Total Pay', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
