@@ -37,8 +37,9 @@ export const TimeSheetSchema = z.object({
     job_code: z.number(),
     begin_time: z.string(),
     end_time: z.string(),
+    hours: z.number(),
+    minutes: z.number(),
     pay_rate: z.number().nonnegative(),
-    total_pay: z.number(),
     added_by: z.string(),
     added_date: z.string(),
 });
@@ -55,8 +56,9 @@ export type TimeSheetFormData = {
     job_code: string;
     begin_time: string;
     end_time: string;
+    hours: string;
+    minutes: string;
     pay_rate: string;
-    total_pay: string;
     added_by: string;
     added_date: string;
 };
@@ -118,7 +120,6 @@ export type WoodFormData = {
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
     id: z.number().optional(),
-    job_labor_code: z.number().min(1, "Labor Code is required"),
     description: z.string().min(1, "Description is required"),
 });
 
@@ -128,6 +129,5 @@ export type NewLaborCode = Omit<LaborCode, 'id'>;
 
 // Form data type (string values for input fields)
 export type LaborCodeFormData = {
-    job_labor_code: string;
     description: string;
 };

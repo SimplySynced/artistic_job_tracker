@@ -35,7 +35,6 @@ type ColumnMeta = {
 
 type LaborCode = {
     id: number
-    job_labor_code: number
     description: string
 }
 
@@ -47,7 +46,7 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew }: any) {
 
     const columns: ColumnDef<LaborCode, any>[] = [
         {
-            accessorKey: 'job_labor_code',
+            accessorKey: 'id',
             header: ({ column }) => {
                 return (
                     <Button

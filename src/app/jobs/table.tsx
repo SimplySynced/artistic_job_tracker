@@ -59,13 +59,13 @@ export function JobTable({ data, onEdit, onDelete, onAddNew }: any) {
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Job Code
+                        Job Number
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Job Code'
+                label: 'Job Number'
             } as ColumnMeta
         },
         {

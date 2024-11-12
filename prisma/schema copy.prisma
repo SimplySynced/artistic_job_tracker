@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./artistic_jobs.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Employees {
+  id          Int     @id @default(autoincrement())
+  first_name  String
+  last_name   String?
+  nick_name   String?
+  location    String?
+  pay_rate    Float?
+  added_by    String?
+  updated_by  String?
+}
+
+model TimeSheets {
+  id          Int     @id @default(autoincrement())
+  employee_id Int
+  date_worked String
+  job_number  Int
+  job_code    Int
+  begin_time  String? @default("")
+  end_time    String? @default("")
+  pay_rate    Float
+  added_by    String
+  added_date  String
+}
+
+model Jobs {
+  id                Int     @id @default(autoincrement())
+  job_code          Int
+  job_location      String  @default("Avenel")
+  job_customer      String
+  job_address       String?
+}
+
+model JobLumberCost {
+  id                Int      @id @default(autoincrement())
+  date              String
+  job_number        Int
+  wood_id           Int
+  wood_type         String
+  wood_replace_id   Int
+  quantity          Int
+  description       String
+  thickness         Float
+  length            Float
+  width             Float
+  cost_over         Int
+  total_cost        Int
+  ft_per_peice      Int
+  price             Float
+  tbf               Float
+  entered_by        String
+  entered_date      String
+  updated_by        String?
+  updated_date      String?
+}
+
+model JobLaborCodes {
+  id                Int     @id @default(autoincrement())
+  job_labor_code    Int
+  description       String
+  enabled           Boolean @default(true)
+}
+
+model Locations {
+  id          Int     @id @default(autoincrement())
+  location    String
+  enabled     Boolean @default(true)
+}
+
+model WoodTypes {
+  id          Int     @id @default(autoincrement())
+  wood_type   String
+  enabled     Boolean @default(true)
+}
+

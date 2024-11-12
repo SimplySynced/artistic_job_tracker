@@ -17,13 +17,11 @@ export default function LaborCodesManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
   const [formData, setFormData] = useState<LaborCodeFormData>({
-    job_labor_code: '',
     description: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LaborCodeFormData, string>>>({});
 
   const initialFormData: LaborCodeFormData = {
-    job_labor_code: '',
     description: '',
   };
 
@@ -51,8 +49,6 @@ export default function LaborCodesManagement() {
     try {
       const stringData = {
         ...data,
-        job_labor_code: parseFloat(data.job_labor_code),
-        description: data.description,
       };
 
       LaborCodeSchema.parse(stringData);
@@ -91,8 +87,6 @@ export default function LaborCodesManagement() {
     setEditingLaborCode(job_labor_code);
     setFormData({
       ...job_labor_code,
-      job_labor_code: job_labor_code.job_labor_code.toString(),
-      description: job_labor_code.description.toString(),
     });
     setIsModalOpen(true);
   };
@@ -126,9 +120,7 @@ export default function LaborCodesManagement() {
     try {
       const currentUser = 'system'; // Replace with actual user authentication
       const submissionData = {
-        ...formData,
-        job_labor_code: parseFloat(formData.job_labor_code),
-        description: formData.description,
+        ...formData
       };
 
       const url = editingLaborCode
@@ -193,7 +185,7 @@ export default function LaborCodesManagement() {
       <div className="space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium">{laborcodes.job_labor_code} </h3>
+            <h3 className="font-medium">{laborcodes.id} </h3>
           </div>
           <div>
             <h3 className="font-medium">{laborcodes.description} </h3>
@@ -219,7 +211,7 @@ export default function LaborCodesManagement() {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <h3 className="text-gray-500 font-medium">Labor Code</h3>
-            <p className='text-sm'>{laborcodes.job_labor_code}</p>
+            <p className='text-sm'>{laborcodes.id}</p>
           </div>
         </div>
       </div>
@@ -259,8 +251,7 @@ export default function LaborCodesManagement() {
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'job_labor_code', label: 'Labor Code', type: 'number' },
-                  { name: 'description', label: 'Descriptions', type: 'text' },
+                  { name: 'description', label: 'Description', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">

@@ -1,27 +1,26 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-datasource db {
-  provider = "sqlite"
-  url      = "file:./artistic_jobs.db"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
 model Employees {
-  id          Int     @id @default(autoincrement())
-  first_name  String
-  last_name   String?
-  nick_name   String?
-  location    String?
-  pay_rate    Float?
-  added_by    String?
-  updated_by  String?
+  id         Int     @id @default(autoincrement())
+  first_name String
+  last_name  String?
+  nick_name  String?
+  location   String? // Foreign key linking to Locations.location
+  pay_rate   Float?
+  added_by   String?
+  updated_by String?
+
+  // Relationships
+  locationInfo Locations?   @relation(fields: [location], references: [location])
+  timesheets   TimeSheets[] // Opposite relation field for TimeSheets
 }
 
 model TimeSheets {
@@ -32,58 +31,68 @@ model TimeSheets {
   job_code    Int
   begin_time  String? @default("")
   end_time    String? @default("")
+  hours       Int     @default(0)
+  minutes     Int     @default(0)
   pay_rate    Float
   added_by    String
   added_date  String
+
+  // Relationship
+  employee Employees @relation(fields: [employee_id], references: [id])
 }
 
 model Jobs {
-  id                Int     @id @default(autoincrement())
-  job_code          Int
-  job_location      String  @default("Avenel")
-  job_customer      String
-  job_address       String?
+  id           Int     @id @default(autoincrement())
+  job_code     Int
+  job_location String // Foreign key linking to Locations.location
+  job_customer String
+  job_address  String?
+
+  // Relationship
+  locationInfo Locations? @relation(fields: [job_location], references: [location])
 }
 
 model JobLumberCost {
-  id                Int      @id @default(autoincrement())
-  date              String
-  job_number        Int
-  wood_id           Int
-  wood_type         String
-  wood_replace_id   Int
-  quantity          Int
-  description       String
-  thickness         Float
-  length            Float
-  width             Float
-  cost_over         Int
-  total_cost        Int
-  ft_per_peice      Int
-  price             Float
-  tbf               Float
-  entered_by        String
-  entered_date      String
-  updated_by        String?
-  updated_date      String?
+  id              Int     @id @default(autoincrement())
+  date            String
+  job_number      Int
+  wood_id         Int
+  wood_type       String
+  wood_replace_id Int
+  quantity        Float // Changed to Float if this can be a decimal
+  description     String
+  thickness       Float
+  length          Float
+  width           Float
+  cost_over       Float // Changed to Float if this can be a decimal
+  total_cost      Float // Changed to Float if this can be a decimal
+  ft_per_peice    Float // Changed to Float if this can be a decimal
+  price           Float
+  tbf             Float
+  entered_by      String
+  entered_date    String
+  updated_by      String?
+  updated_date    String?
 }
 
 model JobLaborCodes {
-  id                Int     @id @default(autoincrement())
-  job_labor_code    Int
-  description       String
-  enabled           Boolean @default(true)
+  id             Int     @id @default(autoincrement())
+  description    String
+  enabled        Boolean @default(true)
 }
 
 model Locations {
-  id          Int     @id @default(autoincrement())
-  location    String
-  enabled     Boolean @default(true)
+  id       Int     @id @default(autoincrement())
+  location String  @unique // Make location unique for linking
+  enabled  Boolean @default(true)
+
+  // Relationships
+  employees Employees[]
+  jobs      Jobs[]
 }
 
 model WoodTypes {
-  id          Int     @id @default(autoincrement())
-  wood_type   String
-  enabled     Boolean @default(true)
+  id        Int     @id @default(autoincrement())
+  wood_type String
+  enabled   Boolean @default(true)
 }
-

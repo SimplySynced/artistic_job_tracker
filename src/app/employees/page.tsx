@@ -302,7 +302,7 @@ export default function EmployeeManagement() {
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
                       {field.label}
-                      {field.name && <span className="text-red-500">*</span>}
+                      {field.name !== 'last_name' && field.name !== 'nick_name' && <span className="text-red-500">*</span>}
                     </label>
                     <Input
                       name={field.name}
@@ -310,7 +310,7 @@ export default function EmployeeManagement() {
                       step={field.step}
                       value={formData[field.name as keyof EmployeeFormData]}
                       onChange={handleInputChange}
-                      required
+                      required={field.name !== 'last_name' && field.name !== 'nick_name'}
                       className={`w-full ${formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}`}
                     />
                     {formErrors[field.name as keyof EmployeeFormData] && (

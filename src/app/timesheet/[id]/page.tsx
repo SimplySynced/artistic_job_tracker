@@ -5,7 +5,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
@@ -13,6 +13,7 @@ import { TimeSheetTable } from "./table"
 
 export default function TimeManagement({ params }:any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
+  const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
   const [formData, setFormData] = useState<TimeSheetFormData>({
@@ -22,8 +23,9 @@ export default function TimeManagement({ params }:any) {
     job_code: '',
     begin_time: '',
     end_time: '',
+    hours: '',
+    minutes: '',
     pay_rate: '',
-    total_pay: '',
     added_by: '',
     added_date: '',
   });
@@ -36,8 +38,9 @@ export default function TimeManagement({ params }:any) {
     job_code: '',
     begin_time: '',
     end_time: '',
+    hours: '',
+    minutes: '',
     pay_rate: '',
-    total_pay: '',
     added_by: '',
     added_date: '',
   };
@@ -47,6 +50,22 @@ export default function TimeManagement({ params }:any) {
   }, []);
 
   const id = params.id;
+
+  const fetchLaborCodes = async (): Promise<void> => {
+    try {
+      const response = await fetch('/api/laborcodes');
+      if (!response.ok) throw new Error('Failed to fetch labor codes');
+      const data = await response.json();
+      const validatedData = z.array(LaborCodeSchema).parse(data);
+      setLaborCodes(validatedData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchTimeSheets = async (): Promise<void> => {
     try {
@@ -72,8 +91,9 @@ export default function TimeManagement({ params }:any) {
         employee_id: parseFloat(data.employee_id),
         job_number: parseFloat(data.job_number),
         job_code: parseFloat(data.job_code),
+        hours: parseFloat(data.hours),
+        minutes: parseFloat(data.minutes),
         pay_rate: parseFloat(data.pay_rate),
-        total_pay: parseFloat(data.total_pay),
       };
 
       TimeSheetSchema.parse(numericData);
@@ -115,8 +135,9 @@ export default function TimeManagement({ params }:any) {
       employee_id: timesheet.employee_id.toString(),
       job_number: timesheet.job_number.toString(),
       job_code: timesheet.job_code.toString(),
+      hours: timesheet.hours.toString(),
+      minutes: timesheet.minutes.toString(),
       pay_rate: timesheet.pay_rate.toString(),
-      total_pay: timesheet.total_pay.toString(),
     });
     setIsModalOpen(true);
   };
@@ -238,7 +259,7 @@ export default function TimeManagement({ params }:any) {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <h3 className="text-gray-500 font-medium">W</h3>
-            <p className='text-sm'>{timesheet.total_pay}</p>
+            <p className='text-sm'>{timesheet.pay_rate}</p>
           </div>
         </div>
       </div>
@@ -278,14 +299,12 @@ export default function TimeManagement({ params }:any) {
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'employee_id', label: 'Employee ID', type: 'text' },
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
                   { name: 'job_number', label: 'Job Number', type: 'text' },
                   { name: 'job_code', label: 'Code', type: 'text' },
-                  { name: 'job_hours', label: 'Hours', type: 'text' },
-                  { name: 'job_mins', label: 'Mins', type: 'text' },
+                  { name: 'hours', label: 'Hours', type: 'text' },
+                  { name: 'minutes', label: 'Minutes', type: 'text' },
                   { name: 'pay_rate', label: 'Pay Rate', type: 'text' },
-                  { name: 'total_pay', label: 'Total Pay', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -307,6 +326,7 @@ export default function TimeManagement({ params }:any) {
                     )}
                   </div>
                 ))}
+                <Input name="employee_id" type="hidden" value={params.id}/>
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"
