@@ -47,6 +47,7 @@ export default function TimeManagement({ params }:any) {
 
   useEffect(() => {
     fetchTimeSheets();
+    fetchLaborCodes();
   }, []);
 
   const id = params.id;
