@@ -40,7 +40,6 @@ export default function LocationManagement() {
       const data = await response.json();
       const validatedData = z.array(LocationSchema).parse(data);
       setLocations(validatedData);
-      console.log(validatedData)
     } catch (error) {
       toast({
         title: "Error",

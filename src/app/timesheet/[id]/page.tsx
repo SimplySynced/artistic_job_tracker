@@ -72,7 +72,6 @@ export default function TimeManagement({ params }:any) {
       const response = await fetch(`/api/timesheet/${id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
-      console.log(data);
       //const validatedData = z.array(TimeSheetSchema).parse(data);
       setTimeSheets(data);
     } catch (error) {

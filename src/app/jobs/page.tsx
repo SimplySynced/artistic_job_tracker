@@ -39,7 +39,6 @@ export default function JobsManagement() {
       const response = await fetch('/api/jobs');
       if (!response.ok) throw new Error('Failed to fetch jobs');
       const data = await response.json();
-      console.log(data)
       const validatedData = z.array(JobSchema).parse(data);
       setJobs(validatedData);
     } catch (error) {

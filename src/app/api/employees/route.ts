@@ -9,7 +9,6 @@ export async function GET() {
         last_name: 'asc',
       },
     });
-    console.log(employees)
     return NextResponse.json(employees);
   } catch (error) {
     console.error('Error fetching employees:', error);

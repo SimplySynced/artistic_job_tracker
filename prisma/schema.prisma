@@ -39,6 +39,7 @@ model TimeSheets {
 
   // Relationship
   employee Employees @relation(fields: [employee_id], references: [id])
+  laborCode JobLaborCodes @relation(fields: [job_code], references: [id])
 }
 
 model Jobs {
@@ -50,6 +51,7 @@ model Jobs {
 
   // Relationship
   locationInfo Locations? @relation(fields: [job_location], references: [location])
+  laborCode JobLaborCodes @relation(fields: [job_code], references: [id])
 }
 
 model JobLumberCost {
@@ -77,9 +79,11 @@ model JobLumberCost {
 
 model JobLaborCodes {
   id             Int     @id @default(autoincrement())
-  job_labor_code Int
   description    String
   enabled        Boolean @default(true)
+
+  TimeSheets TimeSheets[]
+  Jobs Jobs[]
 }
 
 model Locations {
