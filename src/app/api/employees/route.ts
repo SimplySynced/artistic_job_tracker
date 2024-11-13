@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { EmployeeSchema } from '@/types'; // Assume this is the path to your Zod schema
-
-// Reuse Prisma Client instance in a serverless environment
-const prisma = global.prisma || new PrismaClient();
-if (process.env.NODE_ENV !== 'production') global.prisma = prisma;
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
