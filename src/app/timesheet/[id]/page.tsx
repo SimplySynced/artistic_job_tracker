@@ -1,20 +1,20 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+'use client';
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { TimeSheetTable } from "./table"
 
-export default function TimeManagement({ params }:any) {
+export default function TimeManagement({ params }: any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
   const [formData, setFormData] = useState<TimeSheetFormData>({
     employee_id: '',
@@ -31,49 +31,13 @@ export default function TimeManagement({ params }:any) {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
 
-  const initialFormData: TimeSheetFormData = {
-    employee_id: '',
-    date_worked: '',
-    job_number: '',
-    job_code: '',
-    begin_time: '',
-    end_time: '',
-    hours: '',
-    minutes: '',
-    pay_rate: '',
-    added_by: '',
-    added_date: '',
-  };
-
-  useEffect(() => {
-    fetchTimeSheets();
-  }, []);
-
-  const id = params.id;
-
-  const fetchLaborCodes = async (): Promise<void> => {
-    try {
-      const response = await fetch('/api/laborcodes');
-      if (!response.ok) throw new Error('Failed to fetch labor codes');
-      const data = await response.json();
-      const validatedData = z.array(LaborCodeSchema).parse(data);
-      setLaborCodes(validatedData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
-        variant: "destructive",
-      });
-    }
-  };
-
   const fetchTimeSheets = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/timesheet/${id}`);
+      const response = await fetch(`/api/timesheet/${params.id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
-      //const validatedData = z.array(TimeSheetSchema).parse(data);
-      setTimeSheets(data);
+      const validatedData = z.array(TimeSheetSchema).parse(data);
+      setTimeSheets(validatedData);
     } catch (error) {
       toast({
         title: "Error",
@@ -83,6 +47,11 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
+  useEffect(() => {
+    fetchTimeSheets();
+  }, []);
+
+  // Validate form data using TimeSheetSchema
   const validateForm = (data: TimeSheetFormData): boolean => {
     try {
       const numericData = {
@@ -127,7 +96,7 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
-  const handleEdit = (timesheet: TimeSheet): void => {
+  const handleEdit = useCallback((timesheet: TimeSheet): void => {
     setEditingTimeSheet(timesheet);
     setFormData({
       ...timesheet,
@@ -139,19 +108,44 @@ export default function TimeManagement({ params }:any) {
       pay_rate: timesheet.pay_rate.toString(),
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingTimeSheet(null);
-    setFormData(initialFormData);
+    setFormData({
+      employee_id: '',
+      date_worked: '',
+      job_number: '',
+      job_code: '',
+      begin_time: '',
+      end_time: '',
+      hours: '',
+      minutes: '',
+      pay_rate: '',
+      added_by: '',
+      added_date: '',
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingTimeSheet(null);
-    setFormData(initialFormData);
+    setFormData({
+      employee_id: '',
+      date_worked: '',
+      job_number: '',
+      job_code: '',
+      begin_time: '',
+      end_time: '',
+      hours: '',
+      minutes: '',
+      pay_rate: '',
+      added_by: '',
+      added_date: '',
+    });
     setFormErrors({});
   };
 
@@ -168,7 +162,7 @@ export default function TimeManagement({ params }:any) {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData,
       };
@@ -229,63 +223,20 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
-  // New function to render employee card for mobile view
-  const TimeSheetCard = ({ timesheet }: { timesheet: TimeSheet }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{timesheet.date_worked} </h3>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(timesheet)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(timesheet.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">W</h3>
-            <p className='text-sm'>{timesheet.pay_rate}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto py-4 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Timesheet</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Timesheets</h1>
       </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="overflow-x-auto p-1">
         <TimeSheetTable
           data={timeSheets}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAddNew={handleAddNew}
+          isLoading={isLoading}
         />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {timeSheets.map((timeSheet) => (
-          <TimeSheetCard key={timeSheet.id} timesheet={timeSheet} />
-        ))}
       </div>
 
       {isModalOpen && (
@@ -325,7 +276,7 @@ export default function TimeManagement({ params }:any) {
                     )}
                   </div>
                 ))}
-                <Input name="employee_id" type="hidden" value={params.id}/>
+                <Input name="employee_id" type="hidden" value={params.id} />
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"
