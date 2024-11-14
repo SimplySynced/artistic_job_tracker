@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -213,7 +213,6 @@ export default function EmployeePage() {
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
       </div>
 
-      {/* Responsive table view */}
       <div className="overflow-x-auto p-1">
         <EmployeeTable
           data={employees}

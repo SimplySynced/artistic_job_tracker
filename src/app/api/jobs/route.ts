@@ -10,7 +10,8 @@ export async function GET() {
     });
     return NextResponse.json(jobs);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: `Failed to fetch jobs` }, { status: 500 });
   }
 }
 

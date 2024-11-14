@@ -45,7 +45,7 @@ model TimeSheets {
 model Jobs {
   id           Int     @id @default(autoincrement())
   job_code     Int
-  job_number   Int     @unique
+  job_number   Int
   job_location String // Foreign key linking to Locations.location
   job_customer String
   job_address  String?
@@ -53,7 +53,6 @@ model Jobs {
   // Relationship
   locationInfo  Locations?      @relation(fields: [job_location], references: [location])
   laborCode     JobLaborCodes   @relation(fields: [job_code], references: [id])
-  JobLumberCost JobLumberCost[]
 }
 
 model JobLumberCost {
@@ -77,9 +76,6 @@ model JobLumberCost {
   entered_date    String
   updated_by      String?
   updated_date    String?
-
-  // Relationship
-  jobNumber Jobs @relation(fields: [job_number], references: [job_number])
 }
 
 model JobLaborCodes {

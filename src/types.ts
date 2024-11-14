@@ -67,6 +67,7 @@ export type TimeSheetFormData = {
 export const JobSchema = z.object({
     id: z.number().optional(),
     job_code: z.number().min(1, "Job Code is required"),
+    job_number: z.number().min(1, "Job Number is required"),
     job_location: z.string().min(1, "Job Location is required"),
     job_customer: z.string().min(1, "Customer name required"),
     job_address: z.string(),
@@ -79,6 +80,7 @@ export type NewJobCode = Omit<Job, 'id'>;
 // Form data type (string values for input fields)
 export type JobFormData = {
     job_code: string,
+    job_number: string,
     job_location: string,
     job_customer: string,
     job_address: string,
