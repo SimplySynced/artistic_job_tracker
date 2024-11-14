@@ -1,20 +1,19 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
-import { LuClock, LuPencilLine, LuTrash2 } from "react-icons/lu";
-import { useRouter } from 'next/navigation';
-import { EmployeeTable } from "./table"
+import { EmployeeTable } from "./table";
 
-export default function EmployeeManagement() {
+export default function EmployeePage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<EmployeeFormData>({
     first_name: '',
     last_name: '',
@@ -26,28 +25,10 @@ export default function EmployeeManagement() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
 
-  const initialFormData: EmployeeFormData = {
-    first_name: '',
-    last_name: '',
-    nick_name: '',
-    location: '',
-    pay_rate: '',
-    added_by: '',
-    updated_by: ''
-  };
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const router = useRouter();
-
-  const navigateToTimesheet = (id: number) => {
-    router.push(`/timesheet/${id}`);
-  };
-
+  // Fetch employees with loading state
   const fetchEmployees = async (): Promise<void> => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/employees');
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
@@ -59,16 +40,22 @@ export default function EmployeeManagement() {
         description: error instanceof Error ? error.message : "Failed to fetch employees",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  // Validate form data using EmployeeSchema
   const validateForm = (data: EmployeeFormData): boolean => {
     try {
       const numericData = {
         ...data,
         pay_rate: parseFloat(data.pay_rate),
       };
-
       EmployeeSchema.parse(numericData);
       setFormErrors({});
       return true;
@@ -93,6 +80,7 @@ export default function EmployeeManagement() {
       [name]: value
     }));
 
+    // Clear error when field is edited
     if (formErrors[name as keyof EmployeeFormData]) {
       setFormErrors(prev => ({
         ...prev,
@@ -101,26 +89,43 @@ export default function EmployeeManagement() {
     }
   };
 
-  const handleEdit = (employee: Employee): void => {
+  const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
     setFormData({
       ...employee,
       pay_rate: employee.pay_rate.toString(),
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingEmployee(null);
-    setFormData(initialFormData);
+    setFormData({
+      first_name: '',
+      last_name: '',
+      nick_name: '',
+      location: '',
+      pay_rate: '',
+      added_by: '',
+      updated_by: ''
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingEmployee(null);
-    setFormData(initialFormData);
+    setFormData({
+      first_name: '',
+      last_name: '',
+      nick_name: '',
+      location: '',
+      pay_rate: '',
+      added_by: '',
+      updated_by: ''
+    });
     setFormErrors({});
   };
 
@@ -137,6 +142,7 @@ export default function EmployeeManagement() {
     }
 
     try {
+      setIsSaving(true);
       const currentUser = 'system'; // Replace with actual user authentication
       const submissionData = {
         ...formData,
@@ -149,10 +155,8 @@ export default function EmployeeManagement() {
         ? `/api/employees/${editingEmployee.id}`
         : '/api/employees';
 
-      const method = editingEmployee ? 'PUT' : 'POST';
-
       const response = await fetch(url, {
-        method,
+        method: editingEmployee ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -174,6 +178,8 @@ export default function EmployeeManagement() {
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -201,94 +207,29 @@ export default function EmployeeManagement() {
     }
   };
 
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  // New function to render employee card for mobile view
-  const EmployeeCard = ({ employee }: { employee: Employee }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{employee.first_name} {employee.last_name}</h3>
-            <p className="text-sm text-gray-500">{employee.nick_name}</p>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => navigateToTimesheet(employee.id!)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuClock />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(employee)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(employee.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">Location</h3>
-            <p className='text-sm'>{employee.location}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Pay Rate</h3>
-            <p className='text-sm'>{formatCurrency(employee.pay_rate)}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-500 font-medium">Added By</h3>
-            <p className='text-sm'>{employee.added_by}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto py-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
       </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
+      {/* Responsive table view */}
+      <div className="overflow-x-auto p-1">
         <EmployeeTable
           data={employees}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAddNew={handleAddNew}
+          isLoading={isLoading}
         />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {employees.map((employee) => (
-          <EmployeeCard key={employee.id} employee={employee} />
-        ))}
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">
                 {editingEmployee ? 'Edit Employee' : 'Add Employee'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -302,7 +243,7 @@ export default function EmployeeManagement() {
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
                       {field.label}
-                      {field.name !== 'last_name' && field.name !== 'nick_name' && <span className="text-red-500">*</span>}
+                      {field.name !== 'nick_name' && <span className="text-red-500">*</span>}
                     </label>
                     <Input
                       name={field.name}
@@ -310,8 +251,9 @@ export default function EmployeeManagement() {
                       step={field.step}
                       value={formData[field.name as keyof EmployeeFormData]}
                       onChange={handleInputChange}
-                      required={field.name !== 'last_name' && field.name !== 'nick_name'}
-                      className={`w-full ${formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}`}
+                      required={field.name !== 'nick_name'}
+                      disabled={isSaving}
+                      className={formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof EmployeeFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -325,15 +267,16 @@ export default function EmployeeManagement() {
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingEmployee ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingEmployee ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
