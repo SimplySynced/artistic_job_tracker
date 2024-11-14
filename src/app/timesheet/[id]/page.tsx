@@ -5,7 +5,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { EmployeeSchema, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
@@ -48,6 +48,7 @@ export default function TimeManagement({ params }:any) {
   useEffect(() => {
     fetchTimeSheets();
     fetchLaborCodes();
+    fetchEmployeeInfo();
   }, []);
 
   const id = params.id;
@@ -55,6 +56,22 @@ export default function TimeManagement({ params }:any) {
   const fetchLaborCodes = async (): Promise<void> => {
     try {
       const response = await fetch('/api/laborcodes');
+      if (!response.ok) throw new Error('Failed to fetch labor codes');
+      const data = await response.json();
+      const validatedData = z.array(EmployeeSchema).parse(data);
+      setLaborCodes(validatedData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchEmployeeInfo = async (): Promise<void> => {
+    try {
+      const response = await fetch(`/api/employees/${id}`);
       if (!response.ok) throw new Error('Failed to fetch labor codes');
       const data = await response.json();
       const validatedData = z.array(LaborCodeSchema).parse(data);
