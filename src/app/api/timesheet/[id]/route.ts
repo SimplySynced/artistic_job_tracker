@@ -9,7 +9,6 @@ export async function GET(
 ) {
     try {
         const empid = params.id
-        console.log(empid)
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
                 employee_id: parseFloat(empid),
@@ -18,7 +17,6 @@ export async function GET(
                 date_worked: 'desc'
             }
         });
-        console.log(timeSheet)
         return NextResponse.json(timeSheet);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch timesheet' }, { status: 500 });
@@ -30,7 +28,6 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
         const newEntry = await prisma.timeSheets.create({
             data: {
                 ...data, // Default to pay_rate if not provided

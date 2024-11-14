@@ -5,7 +5,7 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { EmployeeSchema, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
@@ -14,6 +14,7 @@ import { TimeSheetTable } from "./table"
 export default function TimeManagement({ params }:any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
+  const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
   const [formData, setFormData] = useState<TimeSheetFormData>({
@@ -47,7 +48,13 @@ export default function TimeManagement({ params }:any) {
 
   useEffect(() => {
     fetchTimeSheets();
+  }, []);
+
+  useEffect(() => {
     fetchLaborCodes();
+  }, []);
+
+  useEffect(() => {
     fetchEmployeeInfo();
   }, []);
 
@@ -56,22 +63,6 @@ export default function TimeManagement({ params }:any) {
   const fetchLaborCodes = async (): Promise<void> => {
     try {
       const response = await fetch('/api/laborcodes');
-      if (!response.ok) throw new Error('Failed to fetch labor codes');
-      const data = await response.json();
-      const validatedData = z.array(EmployeeSchema).parse(data);
-      setLaborCodes(validatedData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchEmployeeInfo = async (): Promise<void> => {
-    try {
-      const response = await fetch(`/api/employees/${id}`);
       if (!response.ok) throw new Error('Failed to fetch labor codes');
       const data = await response.json();
       const validatedData = z.array(LaborCodeSchema).parse(data);
@@ -85,12 +76,28 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
+  const fetchEmployeeInfo = async (): Promise<void> => {
+    try {
+      const response = await fetch(`/api/employees/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch employee info');
+      const data = await response.json();
+      //const validatedData = z.array(EmployeeSchema).parse(data);
+      setEmployeeInfo(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch employee info",
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchTimeSheets = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/timesheet/${id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
-      console.log(data);
+      console.log(data)
       //const validatedData = z.array(TimeSheetSchema).parse(data);
       setTimeSheets(data);
     } catch (error) {
@@ -287,7 +294,7 @@ export default function TimeManagement({ params }:any) {
   return (
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Timesheet</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Timesheet for {employeeinfo[0].first_name} {employeeinfo[0].last_name}</h1>
       </div>
 
       {/* Desktop view */}
@@ -322,7 +329,6 @@ export default function TimeManagement({ params }:any) {
                   { name: 'job_code', label: 'Code', type: 'text' },
                   { name: 'hours', label: 'Hours', type: 'text' },
                   { name: 'minutes', label: 'Minutes', type: 'text' },
-                  { name: 'pay_rate', label: 'Pay Rate', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -345,6 +351,7 @@ export default function TimeManagement({ params }:any) {
                   </div>
                 ))}
                 <Input name="employee_id" type="hidden" value={params.id}/>
+                <Input name="pay_rate" type="hidden" value={employeeinfo[0].pay_rate}/>
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"
