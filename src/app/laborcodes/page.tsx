@@ -1,36 +1,28 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { LaborCode, LaborCodeFormData, LaborCodeSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { LaborCodeTable } from "./table"
-import { Description } from '@radix-ui/react-toast';
 
 export default function LaborCodesManagement() {
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<LaborCodeFormData>({
     description: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LaborCodeFormData, string>>>({});
 
-  const initialFormData: LaborCodeFormData = {
-    description: '',
-  };
-
-  useEffect(() => {
-    fetchLaborCodes();
-  }, []);
-
+  // Fetch labor codes with loading state
   const fetchLaborCodes = async (): Promise<void> => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/laborcodes');
       if (!response.ok) throw new Error('Failed to fetch labor codes');
       const data = await response.json();
@@ -42,9 +34,16 @@ export default function LaborCodesManagement() {
         description: error instanceof Error ? error.message : "Failed to fetch labor codes",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchLaborCodes();
+  }, []);
+
+  // Validate form data using LaborCodeSchema
   const validateForm = (data: LaborCodeFormData): boolean => {
     try {
       const stringData = {
@@ -83,25 +82,30 @@ export default function LaborCodesManagement() {
     }
   };
 
-  const handleEdit = (job_labor_code: LaborCode): void => {
+  const handleEdit = useCallback((job_labor_code: LaborCode): void => {
     setEditingLaborCode(job_labor_code);
     setFormData({
       ...job_labor_code,
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingLaborCode(null);
-    setFormData(initialFormData);
+    setFormData({
+      description: '',
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingLaborCode(null);
-    setFormData(initialFormData);
+    setFormData({
+      description: '',
+    });
     setFormErrors({});
   };
 
@@ -118,7 +122,7 @@ export default function LaborCodesManagement() {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData
       };
@@ -152,6 +156,8 @@ export default function LaborCodesManagement() {
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -179,66 +185,20 @@ export default function LaborCodesManagement() {
     }
   };
 
-  // New function to render employee card for mobile view
-  const LaborCodeCard = ({ laborcodes }: { laborcodes: LaborCode }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{laborcodes.id} </h3>
-          </div>
-          <div>
-            <h3 className="font-medium">{laborcodes.description} </h3>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(laborcodes)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(laborcodes.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">Labor Code</h3>
-            <p className='text-sm'>{laborcodes.id}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto py-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
       </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="overflow-x-auto p-1">
         <LaborCodeTable
           data={laborcodes}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAddNew={handleAddNew}
+          isLoading={isLoading}
         />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {laborcodes.map((laborcode) => (
-          <LaborCodeCard key={laborcode.id} laborcodes={laborcode} />
-        ))}
       </div>
 
       {isModalOpen && (

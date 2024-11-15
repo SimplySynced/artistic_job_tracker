@@ -34,20 +34,21 @@ type ColumnMeta = {
     label: string
 }
 
+// The main data structure used for time sheet entries
 type TimeSheet = {
     id?: number;
-    employee_id: string;
+    employee_id: number;
     date_worked: string;
-    job_number: string;
-    job_code: string;
-    job_hours: string;
-    job_minutes: string;
+    job_number: number;
+    job_code: number;
     begin_time: string;
     end_time: string;
-    pay_rate: string;
+    hours: number;
+    minutes: number;
+    pay_rate: number;
     added_by: string;
     added_date: string;
-}
+};
 
 interface TimesheetTableProps {
     data: TimeSheet[];
