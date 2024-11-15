@@ -5,13 +5,14 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
 import { TimeSheetTable } from "./table"
 
 export default function TimeManagement({ params }: any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
+  const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -266,7 +267,6 @@ export default function TimeManagement({ params }: any) {
                   { name: 'job_code', label: 'Code', type: 'text' },
                   { name: 'hours', label: 'Hours', type: 'text' },
                   { name: 'minutes', label: 'Minutes', type: 'text' },
-                  { name: 'pay_rate', label: 'Pay Rate', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">

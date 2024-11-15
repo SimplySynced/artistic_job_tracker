@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const employee = await prisma.employees.findMany({
+            where: {id: parseInt(params.id)}
+    });
+        return NextResponse.json(employee);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to fetch employee info' }, { status: 500 });
+    }
+}
+
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }
@@ -21,7 +35,6 @@ export async function PUT(
 }
 
 export async function DELETE(
-    request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
