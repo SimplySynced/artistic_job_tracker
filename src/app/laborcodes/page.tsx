@@ -186,29 +186,37 @@ export default function LaborCodesManagement() {
   };
 
   return (
-    <div className="container mx-auto py-4 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
+        </div>
 
-      <div className="overflow-x-auto p-1">
-        <LaborCodeTable
-          data={laborcodes}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-          isLoading={isLoading}
-        />
+        <div className="overflow-x-auto">
+          <LaborCodeTable
+            data={laborcodes}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
                 {editingLaborCode ? 'Edit Labor Codes' : 'Add Labor Codes'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'description', label: 'Description', type: 'text' },
@@ -224,7 +232,7 @@ export default function LaborCodesManagement() {
                       value={formData[field.name as keyof LaborCodeFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof LaborCodeFormData] ? 'border-red-500' : ''}`}
+                      className={formErrors[field.name as keyof LaborCodeFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof LaborCodeFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -238,15 +246,16 @@ export default function LaborCodesManagement() {
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingLaborCode ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingLaborCode ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
@@ -254,6 +263,6 @@ export default function LaborCodesManagement() {
           </div>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

@@ -145,14 +145,14 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
     })
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-                <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-2 w-full sm:w-auto grow">
                     <Input
                         placeholder="Search all columns..."
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(e.target.value)}
-                        className="w-full sm:max-w-xs"
+                        className="w-full sm:max-w-xs focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -209,7 +209,7 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow>
+                            <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
                                         <LuLoader2 className="h-6 w-6 animate-spin" />
@@ -248,15 +248,15 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
             </div>
 
             {/* Responsive pagination */}
-            <div className="flex flex-col-reverse gap-4 items-center sm:flex-row sm:justify-between sm:space-y-0">
+            <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
                 <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
                 </div>
-                <div className='flex flex-wrap-reverse items-center justify-center gap-4'>
+                <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full lg:w-2/3 xl:w-1/2 justify-between lg:justify-end">
                     <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium">Rows per page</p>
                         <Select onValueChange={(value) => table.setPageSize(Number(value))} defaultValue={table.getState().pagination.pageSize.toString()}>
-                            <SelectTrigger className="h-8 w-20 rounded-md border border-neutral-200 bg-white">
+                            <SelectTrigger className="h-10 w-20 rounded-md border border-neutral-200 bg-white focus:ring-0 focus:ring-offset-0">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className='bg-white'>
@@ -268,22 +268,26 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Button variant="outline" className="h-8 w-8 p-0 outline bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
-                            <LuChevronFirst className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" className="h-8 w-8 p-0 outline bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                            <LuChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <span className="text-sm font-medium px-2">
+                    <div className='flex items-center w-full sm:justify-between md:max-w-sm'>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
+                                <LuChevronFirst />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                                <LuChevronLeft />
+                            </Button>
+                        </div>
+                        <span className="text-sm font-medium px-2 grow sm:grow-0 text-center">
                             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                         </span>
-                        <Button variant="outline" className="h-8 w-8 p-0 outline bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                            <LuChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" className="h-8 w-8 p-0 outline bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
-                            <LuChevronLast className="h-4 w-4" />
-                        </Button>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                                <LuChevronRight />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+                                <LuChevronLast />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
