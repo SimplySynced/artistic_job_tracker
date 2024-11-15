@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { Menu, MenuButton, MenuItems, MenuItem, Transition } from '@headlessui/react'
 
-export default function EmployeeDropdown({data}: any) {
-
-  console.log(data)
+export default function EmployeeDropdown({ data }: any) {
 
   const [selected, setSelected] = useState<number>(0)
 

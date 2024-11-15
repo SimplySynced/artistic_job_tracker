@@ -1,21 +1,21 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+'use client';
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { TimeSheetTable } from "./table"
 
-export default function TimeManagement({ params }:any) {
+export default function TimeManagement({ params }: any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
   const [formData, setFormData] = useState<TimeSheetFormData>({
     employee_id: '',
@@ -32,83 +32,30 @@ export default function TimeManagement({ params }:any) {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
 
-  const initialFormData: TimeSheetFormData = {
-    employee_id: '',
-    date_worked: '',
-    job_number: '',
-    job_code: '',
-    begin_time: '',
-    end_time: '',
-    hours: '',
-    minutes: '',
-    pay_rate: '',
-    added_by: '',
-    added_date: '',
-  };
-
-  useEffect(() => {
-    fetchTimeSheets();
-  }, []);
-
-  useEffect(() => {
-    fetchLaborCodes();
-  }, []);
-
-  useEffect(() => {
-    fetchEmployeeInfo();
-  }, []);
-
-  const id = params.id;
-
-  const fetchLaborCodes = async (): Promise<void> => {
-    try {
-      const response = await fetch('/api/laborcodes');
-      if (!response.ok) throw new Error('Failed to fetch labor codes');
-      const data = await response.json();
-      const validatedData = z.array(LaborCodeSchema).parse(data);
-      setLaborCodes(validatedData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch labor codes",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchEmployeeInfo = async (): Promise<void> => {
-    try {
-      const response = await fetch(`/api/employees/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch employee info');
-      const data = await response.json();
-      //const validatedData = z.array(EmployeeSchema).parse(data);
-      setEmployeeInfo(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch employee info",
-        variant: "destructive",
-      });
-    }
-  };
-
   const fetchTimeSheets = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/timesheet/${id}`);
+      setIsLoading(true);
+      const response = await fetch(`/api/timesheet/${params.id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
-      console.log(data)
-      //const validatedData = z.array(TimeSheetSchema).parse(data);
-      setTimeSheets(data);
+      const validatedData = z.array(TimeSheetSchema).parse(data);
+      setTimeSheets(validatedData);
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to fetch timesheet",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchTimeSheets();
+  }, []);
+
+  // Validate form data using TimeSheetSchema
   const validateForm = (data: TimeSheetFormData): boolean => {
     try {
       const numericData = {
@@ -120,7 +67,6 @@ export default function TimeManagement({ params }:any) {
         minutes: parseFloat(data.minutes),
         pay_rate: parseFloat(data.pay_rate),
       };
-
       TimeSheetSchema.parse(numericData);
       setFormErrors({});
       return true;
@@ -153,7 +99,7 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
-  const handleEdit = (timesheet: TimeSheet): void => {
+  const handleEdit = useCallback((timesheet: TimeSheet): void => {
     setEditingTimeSheet(timesheet);
     setFormData({
       ...timesheet,
@@ -165,19 +111,44 @@ export default function TimeManagement({ params }:any) {
       pay_rate: timesheet.pay_rate.toString(),
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingTimeSheet(null);
-    setFormData(initialFormData);
+    setFormData({
+      employee_id: '',
+      date_worked: '',
+      job_number: '',
+      job_code: '',
+      begin_time: '',
+      end_time: '',
+      hours: '',
+      minutes: '',
+      pay_rate: '',
+      added_by: '',
+      added_date: '',
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingTimeSheet(null);
-    setFormData(initialFormData);
+    setFormData({
+      employee_id: '',
+      date_worked: '',
+      job_number: '',
+      job_code: '',
+      begin_time: '',
+      end_time: '',
+      hours: '',
+      minutes: '',
+      pay_rate: '',
+      added_by: '',
+      added_date: '',
+    });
     setFormErrors({});
   };
 
@@ -194,7 +165,7 @@ export default function TimeManagement({ params }:any) {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData,
       };
@@ -228,6 +199,8 @@ export default function TimeManagement({ params }:any) {
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -255,73 +228,38 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
-  // New function to render employee card for mobile view
-  const TimeSheetCard = ({ timesheet }: { timesheet: TimeSheet }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{timesheet.date_worked} </h3>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(timesheet)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(timesheet.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">W</h3>
-            <p className='text-sm'>{timesheet.pay_rate}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Timesheet for {employeeinfo[0].first_name} {employeeinfo[0].last_name}</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Timesheets</h1>
+        </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
-        <TimeSheetTable
-          data={timeSheets}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-        />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {timeSheets.map((timeSheet) => (
-          <TimeSheetCard key={timeSheet.id} timesheet={timeSheet} />
-        ))}
+        <div className="overflow-x-auto">
+          <TimeSheetTable
+            data={timeSheets}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
                 {editingTimeSheet ? 'Edit Time Sheet' : 'Add Time Sheet'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
@@ -341,7 +279,8 @@ export default function TimeManagement({ params }:any) {
                       value={formData[field.name as keyof TimeSheetFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}`}
+                      disabled={isSaving}
+                      className={formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof TimeSheetFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -350,22 +289,22 @@ export default function TimeManagement({ params }:any) {
                     )}
                   </div>
                 ))}
-                <Input name="employee_id" type="hidden" value={params.id}/>
-                <Input name="pay_rate" type="hidden" value={employeeinfo[0].pay_rate}/>
+                <Input name="employee_id" type="hidden" value={params.id} />
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingTimeSheet ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingTimeSheet ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
@@ -373,6 +312,6 @@ export default function TimeManagement({ params }:any) {
           </div>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

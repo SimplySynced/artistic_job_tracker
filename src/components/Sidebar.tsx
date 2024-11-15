@@ -216,7 +216,7 @@ export default function SidebarComponent({ children }: any) {
                     <div className="w-full ">
                         {children}
                     </div>
-                    <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+                    <div className="flex-1 rounded-xl bg-muted/50" />
                 </div>
             </SidebarInset>
         </SidebarProvider >

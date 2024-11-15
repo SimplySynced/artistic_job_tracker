@@ -1,36 +1,28 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { LaborCode, LaborCodeFormData, LaborCodeSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { LaborCodeTable } from "./table"
-import { Description } from '@radix-ui/react-toast';
 
 export default function LaborCodesManagement() {
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<LaborCodeFormData>({
     description: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LaborCodeFormData, string>>>({});
 
-  const initialFormData: LaborCodeFormData = {
-    description: '',
-  };
-
-  useEffect(() => {
-    fetchLaborCodes();
-  }, []);
-
+  // Fetch labor codes with loading state
   const fetchLaborCodes = async (): Promise<void> => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/laborcodes');
       if (!response.ok) throw new Error('Failed to fetch labor codes');
       const data = await response.json();
@@ -42,9 +34,16 @@ export default function LaborCodesManagement() {
         description: error instanceof Error ? error.message : "Failed to fetch labor codes",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchLaborCodes();
+  }, []);
+
+  // Validate form data using LaborCodeSchema
   const validateForm = (data: LaborCodeFormData): boolean => {
     try {
       const stringData = {
@@ -83,25 +82,30 @@ export default function LaborCodesManagement() {
     }
   };
 
-  const handleEdit = (job_labor_code: LaborCode): void => {
+  const handleEdit = useCallback((job_labor_code: LaborCode): void => {
     setEditingLaborCode(job_labor_code);
     setFormData({
       ...job_labor_code,
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingLaborCode(null);
-    setFormData(initialFormData);
+    setFormData({
+      description: '',
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingLaborCode(null);
-    setFormData(initialFormData);
+    setFormData({
+      description: '',
+    });
     setFormErrors({});
   };
 
@@ -118,7 +122,7 @@ export default function LaborCodesManagement() {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData
       };
@@ -152,6 +156,8 @@ export default function LaborCodesManagement() {
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -179,76 +185,38 @@ export default function LaborCodesManagement() {
     }
   };
 
-  // New function to render employee card for mobile view
-  const LaborCodeCard = ({ laborcodes }: { laborcodes: LaborCode }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{laborcodes.id} </h3>
-          </div>
-          <div>
-            <h3 className="font-medium">{laborcodes.description} </h3>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(laborcodes)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(laborcodes.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">Labor Code</h3>
-            <p className='text-sm'>{laborcodes.id}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Labor Codes</h1>
+        </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
-        <LaborCodeTable
-          data={laborcodes}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-        />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {laborcodes.map((laborcode) => (
-          <LaborCodeCard key={laborcode.id} laborcodes={laborcode} />
-        ))}
+        <div className="overflow-x-auto">
+          <LaborCodeTable
+            data={laborcodes}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
                 {editingLaborCode ? 'Edit Labor Codes' : 'Add Labor Codes'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'description', label: 'Description', type: 'text' },
@@ -264,7 +232,7 @@ export default function LaborCodesManagement() {
                       value={formData[field.name as keyof LaborCodeFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof LaborCodeFormData] ? 'border-red-500' : ''}`}
+                      className={formErrors[field.name as keyof LaborCodeFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof LaborCodeFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -278,15 +246,16 @@ export default function LaborCodesManagement() {
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingLaborCode ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingLaborCode ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
@@ -294,6 +263,6 @@ export default function LaborCodesManagement() {
           </div>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

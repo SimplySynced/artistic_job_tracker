@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -12,7 +10,8 @@ export async function GET() {
     });
     return NextResponse.json(jobs);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: `Failed to fetch jobs` }, { status: 500 });
   }
 }
 

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
@@ -33,7 +31,6 @@ export async function POST(
                 ...data, // Default to pay_rate if not provided
             },
         });
-        console.log(newEntry)
         return NextResponse.json(newEntry);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });

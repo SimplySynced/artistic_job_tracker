@@ -1,45 +1,35 @@
-'use client'
-import React, { useEffect, useState } from 'react';
+'use client';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Job, JobFormData, JobSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { JobTable } from "./table"
 
 export default function JobsManagement() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     job_code: '',
+    job_number: '',
     job_location: '',
     job_customer: '',
     job_address: ''
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof JobFormData, string>>>({});
 
-  const initialFormData: JobFormData = {
-    job_code: '',
-    job_location: '',
-    job_customer: '',
-    job_address: ''
-  };
-
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
+  // Fetch jobs with loading state
   const fetchJobs = async (): Promise<void> => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/jobs');
       if (!response.ok) throw new Error('Failed to fetch jobs');
       const data = await response.json();
-      console.log(data)
       const validatedData = z.array(JobSchema).parse(data);
       setJobs(validatedData);
     } catch (error) {
@@ -48,14 +38,22 @@ export default function JobsManagement() {
         description: error instanceof Error ? error.message : "Failed to fetch jobs",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  // Validate form data using JobSchema
   const validateForm = (data: JobFormData): boolean => {
     try {
       const numericData = {
         ...data,
         job_code: parseFloat(data.job_code),
+        job_number: parseFloat(data.job_number),
       };
 
       JobSchema.parse(numericData);
@@ -95,21 +93,35 @@ export default function JobsManagement() {
     setFormData({
       ...job,
       job_code: job.job_code.toString(),
+      job_number: job.job_number.toString(),
     });
     setIsModalOpen(true);
   };
 
   const handleAddNew = (): void => {
     setEditingJob(null);
-    setFormData(initialFormData);
+    setFormData({
+      job_code: '',
+      job_number: '',
+      job_location: '',
+      job_customer: '',
+      job_address: ''
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingJob(null);
-    setFormData(initialFormData);
+    setFormData({
+      job_code: '',
+      job_number: '',
+      job_location: '',
+      job_customer: '',
+      job_address: ''
+    });
     setFormErrors({});
   };
 
@@ -126,10 +138,11 @@ export default function JobsManagement() {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData,
         job_code: parseFloat(formData.job_code),
+        job_number: parseFloat(formData.job_number),
       };
 
       const url = editingJob
@@ -153,7 +166,7 @@ export default function JobsManagement() {
 
       toast({
         title: "Success",
-        description: `JOb ${editingJob ? 'updated' : 'added'} successfully`,
+        description: `Job ${editingJob ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
@@ -172,7 +185,7 @@ export default function JobsManagement() {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Failed to delete employee');
+      if (!response.ok) throw new Error('Failed to delete job');
 
       await fetchJobs();
       toast({
@@ -188,77 +201,42 @@ export default function JobsManagement() {
     }
   };
 
-  // New function to render employee card for mobile view
-  const JobCard = ({ job }: { job: Job }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{job.job_code} {job.job_customer}</h3>
-            <p className="text-sm text-gray-500">{job.job_location}</p>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(job)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(job.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">Location</h3>
-            <p className='text-sm'>{job.job_address}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Jobs</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Jobs</h1>
+        </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
-        <JobTable
-          data={jobs}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-        />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {jobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
+        <div className="overflow-x-auto">
+          <JobTable
+            data={jobs}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
                 {editingJob ? 'Edit Job' : 'Add Job'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'job_code', label: 'Job Code', type: 'number' },
+                  { name: 'job_number', label: 'Job Number', type: 'number' },
                   { name: 'job_location', label: 'Location', type: 'text' },
                   { name: 'job_customer', label: 'Customer', type: 'text' },
                   { name: 'job_address', label: 'Address', type: 'text' },
@@ -274,7 +252,8 @@ export default function JobsManagement() {
                       value={formData[field.name as keyof JobFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof JobFormData] ? 'border-red-500' : ''}`}
+                      disabled={isSaving}
+                      className={formErrors[field.name as keyof JobFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof JobFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -288,15 +267,16 @@ export default function JobsManagement() {
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingJob ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingJob ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
@@ -304,6 +284,6 @@ export default function JobsManagement() {
           </div>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }
