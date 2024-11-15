@@ -73,7 +73,7 @@ model JobLumberCost {
   width           Float
   cost_over       Float // Changed to Float if this can be a decimal
   total_cost      Float // Changed to Float if this can be a decimal
-  ft_per_peice    Float // Changed to Float if this can be a decimal
+  ft_per_piece    Float // Changed to Float if this can be a decimal
   price           Float
   tbf             Float
   entered_by      String
