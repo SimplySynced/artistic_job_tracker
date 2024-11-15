@@ -48,7 +48,6 @@ model TimeSheets {
 
 model Jobs {
   id           Int     @id @default(autoincrement())
-  job_code     Int
   job_number   Int     @unique // Make job_number unique for linking
   job_location String
   job_customer String
@@ -56,7 +55,6 @@ model Jobs {
 
   // Relationships
   locationInfo  Locations?      @relation(fields: [job_location], references: [location])
-  laborCode     JobLaborCodes   @relation(fields: [job_code], references: [id])
   JobLumberCost JobLumberCost[]
   TimeSheets    TimeSheets[]
 }
@@ -94,7 +92,6 @@ model JobLaborCodes {
   enabled     Boolean @default(true)
 
   TimeSheets TimeSheets[]
-  Jobs       Jobs[]
 }
 
 model Locations {
