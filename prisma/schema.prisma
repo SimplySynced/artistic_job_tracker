@@ -22,6 +22,8 @@ model Employees {
   // Relationships
   locationInfo Locations?   @relation(fields: [location], references: [location])
   timesheets   TimeSheets[] // Opposite relation field for TimeSheets
+
+  @@unique([id, pay_rate])
 }
 
 model TimeSheets {
@@ -39,7 +41,7 @@ model TimeSheets {
   added_date  String
 
   // Relationship
-  employee  Employees     @relation(fields: [employee_id], references: [id])
+  employee  Employees     @relation(fields: [employee_id, pay_rate], references: [id, pay_rate])
   laborCode JobLaborCodes @relation(fields: [job_code], references: [id])
   jobNumber Jobs          @relation(fields: [job_number], references: [job_number])
 }
