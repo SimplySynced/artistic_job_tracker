@@ -9,6 +9,15 @@ import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSh
 import { z } from 'zod';
 import { LuPencilLine, LuTrash2 } from "react-icons/lu";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { TimeSheetTable } from "./table"
 
 export default function TimeManagement({ params }:any) {
@@ -323,10 +332,16 @@ export default function TimeManagement({ params }:any) {
                 {editingTimeSheet ? 'Edit Time Sheet' : 'Add Time Sheet'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Sand Jamb</DropdownMenuItem>
+                    <DropdownMenuItem>Sand Railing</DropdownMenuItem>                    
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 {[
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
                   { name: 'job_number', label: 'Job Number', type: 'text' },
-                  { name: 'job_code', label: 'Code', type: 'text' },
                   { name: 'hours', label: 'Hours', type: 'text' },
                   { name: 'minutes', label: 'Minutes', type: 'text' },
                 ].map((field) => (
