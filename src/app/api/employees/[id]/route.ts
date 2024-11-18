@@ -11,6 +11,7 @@ export async function GET(
         const employee = await prisma.employees.findMany({
             where: {id: parseInt(params.id)}
     });
+    console.log(employee)
         return NextResponse.json(employee);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch employee info' }, { status: 500 });

@@ -1,24 +1,48 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+import { LuPencilLine, LuTrash2 } from "react-icons/lu";
+import { Check, ChevronsUpDown } from "lucide-react"
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
+
+import { cn } from "@/lib/utils"
+
 import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { Dialog } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form"
+import { useForm } from "react-hook-form"
 
 import { TimeSheetTable } from "./table"
+
+type Code = {
+  id: number
+  description: string
+}
 
 export default function TimeManagement({ params }:any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
@@ -26,6 +50,8 @@ export default function TimeManagement({ params }:any) {
   const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
+  const [open, setOpen] = useState(false);
+
   const [formData, setFormData] = useState<TimeSheetFormData>({
     employee_id: '',
     date_worked: '',
@@ -57,14 +83,11 @@ export default function TimeManagement({ params }:any) {
 
   useEffect(() => {
     fetchTimeSheets();
+    fetchEmployeeInfo();
   }, []);
 
   useEffect(() => {
     fetchLaborCodes();
-  }, []);
-
-  useEffect(() => {
-    fetchEmployeeInfo();
   }, []);
 
   const id = params.id;
@@ -91,6 +114,7 @@ export default function TimeManagement({ params }:any) {
       if (!response.ok) throw new Error('Failed to fetch employee info');
       const data = await response.json();
       //const validatedData = z.array(EmployeeSchema).parse(data);
+      console.log(data)
       setEmployeeInfo(data);
     } catch (error) {
       toast({
@@ -264,6 +288,10 @@ export default function TimeManagement({ params }:any) {
     }
   };
 
+  const form = useForm<z.infer<typeof TimeSheetSchema>>({
+    resolver: zodResolver(TimeSheetSchema),
+  })
+
   // New function to render employee card for mobile view
   const TimeSheetCard = ({ timesheet }: { timesheet: TimeSheet }) => (
     <div className="bg-white rounded-lg shadow p-4 mb-4">
@@ -300,10 +328,11 @@ export default function TimeManagement({ params }:any) {
     </div>
   );
 
+
   return (
     <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Timesheet for {employeeinfo[0].first_name} {employeeinfo[0].last_name}</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Timesheet for </h1>
       </div>
 
       {/* Desktop view */}
@@ -331,59 +360,108 @@ export default function TimeManagement({ params }:any) {
               <h2 className="text-lg md:text-xl font-bold mt-0">
                 {editingTimeSheet ? 'Edit Time Sheet' : 'Add Time Sheet'}
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>Sand Jamb</DropdownMenuItem>
-                    <DropdownMenuItem>Sand Railing</DropdownMenuItem>                    
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {[
-                  { name: 'date_worked', label: 'Date Worked', type: 'text' },
-                  { name: 'job_number', label: 'Job Number', type: 'text' },
-                  { name: 'hours', label: 'Hours', type: 'text' },
-                  { name: 'minutes', label: 'Minutes', type: 'text' },
-                ].map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium mb-1">
-                      {field.label}
-                      {field.name && <span className="text-red-500">*</span>}
-                    </label>
-                    <Input
-                      name={field.name}
-                      type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full ${formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}`}
-                    />
-                    {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof TimeSheetFormData]}
-                      </p>
+              <Form {...form}>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <FormField
+                    name="job_code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Labor Code</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-[200px] justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? laborcodes.find(
+                                      (laborcode) => laborcode.id === field.value
+                                    )?.description
+                                  : "Select Labor Code"}
+                                <ChevronsUpDown className="opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[200px] p-0 bg-white">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search Labor Code..."
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>No labor code found.</CommandEmpty>
+                                <CommandGroup>
+                                  {laborcodes.map((laborcode) => (
+                                    <CommandItem
+                                      value={laborcode.id.toString()}
+                                      key={laborcode.id}
+                                      onSelect={() => {
+                                        form.setValue("job_code", laborcode.id)
+                                        setOpen(false)
+                                      }}
+                                    >
+                                      {laborcode.id} - {laborcode.description}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </FormItem>
                     )}
+                  />
+                  {[
+                    { name: 'date_worked', label: 'Date Worked', type: 'text' },
+                    { name: 'job_number', label: 'Job Number', type: 'text' },
+                    { name: 'hours', label: 'Hours', type: 'text' },
+                    { name: 'minutes', label: 'Minutes', type: 'text' },
+                  ].map((field) => (
+                    <div key={field.name}>
+                      <label className="block text-sm font-medium mb-1">
+                        {field.label}
+                        {field.name && <span className="text-red-500">*</span>}
+                      </label>
+                      <Input
+                        name={field.name}
+                        type={field.type}
+                        value={formData[field.name as keyof TimeSheetFormData]}
+                        onChange={handleInputChange}
+                        required
+                        className={`w-full ${formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}`}
+                      />
+                      {formErrors[field.name as keyof TimeSheetFormData] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors[field.name as keyof TimeSheetFormData]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                  <Input name="employee_id" type="hidden" value={params.id}/>
+                  <Input name="pay_rate" type="hidden" value={employeeinfo[0].pay_rate}/>
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleModalClose}
+                      className="w-full md:w-auto"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-neutral-900 text-white w-full md:w-auto"
+                    >
+                      {editingTimeSheet ? 'Update' : 'Save'}
+                    </Button>
                   </div>
-                ))}
-                <Input name="employee_id" type="hidden" value={params.id}/>
-                <Input name="pay_rate" type="hidden" value={employeeinfo[0].pay_rate}/>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleModalClose}
-                    className="w-full md:w-auto"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
-                  >
-                    {editingTimeSheet ? 'Update' : 'Save'}
-                  </Button>
-                </div>
-              </form>
+                </form>
+              </Form>
             </div>
           </div>
         </Dialog>
