@@ -2,15 +2,26 @@
 import { z } from 'zod';
 
 // Zod schema for runtime validation
+// export const EmployeeSchema = z.object({
+//     id: z.number().optional(), // Optional for new employees
+//     first_name: z.string().min(1, "First name is required"),
+//     last_name: z.string(),
+//     nick_name: z.string(),
+//     location: z.string(),
+//     pay_rate: z.number().nonnegative("Pay rate must be positive"),
+//     added_by: z.string(),
+//     updated_by: z.string(),
+// });
+
 export const EmployeeSchema = z.object({
     id: z.number().optional(), // Optional for new employees
-    first_name: z.string().min(1, "First name is required"),
-    last_name: z.string(),
-    nick_name: z.string(),
-    location: z.string(),
-    pay_rate: z.number().nonnegative("Pay rate must be positive"),
-    added_by: z.string(),
-    updated_by: z.string(),
+    first_name: z.string().min(1, "First name is required"), // Required
+    last_name: z.string().nullable(), // Optional, can be null
+    nick_name: z.string().nullable(), // Optional, can be null
+    location: z.string().nullable(), // Optional, can be null
+    pay_rate: z.number().nonnegative("Pay rate must be positive"), // Required and must be non-negative
+    added_by: z.string().nullable(), // Optional, can be null
+    updated_by: z.string().nullable(), // Optional, can be null
 });
 
 // TypeScript types derived from Zod schema
@@ -20,12 +31,12 @@ export type NewEmployee = Omit<Employee, 'id'>;
 // Form data type (string values for input fields)
 export type EmployeeFormData = {
     first_name: string;
-    last_name: string;
-    nick_name: string;
-    location: string;
-    pay_rate: string;
-    added_by: string;
-    updated_by: string;
+    last_name: string | null;
+    nick_name: string | null;
+    location: string | null;
+    pay_rate: string; // Form fields always handle numbers as strings
+    added_by: string | null;
+    updated_by: string | null;
 };
 
 // Zod schema for runtime validation

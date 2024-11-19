@@ -6,9 +6,7 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
-        console.log("Incoming ID:", params.id);
         const data = await request.json();
-        console.log("Incoming Data:", data);
 
         const job = await prisma.jobs.update({
             where: { id: parseInt(params.id) },

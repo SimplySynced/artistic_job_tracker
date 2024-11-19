@@ -27,20 +27,32 @@ export default function EmployeePage() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
 
-  // Fetch employees with loading state
   const fetchEmployees = async (): Promise<void> => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/employees');
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
-      const validatedData = z.array(EmployeeSchema).parse(data);
+
+      // Normalize data to ensure no null values
+      const normalizedData = data.map((employee: any) => ({
+        ...employee,
+        last_name: employee.last_name || '', // Replace null with empty string
+        nick_name: employee.nick_name || '',
+        location: employee.location || '',
+        added_by: employee.added_by || '',
+        updated_by: employee.updated_by || '',
+      }));
+
+      // Validate normalized data
+      const validatedData = z.array(EmployeeSchema).parse(normalizedData);
       setEmployees(validatedData);
     } catch (error) {
+      console.error('Error fetching employees:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch employees",
-        variant: "destructive",
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch employees',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -110,8 +122,13 @@ export default function EmployeePage() {
   const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
     setFormData({
-      ...employee,
-      pay_rate: employee.pay_rate.toString(),
+      first_name: employee.first_name || '', // Replace null with empty string
+      last_name: employee.last_name || '', // Replace null with empty string
+      nick_name: employee.nick_name || '', // Replace null with empty string
+      location: employee.location || '', // Replace null with empty string
+      pay_rate: employee.pay_rate.toString(), // Convert number to string for input
+      added_by: employee.added_by || '', // Replace null with empty string
+      updated_by: employee.updated_by || '', // Replace null with empty string
     });
     setIsModalOpen(true);
   }, []);
@@ -273,9 +290,9 @@ export default function EmployeePage() {
                       name={field.name}
                       type={field.type}
                       step={field.step}
-                      value={formData[field.name as keyof EmployeeFormData]}
+                      value={formData[field.name as keyof EmployeeFormData] || ''} // Safely handle nullable values
                       onChange={handleInputChange}
-                      required={field.name !== 'nick_name'}
+                      required={field.name !== 'nick_name'} // Optional if field is `nick_name`
                       disabled={isSaving}
                       className={formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}
                     />
@@ -294,8 +311,8 @@ export default function EmployeePage() {
                   </label>
                   <select
                     name="location"
-                    value={formData.location}
-                    onChange={handleInputChange} // No casting required
+                    value={formData.location || ''} // Safely handle nullable values
+                    onChange={handleInputChange}
                     required
                     disabled={isSaving}
                     className="block w-full border rounded-md px-3 py-2"
@@ -309,7 +326,6 @@ export default function EmployeePage() {
                       </option>
                     ))}
                   </select>
-
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-4">
@@ -330,6 +346,7 @@ export default function EmployeePage() {
                   </Button>
                 </div>
               </form>
+
             </div>
           </div>
         </Dialog>

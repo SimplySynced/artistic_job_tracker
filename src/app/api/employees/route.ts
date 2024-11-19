@@ -19,11 +19,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log('Incoming Data:', data);
 
     // Validate data using Zod
     const validationResult = EmployeeSchema.safeParse(data);
-    console.log('Validation Result:', validationResult);
 
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
