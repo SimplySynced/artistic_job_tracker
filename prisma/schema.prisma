@@ -22,8 +22,6 @@ model Employees {
   // Relationships
   locationInfo Locations?   @relation(fields: [location], references: [location])
   timesheets   TimeSheets[] // Opposite relation field for TimeSheets
-
-  @@unique([id, pay_rate])
 }
 
 model TimeSheets {
@@ -36,12 +34,12 @@ model TimeSheets {
   end_time    String? @default("")
   hours       Int     @default(0)
   minutes     Int     @default(0)
-  pay_rate    Float
+  pay_rate    Float // This will be populated from Employees
   added_by    String
   added_date  String
 
-  // Relationship
-  employee  Employees     @relation(fields: [employee_id, pay_rate], references: [id, pay_rate])
+  // Relationships
+  employee  Employees     @relation(fields: [employee_id], references: [id])
   laborCode JobLaborCodes @relation(fields: [job_code], references: [id])
   jobNumber Jobs          @relation(fields: [job_number], references: [job_number])
 }

@@ -6,7 +6,7 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const empid = params.id
+        const empid = params.id;
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
                 employee_id: parseFloat(empid),
@@ -17,6 +17,7 @@ export async function GET(
         });
         return NextResponse.json(timeSheet);
     } catch (error) {
+        console.error('Error fetching timesheet:', error);
         return NextResponse.json({ error: 'Failed to fetch timesheet' }, { status: 500 });
     }
 }
@@ -26,13 +27,31 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
+
+        // Fetch the pay_rate for the given employee_id
+        const employee = await prisma.employees.findUnique({
+            where: { id: data.employee_id },
+            select: { pay_rate: true },
+        });
+
+        if (!employee || employee.pay_rate === null) {
+            return NextResponse.json(
+                { error: 'Employee not found or pay_rate is null' },
+                { status: 404 }
+            );
+        }
+
+        // Add the fetched pay_rate to the timesheet data
         const newEntry = await prisma.timeSheets.create({
             data: {
-                ...data, // Default to pay_rate if not provided
+                ...data,
+                pay_rate: employee.pay_rate,
             },
         });
+
         return NextResponse.json(newEntry);
     } catch (error) {
+        console.error('Error adding timesheet:', error);
         return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
     }
 }

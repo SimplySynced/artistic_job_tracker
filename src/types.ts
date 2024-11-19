@@ -63,27 +63,29 @@ export type TimeSheetFormData = {
     added_date: string;
 };
 
-// Zod schema for Jobs
+// Updated Zod schema for Jobs
 export const JobSchema = z.object({
     id: z.number().optional(),
-    job_code: z.number().min(1, "Job Code is required"),
-    job_number: z.number().min(1, "Job Number is required"),
-    job_location: z.string().min(1, "Job Location is required"),
-    job_customer: z.string().min(1, "Customer name required"),
-    job_address: z.string(),
+    job_number: z.number().min(1, 'Job Number is required'),
+    job_location: z.string().min(1, 'Job Location is required'),
+    job_customer: z.string().min(1, 'Customer name is required'),
+    job_address: z.string().min(1, 'Address is required'),
 });
 
-// TypeScript types derived from Zod schema
+// Updated TypeScript types derived from Zod schema
 export type Job = z.infer<typeof JobSchema>;
 export type NewJobCode = Omit<Job, 'id'>;
 
-// Form data type (string values for input fields)
+// Updated Form data type (string values for input fields)
 export type JobFormData = {
-    job_code: string,
-    job_number: string,
-    job_location: string,
-    job_customer: string,
-    job_address: string,
+    job_number: number;
+    job_location: string;
+    job_customer: string;
+    job_address: string; // Combined address
+    street?: string; // Optional field
+    city?: string;   // Optional field
+    state?: string;  // Optional field
+    zip?: string;    // Optional field
 };
 
 

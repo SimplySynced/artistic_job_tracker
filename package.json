@@ -42,8 +42,7 @@
   "name": "artistic_job_tracker",
   "packageManager": "yarn@4.5.1",
   "prisma": {
-    "schema": "prisma/schema.prisma",
-    "seed": "node prisma/seed.js"
+    "schema": "prisma/schema.prisma"
   },
   "private": true,
   "scripts": {

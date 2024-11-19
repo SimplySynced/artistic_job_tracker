@@ -6,7 +6,10 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
+        console.log("Incoming ID:", params.id);
         const data = await request.json();
+        console.log("Incoming Data:", data);
+
         const job = await prisma.jobs.update({
             where: { id: parseInt(params.id) },
             data: {
@@ -15,9 +18,11 @@ export async function PUT(
         });
         return NextResponse.json(job);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+        console.error("Error updating job:", error);
+        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 }
+
 
 export async function DELETE(
     request: Request,

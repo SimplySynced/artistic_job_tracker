@@ -11,6 +11,7 @@ import { EmployeeTable } from "./table";
 
 export default function EmployeePage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [locations, setLocations] = useState<{ id: number; location: string }[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +51,25 @@ export default function EmployeePage() {
     fetchEmployees();
   }, []);
 
+  const fetchLocations = async (): Promise<void> => {
+    try {
+      const response = await fetch('/api/locations');
+      if (!response.ok) throw new Error('Failed to fetch locations');
+      const data = await response.json();
+      setLocations(data); // Ensure `data` is an array of { id, location }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch locations',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
   // Validate form data using EmployeeSchema
   const validateForm = (data: EmployeeFormData): boolean => {
     try {
@@ -74,21 +94,18 @@ export default function EmployeePage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when field is edited
     if (formErrors[name as keyof EmployeeFormData]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [name]: undefined
-      }));
+      setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
+
 
   const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
@@ -231,11 +248,11 @@ export default function EmployeePage() {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
-            onClick={handleModalClose} // Close modal on clicking the backdrop
+            onClick={handleModalClose}
           >
             <div
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+              onClick={(e) => e.stopPropagation()}
             >
               <span className="text-xl font-bold">
                 {editingEmployee ? 'Edit Employee' : 'Add Employee'}
@@ -245,7 +262,6 @@ export default function EmployeePage() {
                   { name: 'first_name', label: 'First Name', type: 'text' },
                   { name: 'last_name', label: 'Last Name', type: 'text' },
                   { name: 'nick_name', label: 'Nick Name', type: 'text' },
-                  { name: 'location', label: 'Location', type: 'text' },
                   { name: 'pay_rate', label: 'Pay Rate', type: 'number', step: '0.01' },
                 ].map((field) => (
                   <div key={field.name}>
@@ -270,6 +286,32 @@ export default function EmployeePage() {
                     )}
                   </div>
                 ))}
+
+                {/* Location Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Location <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange} // No casting required
+                    required
+                    disabled={isSaving}
+                    className="block w-full border rounded-md px-3 py-2"
+                  >
+                    <option value="" disabled>
+                      Select a location
+                    </option>
+                    {locations.map((loc) => (
+                      <option key={loc.id} value={loc.location}>
+                        {loc.location}
+                      </option>
+                    ))}
+                  </select>
+
+                </div>
+
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"

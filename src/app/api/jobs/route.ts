@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const jobs = await prisma.jobs.findMany({
       orderBy: {
-        job_code: 'asc'
+        job_number: 'asc'
       }
     });
     return NextResponse.json(jobs);

@@ -34,13 +34,12 @@ type ColumnMeta = {
 }
 
 type Job = {
-    id?: number;
-    job_code: number;
+    id?: number; // Optional for new jobs
     job_number: number;
     job_location: string;
     job_customer: string;
     job_address: string;
-}
+};
 
 interface JobTableProps {
     data: Job[];
@@ -58,25 +57,6 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
 
     const columns: ColumnDef<Job, any>[] = [
         {
-            accessorFn: (row) => `${row.job_code}`,
-            id: 'job_code',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Job Code
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            meta: {
-                label: 'Job Code'
-            } as ColumnMeta
-        },
-        {
             accessorFn: (row) => `${row.job_number}`,
             id: 'job_number',
             header: ({ column }) => {
@@ -91,9 +71,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Display "NULL" for undefined or null
             meta: {
                 label: 'Job Number'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_location',
@@ -109,9 +90,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Location'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_customer',
@@ -127,9 +109,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Customer'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_address',
@@ -145,9 +128,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Address'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             id: 'actions',
@@ -260,7 +244,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_code', 'job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
+                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
                                     >
                                         {header.isPlaceholder
                                             ? null
@@ -292,7 +276,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
-                                            className={`font-medium text-center ${['job_code', 'job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
+                                            className={`font-medium text-center ${['job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
