@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { EmployeeSchema } from '@/types'; // Assume this is the path to your Zod schema
+import { TimeSheetSchema } from '@/types'; // Assume this is the path to your Zod schema
 import prisma from '@/lib/prisma';
 
 export async function GET() {
@@ -19,9 +19,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log(data)
 
     // Validate data using Zod
-    const validationResult = EmployeeSchema.safeParse(data);
+    const validationResult = TimeSheetSchema.safeParse(data);
 
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
@@ -29,14 +30,12 @@ export async function POST(request: Request) {
     }
 
     // Data is valid, proceed with creation
-    const employee = await prisma.employees.create({
+    const timesheet = await prisma.timeSheets.create({
       data: {
         ...validationResult.data,
-        added_by: validationResult.data.added_by || 'system', // Default value
-        updated_by: validationResult.data.updated_by || 'system', // Default value
       },
     });
-    return NextResponse.json(employee);
+    return NextResponse.json(timesheet);
   } catch (error) {
     console.error('Error creating employee:', error);
     return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });

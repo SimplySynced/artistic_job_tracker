@@ -15,6 +15,8 @@ export const metadata = {
   description: 'A NextJS App to track employee time and jobs.',
 }
 
+export const viewport = "width=device-width, initial-scale=1.0, user-scalable=no";
+
 export default function RootLayout({
   children,
 }: {

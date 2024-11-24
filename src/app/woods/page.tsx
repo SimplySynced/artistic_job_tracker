@@ -1,35 +1,28 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+'use client';
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Wood, WoodFormData, WoodSchema } from '@/types';
 import { z } from 'zod';
-import { LuPencilLine, LuTrash2 } from "react-icons/lu";
-
 import { WoodTable } from "./table"
 
 export default function WoodManagement() {
   const [woods, setWoods] = useState<Wood[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWood, setEditingWood] = useState<Wood | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<WoodFormData>({
     wood_type: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof WoodFormData, string>>>({});
 
-  const initialFormData: WoodFormData = {
-    wood_type: '',
-  };
-
-  useEffect(() => {
-    fetchWoods();
-  }, []);
-
   const fetchWoods = async (): Promise<void> => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/woods');
       if (!response.ok) throw new Error('Failed to fetch woods');
       const data = await response.json();
@@ -41,16 +34,22 @@ export default function WoodManagement() {
         description: error instanceof Error ? error.message : "Failed to fetch woods",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchWoods();
+  }, []);
+
+  // Validate form data using WoodSchema
   const validateForm = (data: WoodFormData): boolean => {
     try {
       const stringData = {
         ...data,
         wood_type: data.wood_type,
       };
-
       WoodSchema.parse(stringData);
       setFormErrors({});
       return true;
@@ -83,26 +82,31 @@ export default function WoodManagement() {
     }
   };
 
-  const handleEdit = (wood: Wood): void => {
+  const handleEdit = useCallback((wood: Wood): void => {
     setEditingWood(wood);
     setFormData({
       ...wood,
       wood_type: wood.wood_type.toString(),
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleAddNew = (): void => {
     setEditingWood(null);
-    setFormData(initialFormData);
+    setFormData({
+      wood_type: '',
+    });
     setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleModalClose = (): void => {
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingWood(null);
-    setFormData(initialFormData);
+    setFormData({
+      wood_type: '',
+    });
     setFormErrors({});
   };
 
@@ -119,7 +123,7 @@ export default function WoodManagement() {
     }
 
     try {
-      const currentUser = 'system'; // Replace with actual user authentication
+      setIsSaving(true);
       const submissionData = {
         ...formData,
         wood_type: formData.wood_type,
@@ -154,6 +158,8 @@ export default function WoodManagement() {
         description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -181,73 +187,38 @@ export default function WoodManagement() {
     }
   };
 
-  // New function to render employee card for mobile view
-  const WoodCard = ({ wood }: { wood: Wood }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
-      <div className="space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{wood.wood_type} </h3>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(wood)}
-              className="bg-sky-500 text-white text-xs px-3 py-1"
-            >
-              <LuPencilLine />
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(wood.id!)}
-              className="bg-red-500 text-white text-xs px-3 py-1"
-            >
-              <LuTrash2 />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <h3 className="text-gray-500 font-medium">Wood Type</h3>
-            <p className='text-sm'>{wood.wood_type}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="px-4 md:px-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Wood Types</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Wood Types</h1>
+        </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto">
-        <WoodTable
-          data={woods}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-        />
-      </div>
-
-      {/* Mobile view */}
-      <div className="md:hidden space-y-4">
-        {woods.map((wood) => (
-          <WoodCard key={wood.id} wood={wood} />
-        ))}
+        <div className="overflow-x-auto">
+          <WoodTable
+            data={woods}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-              <h2 className="text-lg md:text-xl font-bold mt-0">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
                 {editingWood ? 'Edit Wood Type' : 'Add Wood Type'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'wood_type', label: 'Wood Type', type: 'text' },
@@ -263,7 +234,8 @@ export default function WoodManagement() {
                       value={formData[field.name as keyof WoodFormData]}
                       onChange={handleInputChange}
                       required
-                      className={`w-full ${formErrors[field.name as keyof WoodFormData] ? 'border-red-500' : ''}`}
+                      disabled={isSaving}
+                      className={formErrors[field.name as keyof WoodFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof WoodFormData] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -277,15 +249,16 @@ export default function WoodManagement() {
                     type="button"
                     variant="outline"
                     onClick={handleModalClose}
-                    className="w-full md:w-auto"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-neutral-900 text-white w-full md:w-auto"
+                    className="bg-neutral-900 text-white"
+                    disabled={isSaving}
                   >
-                    {editingWood ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingWood ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
@@ -293,6 +266,6 @@ export default function WoodManagement() {
           </div>
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

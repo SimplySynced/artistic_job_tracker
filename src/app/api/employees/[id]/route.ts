@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
@@ -11,7 +9,6 @@ export async function GET(
         const employee = await prisma.employees.findMany({
             where: {id: parseInt(params.id)}
     });
-    console.log(employee)
         return NextResponse.json(employee);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch employee info' }, { status: 500 });
@@ -24,6 +21,7 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
+        console.log(data)
         const employee = await prisma.employees.update({
             where: { id: parseInt(params.id) },
             data: {

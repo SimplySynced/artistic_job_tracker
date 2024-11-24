@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { EmployeeTable } from "./table";
 
 export default function EmployeePage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [locations, setLocations] = useState<{ id: number; location: string }[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,20 +27,32 @@ export default function EmployeePage() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
 
-  // Fetch employees with loading state
   const fetchEmployees = async (): Promise<void> => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/employees');
       if (!response.ok) throw new Error('Failed to fetch employees');
       const data = await response.json();
-      const validatedData = z.array(EmployeeSchema).parse(data);
+
+      // Normalize data to ensure no null values
+      const normalizedData = data.map((employee: any) => ({
+        ...employee,
+        last_name: employee.last_name || '', // Replace null with empty string
+        nick_name: employee.nick_name || '',
+        location: employee.location || '',
+        added_by: employee.added_by || '',
+        updated_by: employee.updated_by || '',
+      }));
+
+      // Validate normalized data
+      const validatedData = z.array(EmployeeSchema).parse(normalizedData);
       setEmployees(validatedData);
     } catch (error) {
+      console.error('Error fetching employees:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch employees",
-        variant: "destructive",
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch employees',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -47,6 +61,25 @@ export default function EmployeePage() {
 
   useEffect(() => {
     fetchEmployees();
+  }, []);
+
+  const fetchLocations = async (): Promise<void> => {
+    try {
+      const response = await fetch('/api/locations');
+      if (!response.ok) throw new Error('Failed to fetch locations');
+      const data = await response.json();
+      setLocations(data); // Ensure `data` is an array of { id, location }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch locations',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
   }, []);
 
   // Validate form data using EmployeeSchema
@@ -73,27 +106,29 @@ export default function EmployeePage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when field is edited
     if (formErrors[name as keyof EmployeeFormData]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [name]: undefined
-      }));
+      setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
+
 
   const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
     setFormData({
-      ...employee,
-      pay_rate: employee.pay_rate.toString(),
+      first_name: employee.first_name || '', // Replace null with empty string
+      last_name: employee.last_name || '', // Replace null with empty string
+      nick_name: employee.nick_name || '', // Replace null with empty string
+      location: employee.location || '', // Replace null with empty string
+      pay_rate: employee.pay_rate.toString(), // Convert number to string for input
+      added_by: employee.added_by || '', // Replace null with empty string
+      updated_by: employee.updated_by || '', // Replace null with empty string
     });
     setIsModalOpen(true);
   }, []);
@@ -208,36 +243,42 @@ export default function EmployeePage() {
   };
 
   return (
-    <div className="container mx-auto py-4 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
-      </div>
+    <>
+      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">Employees</h1>
+        </div>
 
-      {/* Responsive table view */}
-      <div className="overflow-x-auto p-1">
-        <EmployeeTable
-          data={employees}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-          isLoading={isLoading}
-        />
+        <div className="overflow-x-auto">
+          <EmployeeTable
+            data={employees}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">
+          <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center px-4"
+            onClick={handleModalClose}
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-xl font-bold">
                 {editingEmployee ? 'Edit Employee' : 'Add Employee'}
-              </h2>
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'first_name', label: 'First Name', type: 'text' },
                   { name: 'last_name', label: 'Last Name', type: 'text' },
                   { name: 'nick_name', label: 'Nick Name', type: 'text' },
-                  { name: 'location', label: 'Location', type: 'text' },
                   { name: 'pay_rate', label: 'Pay Rate', type: 'number', step: '0.01' },
                 ].map((field) => (
                   <div key={field.name}>
@@ -249,9 +290,9 @@ export default function EmployeePage() {
                       name={field.name}
                       type={field.type}
                       step={field.step}
-                      value={formData[field.name as keyof EmployeeFormData]}
+                      value={formData[field.name as keyof EmployeeFormData] || ''} // Safely handle nullable values
                       onChange={handleInputChange}
-                      required={field.name !== 'nick_name'}
+                      required={field.name !== 'nick_name'} // Optional if field is `nick_name`
                       disabled={isSaving}
                       className={formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}
                     />
@@ -262,6 +303,31 @@ export default function EmployeePage() {
                     )}
                   </div>
                 ))}
+
+                {/* Location Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Location <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="location"
+                    value={formData.location || ''} // Safely handle nullable values
+                    onChange={handleInputChange}
+                    required
+                    disabled={isSaving}
+                    className="block w-full border rounded-md px-3 py-2"
+                  >
+                    <option value="" disabled>
+                      Select a location
+                    </option>
+                    {locations.map((loc) => (
+                      <option key={loc.id} value={loc.location}>
+                        {loc.location}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"
@@ -280,10 +346,11 @@ export default function EmployeePage() {
                   </Button>
                 </div>
               </form>
+
             </div>
           </div>
         </Dialog>
       )}
-    </div>
-  );
-}
+    </>
+  )
+};

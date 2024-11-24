@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
     const jobs = await prisma.jobs.findMany({
       orderBy: {
-        job_code: 'asc'
+        job_number: 'asc'
       }
     });
     return NextResponse.json(jobs);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: `Failed to fetch jobs` }, { status: 500 });
   }
 }
 

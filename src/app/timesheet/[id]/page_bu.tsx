@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { TimeSheetTable } from './table';
+import { TimeSheetTable } from "./table"
 
 export default function TimeManagement({ params }: any) {
-  const [locations, setLocations] = useState<{ id: number; location: string }[]>([]);
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
@@ -33,8 +32,6 @@ export default function TimeManagement({ params }: any) {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
 
-
-  // Fetch TimeSheets
   const fetchTimeSheets = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -54,30 +51,30 @@ export default function TimeManagement({ params }: any) {
     }
   };
 
-  useEffect(() => {
-    fetchTimeSheets();
-  }, []);
-
-  const fetchLocations = async (): Promise<void> => {
+  const fetchEmployeeInfo = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/locations');
-      if (!response.ok) throw new Error('Failed to fetch locations');
+      setIsLoading(true);
+      const response = await fetch(`/api/employees/${params.id}`);
+      if (!response.ok) throw new Error('Failed to fetch info');
       const data = await response.json();
-      setLocations(data); // Ensure `data` is an array of { id, location }
+      setEmployeeInfo(data);
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch locations',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch employee info",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLocations();
+    fetchEmployeeInfo();
+    fetchTimeSheets();
   }, []);
 
-  // Validate form
+  // Validate form data using TimeSheetSchema
   const validateForm = (data: TimeSheetFormData): boolean => {
     try {
       const numericData = {
@@ -106,26 +103,22 @@ export default function TimeManagement({ params }: any) {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ): void => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
-    const parsedValue =
-      name === 'job_number' ? (value ? parseInt(value, 10) : 0) : value;
-
-      setFormData((prev) => ({ ...prev, [name]: parsedValue }));
-
-    // Clear error when field is edited
     if (formErrors[name as keyof TimeSheetFormData]) {
-      setFormErrors((prev) => ({ ...prev, [name]: undefined }));
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
     }
   };
 
-  // Handle edit job
-  const handleEdit = (timesheet: TimeSheet): void => {
-
-
+  const handleEdit = useCallback((timesheet: TimeSheet): void => {
     setEditingTimeSheet(timesheet);
     setFormData({
       ...timesheet,
@@ -137,9 +130,8 @@ export default function TimeManagement({ params }: any) {
       pay_rate: timesheet.pay_rate.toString(),
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
-  // Handle add new job
   const handleAddNew = (): void => {
     setEditingTimeSheet(null);
     setFormData({
@@ -159,9 +151,8 @@ export default function TimeManagement({ params }: any) {
     setIsModalOpen(true);
   };
 
-  // Handle modal close
   const handleModalClose = (): void => {
-    if (isSaving) return;
+    if (isSaving) return; // Prevent closing while saving
     setIsModalOpen(false);
     setEditingTimeSheet(null);
     setFormData({
@@ -180,83 +171,79 @@ export default function TimeManagement({ params }: any) {
     setFormErrors({});
   };
 
-  // Handle submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    // Prepare submission data, omitting street, city, state, and zip
-    //const { street, city, state, zip, ...submissionData } = formData;
-
-    const finalSubmissionData = {
-      ...formData,
-      job_number: Number(formData.job_number),
-      added_by: "2024-11-19 00:00:00.000",
-      added_date: "2024-11-19 00:00:00.000",
-      pay_rate: "20",
-    };
-    console.log(finalSubmissionData);
-
-
-    if (!validateForm(finalSubmissionData)) {
+    if (!validateForm(formData)) {
       toast({
-        title: 'Validation Error',
-        description: 'Please check the form for errors',
-        variant: 'destructive',
+        title: "Validation Error",
+        description: "Please check the form for errors",
+        variant: "destructive",
       });
       return;
     }
 
     try {
       setIsSaving(true);
-      const url = editingTimeSheet ? `/api/timesheet/${editingTimeSheet.id}` : '/api/timesheet/';
+      const submissionData = {
+        ...formData,
+        job_number: Number(formData.job_number),
+      };
+
+      const url = editingTimeSheet
+        ? `/api/timesheet/${editingTimeSheet.id}`
+        : `/api/timesheet/`;
 
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalSubmissionData),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) throw new Error('Failed to save job');
+      if (!response.ok) throw new Error('Failed to save timesheet');
 
       await fetchTimeSheets();
       handleModalClose();
 
       toast({
-        title: 'Success',
-        description: `Job ${editingTimeSheet ? 'updated' : 'added'} successfully`,
+        title: "Success",
+        description: `Timesheet has been ${editingTimeSheet ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
       });
     } finally {
       setIsSaving(false);
     }
   };
 
-
-  // Handle delete
   const handleDelete = async (timesheetId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+    if (!confirm('Are you sure you want to delete this timesheet entry?')) return;
 
     try {
-      const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete job');
+      const response = await fetch(`/api/timesheets/${timesheetId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete timesheet entry');
 
       await fetchTimeSheets();
       toast({
-        title: 'Success',
-        description: 'Job deleted successfully',
+        title: "Success",
+        description: "Timesheet entry deleted successfully",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
       });
     }
   };
@@ -265,7 +252,7 @@ export default function TimeManagement({ params }: any) {
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl md:text-3xl font-bold">TimeSheet for</h1>
+          <h1 className="text-xl md:text-3xl font-bold">Timesheet </h1>
         </div>
 
         <div className="overflow-x-auto">
@@ -284,13 +271,15 @@ export default function TimeManagement({ params }: any) {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
-            onClick={handleModalClose}
+            onClick={handleModalClose} // Close modal on clicking the backdrop
           >
             <div
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
             >
-              <span className="text-xl font-bold">{editingTimeSheet ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
+              <span className="text-xl font-bold">
+                {editingTimeSheet ? 'Edit Time Sheet' : 'Add Time Sheet'}
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
@@ -303,7 +292,8 @@ export default function TimeManagement({ params }: any) {
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
-                      {field.label} <span className="text-red-500">*</span>
+                      {field.label}
+                      {field.name && <span className="text-red-500">*</span>}
                     </label>
                     <Input
                       name={field.name}
@@ -324,8 +314,7 @@ export default function TimeManagement({ params }: any) {
                 <Input name="employee_id" type="hidden" value={params.id} />
                 <Input name="added_by" type="hidden" value="2024-11-19 00:00:00.000" />
                 <Input name="added_date" type="hidden" value="2024-11-19 00:00:00.000" />
-                <Input name="pay_rate" type="hidden" value="20" />
-
+                <Input name="pay_rate" type="hidden" value="20"/>
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"

@@ -13,14 +13,14 @@ model Employees {
   first_name String
   last_name  String?
   nick_name  String?
-  location   String? // Foreign key linking to Locations.location
+  location   String?
   pay_rate   Float?
   added_by   String?
   updated_by String?
+  active     Boolean @default(true)
 
   // Relationships
   locationInfo Locations?   @relation(fields: [location], references: [location])
-  timesheets   TimeSheets[] // Opposite relation field for TimeSheets
 }
 
 model TimeSheets {
@@ -33,23 +33,21 @@ model TimeSheets {
   end_time    String? @default("")
   hours       Int     @default(0)
   minutes     Int     @default(0)
-  pay_rate    Float
+  pay_rate    Float // This will be populated from Employees
   added_by    String
   added_date  String
-
-  // Relationship
-  employee Employees @relation(fields: [employee_id], references: [id])
 }
 
 model Jobs {
   id           Int     @id @default(autoincrement())
-  job_code     Int
-  job_location String // Foreign key linking to Locations.location
+  job_number   Int     @unique // Make job_number unique for linking
+  job_location String
   job_customer String
   job_address  String?
 
-  // Relationship
-  locationInfo Locations? @relation(fields: [job_location], references: [location])
+  // Relationships
+  locationInfo  Locations?      @relation(fields: [job_location], references: [location])
+  JobLumberCost JobLumberCost[]
 }
 
 model JobLumberCost {
@@ -66,19 +64,23 @@ model JobLumberCost {
   width           Float
   cost_over       Float // Changed to Float if this can be a decimal
   total_cost      Float // Changed to Float if this can be a decimal
-  ft_per_peice    Float // Changed to Float if this can be a decimal
+  ft_per_piece    Float // Changed to Float if this can be a decimal
   price           Float
   tbf             Float
   entered_by      String
   entered_date    String
   updated_by      String?
   updated_date    String?
+
+  // Relationships
+  lumberType WoodTypes? @relation(fields: [wood_id, wood_type], references: [id, wood_type])
+  jobNumber  Jobs?      @relation(fields: [job_number], references: [job_number])
 }
 
 model JobLaborCodes {
-  id             Int     @id @default(autoincrement())
-  description    String
-  enabled        Boolean @default(true)
+  id          Int     @id @default(autoincrement())
+  description String
+  enabled     Boolean @default(true)
 }
 
 model Locations {
@@ -93,6 +95,10 @@ model Locations {
 
 model WoodTypes {
   id        Int     @id @default(autoincrement())
-  wood_type String
+  wood_type String  @unique // Make wood_type unique for linking
   enabled   Boolean @default(true)
+
+  JobLumberCost JobLumberCost[]
+
+  @@unique([id, wood_type])
 }

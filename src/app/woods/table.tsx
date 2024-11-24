@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 import { Input } from '@/components/ui/input'
 import {
@@ -17,7 +15,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -27,18 +24,29 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
+    getPaginationRowModel
 } from '@tanstack/react-table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LuSlidersHorizontal, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPencilLine, LuPlus, LuTrash2, LuArrowUpDown } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
 }
 
 type Wood = {
-    id: number
+    id?: number
     wood_type: string
 }
 
-export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
+interface WoodTableProps {
+    data: Wood[];
+    onEdit: (wood: Wood) => void;
+    onDelete: (woodId: number) => void;
+    onAddNew: () => void;
+    isLoading: boolean;
+}
+
+export function WoodTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: WoodTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
@@ -56,7 +64,7 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
                         className="p-0 hover:bg-transparent"
                     >
                         Wood Type
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -79,14 +87,14 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
                             onClick={() => onEdit(wood)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
-                            <PencilLine className="h-4 w-4" />
+                            <LuPencilLine />
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => onDelete(wood.id)}
+                            onClick={() => onDelete(wood.id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <LuTrash2 />
                         </Button>
                     </div>
                 )
@@ -104,35 +112,40 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
         onColumnFiltersChange: setColumnFilters,
         onGlobalFilterChange: setGlobalFilter,
         onColumnVisibilityChange: setColumnVisibility,
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
             globalFilter,
             columnVisibility,
         },
+        initialState: {
+            pagination: {
+                pageSize: 10,
+            },
+        },
     })
 
     return (
-        <div className="space-y-2 p-1">
-            <div className="flex items-center justify-between">
-                <Input
-                    placeholder="Search all columns..."
-                    value={globalFilter ?? ''}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="max-w-sm"
-                />
-                <div>
+        <div className="space-y-2">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+                <div className="flex items-center gap-2 w-full sm:w-auto grow">
+                    <Input
+                        placeholder="Search all columns..."
+                        value={globalFilter ?? ''}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        className="w-full sm:max-w-xs focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className="ml-4 bg-neutral-900 text-white">
-                                <SlidersHorizontal className="h-4 w-4" />
+                            <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+                                <LuSlidersHorizontal className="mr-1" />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className='bg-white'>
                             {table
                                 .getAllColumns()
-                                .filter((column) => column.getCanHide())
                                 .map((column) => (
                                     <DropdownMenuCheckboxItem
                                         key={column.id}
@@ -147,15 +160,16 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
                                 ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button onClick={onAddNew} className="ml-4 bg-neutral-900 text-white">
-                        <Plus className="h-4 w-4" />
-                        Add Wood Type
-                    </Button>
                 </div>
+                <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
+                    <LuPlus className="mr-1" />
+                    Add Wood Type
+                </Button>
             </div>
 
-            <div>
-                <Table>
+            {/* Responsive table container */}
+            <div className="overflow-x-auto">
+                <Table className="min-w-full border">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
@@ -176,11 +190,20 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {isLoading ? (
+                            <TableRow className="hover:bg-neutral-50 bg-white">
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                    <div className="flex items-center justify-center">
+                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <span className="ml-2">Loading...</span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="hover:bg-neutral-100 bg-white"
+                                    className="hover:bg-neutral-50 bg-white"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="font-medium text-center">
@@ -194,16 +217,58 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew }: any) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results.
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-neutral-500">
+                                    No results found.
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Responsive pagination */}
+            <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
+                <div className="text-sm text-neutral-700">
+                    {table.getFilteredRowModel().rows.length} total rows
+                </div>
+                <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full lg:w-2/3 xl:w-1/2 justify-between lg:justify-end">
+                    <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium">Rows per page</p>
+                        <Select onValueChange={(value) => table.setPageSize(Number(value))} defaultValue={table.getState().pagination.pageSize.toString()}>
+                            <SelectTrigger className="h-10 w-20 rounded-md border border-neutral-200 bg-white focus:ring-0 focus:ring-offset-0">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className='bg-white'>
+                                {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={pageSize.toString()} className='cursor-pointer'>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className='flex items-center w-full sm:justify-between md:max-w-sm'>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
+                                <LuChevronFirst />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                                <LuChevronLeft />
+                            </Button>
+                        </div>
+                        <span className="text-sm font-medium px-2 grow sm:grow-0 text-center">
+                            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                        </span>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                                <LuChevronRight />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+                                <LuChevronLast />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )

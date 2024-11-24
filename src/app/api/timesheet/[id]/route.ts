@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
-        const empid = params.id
+        const empid = params.id;
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
                 employee_id: parseFloat(empid),
@@ -19,24 +17,8 @@ export async function GET(
         });
         return NextResponse.json(timeSheet);
     } catch (error) {
+        console.error('Error fetching timesheet:', error);
         return NextResponse.json({ error: 'Failed to fetch timesheet' }, { status: 500 });
-    }
-}
-
-export async function POST(
-    request: Request,
-) {
-    try {
-        const data = await request.json();
-        const newEntry = await prisma.timeSheets.create({
-            data: {
-                ...data, // Default to pay_rate if not provided
-            },
-        });
-        console.log(newEntry)
-        return NextResponse.json(newEntry);
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
     }
 }
 
@@ -46,15 +28,16 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        const employee = await prisma.timeSheets.update({
+        const job = await prisma.timeSheets.update({
             where: { id: parseInt(params.id) },
             data: {
                 ...data,
             },
         });
-        return NextResponse.json(employee);
+        return NextResponse.json(job);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+        console.error("Error updating job:", error);
+        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 }
 

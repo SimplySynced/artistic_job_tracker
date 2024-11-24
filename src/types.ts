@@ -2,15 +2,26 @@
 import { z } from 'zod';
 
 // Zod schema for runtime validation
+// export const EmployeeSchema = z.object({
+//     id: z.number().optional(), // Optional for new employees
+//     first_name: z.string().min(1, "First name is required"),
+//     last_name: z.string(),
+//     nick_name: z.string(),
+//     location: z.string(),
+//     pay_rate: z.number().nonnegative("Pay rate must be positive"),
+//     added_by: z.string(),
+//     updated_by: z.string(),
+// });
+
 export const EmployeeSchema = z.object({
     id: z.number().optional(), // Optional for new employees
-    first_name: z.string().min(1, "First name is required"),
-    last_name: z.string(),
-    nick_name: z.string(),
-    location: z.string(),
-    pay_rate: z.number().nonnegative("Pay rate must be positive"),
-    added_by: z.string(),
-    updated_by: z.string(),
+    first_name: z.string().min(1, "First name is required"), // Required
+    last_name: z.string().nullable(), // Optional, can be null
+    nick_name: z.string().nullable(), // Optional, can be null
+    location: z.string().nullable(), // Optional, can be null
+    pay_rate: z.number().nonnegative("Pay rate must be positive"), // Required and must be non-negative
+    added_by: z.string().nullable(), // Optional, can be null
+    updated_by: z.string().nullable(), // Optional, can be null
 });
 
 // TypeScript types derived from Zod schema
@@ -20,12 +31,12 @@ export type NewEmployee = Omit<Employee, 'id'>;
 // Form data type (string values for input fields)
 export type EmployeeFormData = {
     first_name: string;
-    last_name: string;
-    nick_name: string;
-    location: string;
-    pay_rate: string;
-    added_by: string;
-    updated_by: string;
+    last_name: string | null;
+    nick_name: string | null;
+    location: string | null;
+    pay_rate: string; // Form fields always handle numbers as strings
+    added_by: string | null;
+    updated_by: string | null;
 };
 
 // Zod schema for runtime validation
@@ -52,7 +63,7 @@ export type NewTimeSheet = Omit<TimeSheet, 'id'>;
 export type TimeSheetFormData = {
     employee_id: string;
     date_worked: string;
-    job_number: string;
+    job_number: number;
     job_code: string;
     begin_time: string;
     end_time: string;
@@ -63,25 +74,29 @@ export type TimeSheetFormData = {
     added_date: string;
 };
 
-// Zod schema for Jobs
+// Updated Zod schema for Jobs
 export const JobSchema = z.object({
     id: z.number().optional(),
-    job_code: z.number().min(1, "Job Code is required"),
-    job_location: z.string().min(1, "Job Location is required"),
-    job_customer: z.string().min(1, "Customer name required"),
-    job_address: z.string(),
+    job_number: z.number().min(1, 'Job Number is required'),
+    job_location: z.string().min(1, 'Job Location is required'),
+    job_customer: z.string().min(1, 'Customer name is required'),
+    job_address: z.string().min(1, 'Address is required'),
 });
 
-// TypeScript types derived from Zod schema
+// Updated TypeScript types derived from Zod schema
 export type Job = z.infer<typeof JobSchema>;
 export type NewJobCode = Omit<Job, 'id'>;
 
-// Form data type (string values for input fields)
+// Updated Form data type (string values for input fields)
 export type JobFormData = {
-    job_code: string,
-    job_location: string,
-    job_customer: string,
-    job_address: string,
+    job_number: number;
+    job_location: string;
+    job_customer: string;
+    job_address: string; // Combined address
+    street?: string; // Optional field
+    city?: string;   // Optional field
+    state?: string;  // Optional field
+    zip?: string;    // Optional field
 };
 
 
@@ -116,9 +131,10 @@ export type WoodFormData = {
     wood_type: string;
 };
 
+
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
-    id: z.number(),
+    id: z.number().optional(),
     description: z.string().min(1, "Description is required"),
 });
 
@@ -128,7 +144,5 @@ export type NewLaborCode = Omit<LaborCode, 'id'>;
 
 // Form data type (string values for input fields)
 export type LaborCodeFormData = {
-    id: number;
     description: string;
 };
-
