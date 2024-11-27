@@ -126,11 +126,7 @@ export default function JobsManagement() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, value } = e.target;
-
-    const parsedValue =
-      name === 'job_number' ? (value ? parseInt(value, 10) : 0) : value;
-
-      setFormData((prev) => ({ ...prev, [name]: parsedValue }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when field is edited
     if (formErrors[name as keyof JobFormData]) {
@@ -407,7 +403,6 @@ export default function JobsManagement() {
                     type="text"
                     value={formData.zip}
                     onChange={handleInputChange}
-                    required
                     disabled={isSaving}
                   />
                 </div>

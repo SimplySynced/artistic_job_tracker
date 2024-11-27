@@ -61,15 +61,15 @@ export type NewTimeSheet = Omit<TimeSheet, 'id'>;
 
 // Form data type (string values for input fields)
 export type TimeSheetFormData = {
-    employee_id: string;
+    employee_id: number;
     date_worked: string;
     job_number: number;
-    job_code: string;
+    job_code: number;
     begin_time: string;
     end_time: string;
-    hours: string;
-    minutes: string;
-    pay_rate: string;
+    hours: number;
+    minutes: number;
+    pay_rate: number;
     added_by: string;
     added_date: string;
 };
@@ -99,6 +99,56 @@ export type JobFormData = {
     zip?: string;    // Optional field
 };
 
+// Updated Zod schema for JobLumberCost
+export const LumberCostSchema = z.object({
+    id: z.number().optional(),
+    date: z.string().min(1, 'Date is required'),
+    job_number: z.number().min(1, 'Job Number is required'),
+    wood_id: z.number().min(1, 'Job Location is required'),
+    wood_type: z.string().min(1, 'Customer name is required'),
+    wood_replace_id: z.number().min(1, 'Address is required'),
+    quantity: z.number().min(1, 'Quantity required'),
+    description: z.string().min(1,'Job Description'),
+    thickness: z.number().min(1, 'Thickness is required'),
+    length: z.number().min(1, 'Length is required'),
+    width: z.number().min(1, 'Width is required'),
+    cost_over: z.number(),
+    total_cost: z.number(),
+    ft_per_piece: z.number(),
+    price: z.number(),
+    tbf: z.number(),
+    entered_by: z.string(),
+    entered_date: z.string(),
+    updated_by: z.string(),
+    updated_date: z.string()
+});
+
+// Updated TypeScript types derived from Zod schema
+export type LumberCost = z.infer<typeof LumberCostSchema>;
+export type NewLumberCost = Omit<LumberCost, 'id'>;
+
+// Updated Form data type (string values for input fields)
+export type LumberCostFormData = {
+    date: string;
+    job_number: number;
+    wood_id: number;
+    wood_type: string;
+    wood_replace_id: number;
+    quantity: number;
+    description: string;
+    thickness: number;
+    length: number;
+    width: number;
+    cost_over: number;
+    total_cost: number;
+    ft_per_piece: number;
+    price: number;
+    tbf: number;
+    entered_by: string;
+    entered_date: string;
+    updated_by: string;
+    updated_date: string
+};
 
 // Zod schema for Locations
 export const LocationSchema = z.object({

@@ -5,86 +5,54 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { LumberCostSchema, LumberCostFormData, LumberCost, Wood, Job } from '@/types';
 import { z } from 'zod';
-import { TimeSheetTable } from './table';
+import { JobTable } from './table';
 
-export default function TimeManagement({ params }: any) {
-  const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
-  const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
-  const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
+export default function JobManagement({ params }: any) {
+  const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
+  const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null >(null);
+  const [woodtypes, setWoodTypes] = useState<Wood[]>([]);
+  const [jobinfo, setJobInfo] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
-  const [formData, setFormData] = useState<TimeSheetFormData>({
-    employee_id: 0,
-    date_worked: '',
+  const [formData, setFormData] = useState<LumberCostFormData>({
+    date: '',
     job_number: 0,
-    job_code: 0,
-    begin_time: '',
-    end_time: '',
-    hours: 0,
-    minutes: 0,
-    pay_rate: 0,
-    added_by: '',
-    added_date: '',
+    wood_id: 0,
+    wood_type: '',
+    wood_replace_id: 0,
+    quantity: 0,
+    description: '',
+    thickness: 0,
+    length: 0,
+    width: 0,
+    cost_over: 0,
+    total_cost: 0,
+    ft_per_piece: 0,
+    price: 0,
+    tbf: 0,
+    entered_by: '',
+    entered_date: '',
+    updated_by: '',
+    updated_date: ''
   });
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof LumberCostFormData, string>>>({});
 
-  const fetchEmployeeInfo = async (): Promise<void> => {
+  const fetchLumberCost = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/employees/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch employee info');
+      setIsLoading(true)
+      const response = await fetch(`/api/job/${params.id}`);
+      if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
       console.log(data)
-      setEmployeeInfo(data); // Ensure `data` is an array of { id, location }
+      setLumberCost(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to fetch locations',
         variant: 'destructive',
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployeeInfo();
-  }, []);
-
-  const fetchLaborCodes = async (): Promise<void> => {
-    try {
-      const response = await fetch(`/api/laborcodes/`);
-      if (!response.ok) throw new Error('Failed to fetch employee info');
-      const data = await response.json();
-      setLaborCodes(data); // Ensure `data` is an array of { id, location }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch locations',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchLaborCodes();
-  }, []);
-
-  // Fetch TimeSheets
-  const fetchTimeSheets = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/timesheet/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch timesheets');
-      const data = await response.json();
-      const validatedData = z.array(TimeSheetSchema).parse(data);
-      setTimeSheets(validatedData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch timesheet",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -92,30 +60,80 @@ export default function TimeManagement({ params }: any) {
   };
 
   useEffect(() => {
-    fetchTimeSheets();
+    fetchLumberCost();
   }, []);
 
+  const fetchWoodTypes = async (): Promise<void> => {
+    try {
+      const response = await fetch(`/api/woods/`);
+      if (!response.ok) throw new Error('Failed to fetch wood types');
+      const data = await response.json();
+      console.log(data)
+      setWoodTypes(data); // Ensure `data` is an array of { id, location }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch locations',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchWoodTypes();
+  }, []);
+
+  const fetchJobInfo = async (): Promise<void> => {
+    try {
+      const response = await fetch(`/api/jobs/${params.id}`);
+      if (!response.ok) throw new Error('Failed to fetch job info');
+      const data = await response.json();
+      console.log(data)
+      setJobInfo(data); // Ensure `data` is an array of { id, location }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to fetch job info',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchJobInfo();
+  }, []);
+
+  console.log(jobinfo)
+
+  //console.log(jobinfo)
+
   // Validate form
-  const validateForm = (data: TimeSheetFormData): boolean => {
+  const validateForm = (data: LumberCostFormData): boolean => {
     try {
       const numericData = {
         ...data,
-        employee_id: Number(data.employee_id),
         job_number: Number(data.job_number),
-        job_code: Number(data.job_code),
-        hours: Number(data.hours),
-        minutes: Number(data.minutes),
-        pay_rate: Number(data.pay_rate),
+        wood_id: Number(data.wood_id),
+        wood_replace_id: Number(data.wood_replace_id),
+        quantity: Number(data.quantity),
+        thickness: Number(data.thickness),
+        length: Number(data.length),
+        width: Number(data.width),
+        cost_over: Number(data.cost_over),
+        total_cost: Number(data.total_cost),
+        ft_per_piece: Number(data.ft_per_piece),
+        price: Number(data.price),
+        tbf: Number(data.tbf),
       };
-      TimeSheetSchema.parse(numericData);
+      LumberCostSchema.parse(numericData);
       setFormErrors({});
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors: Partial<Record<keyof TimeSheetFormData, string>> = {};
+        const errors: Partial<Record<keyof LumberCostFormData, string>> = {};
         error.errors.forEach((err) => {
           if (err.path) {
-            errors[err.path[0] as keyof TimeSheetFormData] = err.message;
+            errors[err.path[0] as keyof LumberCostFormData] = err.message;
           }
         });
         setFormErrors(errors);
@@ -131,37 +149,44 @@ export default function TimeManagement({ params }: any) {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when field is edited
-    if (formErrors[name as keyof TimeSheetFormData]) {
+    if (formErrors[name as keyof LumberCostFormData]) {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  // Handle edit job
-  const handleEdit = (timesheet: TimeSheet): void => {
+  // Handle edit lumber cost
+  const handleEdit = (lumbercost: LumberCost): void => {
 
-
-    setEditingTimeSheet(timesheet);
+    setEditingLumberCost(lumbercost);
     setFormData({
-      ...timesheet,
+      ...lumbercost,
     });
     setIsModalOpen(true);
   };
 
   // Handle add new job
   const handleAddNew = (): void => {
-    setEditingTimeSheet(null);
+    setEditingLumberCost(null);
     setFormData({
-      employee_id: 0,
-      date_worked: '',
+      date: '',
       job_number: 0,
-      job_code: 0,
-      begin_time: '',
-      end_time: '',
-      hours: 0,
-      minutes: 0,
-      pay_rate: 0,
-      added_by: '',
-      added_date: '',
+      wood_id: 0,
+      wood_type: '',
+      wood_replace_id: 0,
+      quantity: 0,
+      description: '',
+      thickness: 0,
+      length: 0,
+      width: 0,
+      cost_over: 0,
+      total_cost: 0,
+      ft_per_piece: 0,
+      price: 0,
+      tbf: 0,
+      entered_by: '',
+      entered_date: '',
+      updated_by: '',
+      updated_date: ''
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -171,19 +196,27 @@ export default function TimeManagement({ params }: any) {
   const handleModalClose = (): void => {
     if (isSaving) return;
     setIsModalOpen(false);
-    setEditingTimeSheet(null);
+    setEditingLumberCost(null);
     setFormData({
-      employee_id: 0,
-      date_worked: '',
+      date: '',
       job_number: 0,
-      job_code: 0,
-      begin_time: '',
-      end_time: '',
-      hours: 0,
-      minutes: 0,
-      pay_rate: 0,
-      added_by: '',
-      added_date: '',
+      wood_id: 0,
+      wood_type: '',
+      wood_replace_id: 0,
+      quantity: 0,
+      description: '',
+      thickness: 0,
+      length: 0,
+      width: 0,
+      cost_over: 0,
+      total_cost: 0,
+      ft_per_piece: 0,
+      price: 0,
+      tbf: 0,
+      entered_by: '',
+      entered_date: '',
+      updated_by: '',
+      updated_date: ''
     });
     setFormErrors({});
   };
@@ -206,12 +239,18 @@ export default function TimeManagement({ params }: any) {
 
     const finalSubmissionData = {
       ...formData,
-      employee_id: Number(employeeinfo[0].id),
-      job_number: Number(formData.job_number),
-      job_code: Number(formData.job_code),
-      hours: Number(formData.hours),
-      minutes: Number(formData.minutes),
-      pay_rate: Number(employeeinfo[0].pay_rate),
+      job_number: Number(params.id),
+      wood_id: Number(formData.wood_id),
+      wood_replace_id: Number(formData.wood_replace_id),
+      quantity: Number(formData.quantity),
+      thickness: Number(formData.thickness),
+      length: Number(formData.length),
+      width: Number(formData.width),
+      cost_over: Number(formData.cost_over),
+      total_cost: Number(formData.total_cost),
+      ft_per_piece: Number(formData.ft_per_piece),
+      price: Number(formData.price),
+      tbf: Number(formData.tbf),
       added_date: formattedDate,
     };
     console.log(finalSubmissionData);
@@ -228,9 +267,9 @@ export default function TimeManagement({ params }: any) {
 
     try {
       setIsSaving(true);
-      const url = editingTimeSheet ? `/api/timesheet/${editingTimeSheet.id}` : '/api/timesheet/';
+      const url = editingLumberCost ? `/api/jobs/${editingLumberCost.id}` : '/api/jobs/';
 
-      const method = editingTimeSheet ? 'PUT' : 'POST';
+      const method = editingLumberCost ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -240,12 +279,12 @@ export default function TimeManagement({ params }: any) {
 
       if (!response.ok) throw new Error('Failed to save job');
 
-      await fetchTimeSheets();
+      await fetchLumberCost();
       handleModalClose();
 
       toast({
         title: 'Success',
-        description: `Job ${editingTimeSheet ? 'updated' : 'added'} successfully`,
+        description: `Job ${editingLumberCost ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
       toast({
@@ -260,17 +299,17 @@ export default function TimeManagement({ params }: any) {
 
 
   // Handle delete
-  const handleDelete = async (timesheetId: number): Promise<void> => {
+  const handleDelete = async (lumbercostId: number): Promise<void> => {
     if (!confirm('Are you sure you want to delete this job?')) return;
 
     try {
-      const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete job');
+      const response = await fetch(`/api/job/${lumbercostId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete lumber cost');
 
-      await fetchTimeSheets();
+      await fetchLumberCost();
       toast({
         title: 'Success',
-        description: 'Job deleted successfully',
+        description: 'Lumber cost deleted successfully',
       });
     } catch (error) {
       toast({
@@ -284,31 +323,23 @@ export default function TimeManagement({ params }: any) {
   return (
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-      {employeeinfo.length > 0 ? (
-        <div className="justify-between items-center">
+        <div className="flex justify-between items-center">
           <h1 className="text-xl md:text-3xl font-bold">
-            TimeSheet for {employeeinfo[0].first_name} {employeeinfo[0].last_name}
+            Lumber Cost Sheet for Job# {params.id}
           </h1>
-          <h3 className="text-md md:text-lg">
-            Location: {employeeinfo[0].location}
-          </h3>
+          <h3 className="text-md font-bold">Job Name: {jobinfo.job_customer}</h3>
         </div>
-      ) : (
-        <div className="text-center">
-          <p>Loading employee information...</p>
-        </div>
-      )}
 
-        <div className="overflow-x-auto">
-          <TimeSheetTable
-            data={timeSheets}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAddNew={handleAddNew}
-            isLoading={isLoading}
-          />
-        </div>
+      <div className="overflow-x-auto">
+        <JobTable
+          data={lumbercosts}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAddNew={handleAddNew}
+          isLoading={isLoading}
+        />
       </div>
+    </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
@@ -321,7 +352,7 @@ export default function TimeManagement({ params }: any) {
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-xl font-bold">{editingTimeSheet ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
+              <span className="text-xl font-bold">{editingLumberCost ? 'Edit Lumber Cost' : 'Add Lumber Cost'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
@@ -334,15 +365,15 @@ export default function TimeManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]}
+                      value={formData[field.name as keyof LumberCostFormData]}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}
-                      className={formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}
+                      className={formErrors[field.name as keyof LumberCostFormData] ? 'border-red-500' : ''}
                     />
-                    {formErrors[field.name as keyof TimeSheetFormData] && (
+                    {formErrors[field.name as keyof LumberCostFormData] && (
                       <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof TimeSheetFormData]}
+                        {formErrors[field.name as keyof LumberCostFormData]}
                       </p>
                     )}
                   </div>
@@ -353,19 +384,19 @@ export default function TimeManagement({ params }: any) {
                     Labor Code <span className="text-red-500">*</span>
                   </label>
                   <select
-                    name="job_code"
-                    value={formData.job_code || ''} // Safely handle nullable values
+                    name="wood_id"
+                    value={formData.wood_id || ''} // Safely handle nullable values
                     onChange={handleInputChange}
                     required
                     disabled={isSaving}
                     className="block w-full border rounded-md px-3 py-2"
                   >
                     <option value="" disabled>
-                      Select a Labor Code
+                      Select Lumber
                     </option>
-                    {laborcodes.map((lc) => (
-                      <option key={lc.id} value={lc.id}>
-                        {lc.id} - {lc.description}
+                    {woodtypes.map((wt) => (
+                      <option key={wt.id} value={wt.id}>
+                        {wt.id} - {wt.wood_type}
                       </option>
                     ))}
                   </select>
@@ -384,15 +415,15 @@ export default function TimeManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]}
+                      value={formData[field.name as keyof LumberCostFormData]}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}
-                      className={formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}
+                      className={formErrors[field.name as keyof LumberCostFormData] ? 'border-red-500' : ''}
                     />
-                    {formErrors[field.name as keyof TimeSheetFormData] && (
+                    {formErrors[field.name as keyof LumberCostFormData] && (
                       <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof TimeSheetFormData]}
+                        {formErrors[field.name as keyof LumberCostFormData]}
                       </p>
                     )}
                   </div>
@@ -412,7 +443,7 @@ export default function TimeManagement({ params }: any) {
                     className="bg-neutral-900 text-white"
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Saving...' : editingTimeSheet ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingLumberCost ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>

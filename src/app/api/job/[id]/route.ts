@@ -1,0 +1,16 @@
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const lumbercost = await prisma.jobLumberCost.findMany({
+            where: {job_number: parseInt(params.id)}
+    });
+        return NextResponse.json(lumbercost);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to fetch lumber cost' }, { status: 500 });
+    }
+}
