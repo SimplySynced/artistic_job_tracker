@@ -7,27 +7,15 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from '@/components/ui/table';
+} from '@/components/ui/table'
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import {
-    LuPlus,
-    LuSlidersHorizontal,
-    LuArrowUpDown,
-    LuClipboard,
-    LuPencilLine,
-    LuTrash2,
-    LuChevronFirst,
-    LuChevronLast,
-    LuChevronLeft,
-    LuChevronRight,
-    LuLoader2,
-} from 'react-icons/lu';
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -38,52 +26,56 @@ import {
     ColumnFiltersState,
     SortingState,
     getPaginationRowModel,
-} from '@tanstack/react-table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useRouter } from 'next/navigation';
+} from '@tanstack/react-table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPlus, LuSlidersHorizontal } from 'react-icons/lu'
 
 type ColumnMeta = {
-    label: string;
-};
+    label: string
+}
 
-type Job = {
-    id?: number; // Optional for new jobs
+// The main data structure used for time sheet entries
+type LumberCost = {
+    id?: number;
+    date: string;
     job_number: number;
-    job_location: string;
-    job_customer: string;
-    job_address: string;
+    wood_id: number;
+    wood_type: string;
+    wood_replace_id: number;
+    quantity: number;
+    description: string;
+    thickness: number;
+    length: number;
+    width: number;
+    cost_over: number;
+    total_cost: number;
+    ft_per_piece: number;
+    price: number;
+    tbf: number;
+    entered_by: string;
+    entered_date: string;
+    updated_by: string;
+    updated_date: string
 };
 
 interface JobTableProps {
-    data: Job[];
-    onEdit: (job: Job) => void;
-    onDelete: (jobId: number) => void;
+    data: LumberCost[];
+    onEdit: (lumbersheet: LumberCost) => void;
+    onDelete: (lumbersheetId: number) => void;
     onAddNew: () => void;
     isLoading: boolean;
 }
 
-export function JobTable({
-    data,
-    onEdit,
-    onDelete,
-    onAddNew,
-    isLoading = false,
-}: JobTableProps) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const [globalFilter, setGlobalFilter] = React.useState('');
-    const [columnVisibility, setColumnVisibility] = React.useState({});
+export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
+    const [sorting, setSorting] = React.useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = React.useState('')
+    const [columnVisibility, setColumnVisibility] = React.useState({})
 
-    const router = useRouter();
-
-    const navigateToJob = (id: number) => {
-        router.push(`/job/${id}`);
-    };
-
-    const columns: ColumnDef<Job, any>[] = [
+    const columns: ColumnDef<LumberCost, any>[] = [
         {
-            accessorFn: (row) => `${row.job_number}`,
-            id: 'job_number',
+            accessorFn: (row) => `${row.date}`,
+            id: 'date',
             header: ({ column }) => {
                 return (
                     <Button
@@ -91,18 +83,17 @@ export function JobTable({
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Job Number
-                        <LuArrowUpDown className="ml-1" />
+                        Date
+                        <ArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            cell: ({ getValue }) => getValue() ?? "NULL", // Display "NULL" for undefined or null
             meta: {
-                label: 'Job Number'
-            } as ColumnMeta,
+                label: 'Date'
+            } as ColumnMeta
         },
         {
-            accessorKey: 'job_location',
+            accessorKey: 'quantity',
             header: ({ column }) => {
                 return (
                     <Button
@@ -110,18 +101,17 @@ export function JobTable({
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Location
-                        <LuArrowUpDown className="ml-1" />
+                        Quantity
+                        <ArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
-                label: 'Location'
-            } as ColumnMeta,
+                label: 'Quantity'
+            } as ColumnMeta
         },
         {
-            accessorKey: 'job_customer',
+            accessorKey: 'wood_type',
             header: ({ column }) => {
                 return (
                     <Button
@@ -129,18 +119,17 @@ export function JobTable({
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Customer
-                        <LuArrowUpDown className="ml-1" />
+                        Wood Type
+                        <ArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
-                label: 'Customer'
-            } as ColumnMeta,
+                label: 'Wood Type'
+            } as ColumnMeta
         },
         {
-            accessorKey: 'job_address',
+            accessorKey: 'thickness',
             header: ({ column }) => {
                 return (
                     <Button
@@ -148,15 +137,122 @@ export function JobTable({
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Address
-                        <LuArrowUpDown className="ml-1" />
+                        Thickness
+                        <ArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
-                label: 'Address'
-            } as ColumnMeta,
+                label: 'Thickness'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'width',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Width
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Width'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'length',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Length
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Length'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'description',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Description
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Description'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'tbf',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Total Board Feet
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Total Board Feet'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'ft_per_piece',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        FT/P
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'FT/P'
+            } as ColumnMeta
+        },
+        {
+            accessorKey: 'price',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Price
+                        <ArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Price'
+            } as ColumnMeta
         },
         {
             id: 'actions',
@@ -165,35 +261,28 @@ export function JobTable({
                 label: 'Actions'
             } as ColumnMeta,
             cell: ({ row }) => {
-                const job = row.original
+                const lumbercost = row.original
                 return (
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => navigateToJob(job.job_number ?? 0)}
-                            className="size-8 text-white bg-green-500 hover:bg-green-600"
-                        >
-                            <LuClipboard className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => onEdit(job)}
+                            onClick={() => onEdit(lumbercost)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
-                            <LuPencilLine className="h-4 w-4" />
+                            <PencilLine className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => onDelete(job.id ?? 0)}
+                            onClick={() => onDelete(lumbercost.id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
-                            <LuTrash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
                 )
             },
         },
-    ];
+    ]
 
     const table = useReactTable({
         data,
@@ -217,7 +306,7 @@ export function JobTable({
                 pageSize: 10,
             },
         },
-    });
+    })
 
     return (
         <div className="space-y-2">
@@ -231,28 +320,32 @@ export function JobTable({
                     />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+                            <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
                                 <LuSlidersHorizontal className="mr-1" />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white">
-                            {table.getAllColumns().map((column) => (
-                                <DropdownMenuCheckboxItem
-                                    key={column.id}
-                                    className="cursor-pointer"
-                                    checked={column.getIsVisible()}
-                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                >
-                                    {(column.columnDef.meta as ColumnMeta)?.label || column.id}
-                                </DropdownMenuCheckboxItem>
-                            ))}
+                        <DropdownMenuContent align="end" className='bg-white'>
+                            {table
+                                .getAllColumns()
+                                .map((column) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="cursor-pointer"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                    >
+                                        {(column.columnDef.meta as ColumnMeta)?.label || column.id}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
-                    Add Job
+                    Add Time Entry
                 </Button>
             </div>
 
@@ -265,11 +358,14 @@ export function JobTable({
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
+                                        className="bg-neutral-900 text-white text-center font-semibold"
                                     >
                                         {header.isPlaceholder
                                             ? null
-                                            : flexRender(header.column.columnDef.header, header.getContext())}
+                                            : flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -287,15 +383,9 @@ export function JobTable({
                             </TableRow>
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    className="hover:bg-neutral-50 bg-white"
-                                >
+                                <TableRow key={row.id} className="hover:bg-neutral-50 bg-white">
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell
-                                            key={cell.id}
-                                            className={`font-medium text-center ${['job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
-                                        >
+                                        <TableCell key={cell.id} className="font-medium text-center">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -303,21 +393,17 @@ export function JobTable({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center text-neutral-500"
-                                >
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-neutral-500">
                                     No results found.
                                 </TableCell>
                             </TableRow>
-                        )
-                        }
+                        )}
                     </TableBody>
                 </Table>
             </div>
 
             {/* Responsive pagination */}
-            < div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0" >
+            <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
                 <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
                 </div>
@@ -358,8 +444,8 @@ export function JobTable({
                             </Button>
                         </div>
                     </div>
-                </div >
-            </div >
-        </div >
-    );
+                </div>
+            </div>
+        </div>
+    )
 }

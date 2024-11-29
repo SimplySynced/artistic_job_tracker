@@ -21,7 +21,6 @@ model Employees {
 
   // Relationships
   locationInfo Locations?   @relation(fields: [location], references: [location])
-  timesheets   TimeSheets[] // Opposite relation field for TimeSheets
 }
 
 model TimeSheets {
@@ -37,11 +36,6 @@ model TimeSheets {
   pay_rate    Float // This will be populated from Employees
   added_by    String
   added_date  String
-
-  // Relationships
-  employee  Employees     @relation(fields: [employee_id], references: [id])
-  laborCode JobLaborCodes @relation(fields: [job_code], references: [id])
-  jobNumber Jobs          @relation(fields: [job_number], references: [job_number])
 }
 
 model Jobs {
@@ -54,7 +48,6 @@ model Jobs {
   // Relationships
   locationInfo  Locations?      @relation(fields: [job_location], references: [location])
   JobLumberCost JobLumberCost[]
-  TimeSheets    TimeSheets[]
 }
 
 model JobLumberCost {
@@ -88,8 +81,6 @@ model JobLaborCodes {
   id          Int     @id @default(autoincrement())
   description String
   enabled     Boolean @default(true)
-
-  TimeSheets TimeSheets[]
 }
 
 model Locations {

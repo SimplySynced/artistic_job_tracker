@@ -62,15 +62,16 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        const employee = await prisma.timeSheets.update({
+        const job = await prisma.timeSheets.update({
             where: { id: parseInt(params.id) },
             data: {
                 ...data,
             },
         });
-        return NextResponse.json(employee);
+        return NextResponse.json(job);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+        console.error("Error updating job:", error);
+        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 }
 

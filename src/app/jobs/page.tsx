@@ -98,7 +98,7 @@ export default function JobsManagement() {
     try {
       // Preprocess form data to match JobSchema
       const numericData = {
-        job_number: data.job_number,
+        job_number: Number(data.job_number),
         job_location: data.job_location,
         job_customer: data.job_customer,
         job_address: `${data.street || ''}, ${data.city || ''}, ${data.state || ''} ${data.zip || ''}`, // Combine address fields
@@ -199,7 +199,7 @@ export default function JobsManagement() {
     const finalSubmissionData = {
       ...submissionData,
       job_address: combinedAddress,
-      job_number: formData.job_number,
+      job_number: Number(formData.job_number),
     };
 
     if (!validateForm(finalSubmissionData)) {
