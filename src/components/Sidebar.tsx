@@ -6,17 +6,6 @@ import Logo from "../../public/images/logo_drop_shadow.png"
 import { FaUser, FaTasks, FaCogs, FaFileCode, FaBuilding } from "react-icons/fa";
 import { GiWoodBeam } from "react-icons/gi";
 import {
-    ChevronRight,
-    ChevronsUpDown,
-    LogOut,
-} from "lucide-react"
-
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar"
-import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
@@ -45,7 +34,7 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 import Link from "@/components/Link"
-import { Button } from "./ui/button";
+import { LuChevronRight, LuUser2 } from "react-icons/lu";
 
 const data = {
     user: {
@@ -96,17 +85,19 @@ const data = {
 export default function SidebarComponent({ children }: any) {
     return (
         <SidebarProvider>
-            <Sidebar collapsible="icon">
-                <div className="flex px-2 justify-center items-center gap-2">
-                    <div className="flex aspect-square w-full h-auto items-center justify-center rounded-lg text-sidebar-primary-foreground">
-                        <Link href='/'>
-                            <Image
-                                src={Logo}
-                                alt='Logo'
-                                className="w-auto h-auto mx-auto"
-                            />
-                        </Link>
-                    </div>
+            <Sidebar>
+                {/* Responsive Logo */}
+                <div className="flex px-2 justify-center items-center gap-2 py-4">
+                    <Link href="/">
+                        <Image
+                            src={Logo}
+                            alt="Logo"
+                            className="mx-auto"
+                            width={150} // Adjust for desktop
+                            height={150}
+                            style={{ maxWidth: "100%", height: "auto" }} // Ensures responsiveness
+                        />
+                    </Link>
                 </div>
                 <SidebarContent>
                     <SidebarGroup>
@@ -134,7 +125,7 @@ export default function SidebarComponent({ children }: any) {
                                             <SidebarMenuButton tooltip={item.title}>
                                                 {item.icon && <item.icon />}
                                                 <span>{item.title}</span>
-                                                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                <LuChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                             </SidebarMenuButton>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent>
@@ -161,43 +152,19 @@ export default function SidebarComponent({ children }: any) {
                         <SidebarMenuItem>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <SidebarMenuButton
-                                        size="lg"
-                                        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                                    >
-                                        <Avatar className="h-8 w-8 rounded-lg">
-                                            <AvatarImage
-                                                src={data.user.avatar}
-                                                alt={data.user.name}
-                                            />
-                                            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                                        </Avatar>
-                                        <div className="grid flex-1 text-left text-sm leading-tight">
-                                            <span className="truncate font-semibold">
-                                                {data.user.name}
-                                            </span>
-                                            <span className="truncate text-xs">
-                                                {data.user.email}
-                                            </span>
-                                        </div>
-                                        <ChevronsUpDown className="ml-auto size-4" />
+                                    <SidebarMenuButton>
+                                        <LuUser2 /> Username
+                                        <LuChevronRight className="ml-auto" />
                                     </SidebarMenuButton>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent
-                                    className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-white"
-                                    side="bottom"
-                                    align="end"
-                                    sideOffset={4}
+                                    side="top"
+                                    className="w-[--radix-popper-anchor-width]"
                                 >
                                     <DropdownMenuItem>
-                                        <div className="w-full">
-                                            <Link href="#">
-                                                <Button variant="ghost" className="flex w-full justify-start items-center gap-2">
-                                                    <LogOut />
-                                                    Log out
-                                                </Button>
-                                            </Link>
-                                        </div>
+                                        <Link href="/auth/signout">
+                                            Sign Out
+                                        </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
