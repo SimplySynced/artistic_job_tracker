@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "@/components/Link"
 import { LuChevronRight, LuUser2 } from "react-icons/lu";
+import { signOut } from "next-auth/react";
 
 const data = {
     user: {
@@ -162,7 +163,7 @@ export default function SidebarComponent({ children }: any) {
                                     className="w-[--radix-popper-anchor-width]"
                                 >
                                     <DropdownMenuItem>
-                                        <Link href="/auth/signout">
+                                        <Link onClick={() => signOut()} href="/">
                                             Sign Out
                                         </Link>
                                     </DropdownMenuItem>
