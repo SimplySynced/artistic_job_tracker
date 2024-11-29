@@ -30,8 +30,9 @@ export const getUserFromDb = async (email: string, plaintextPassword: string) =>
     // Return user data (excluding sensitive information like password)
     return {
         id: user.id,
-        email: user.email,
         name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified || null,
     };
 };
 
@@ -44,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
             },
-            authorize: async (credentials, req) => {
+            async authorize(credentials) {
                 // Type narrowing for credentials
                 if (!credentials || typeof credentials.email !== "string" || typeof credentials.password !== "string") {
                     throw new Error("Invalid credentials format.");
@@ -72,19 +73,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         strategy: "jwt", // Use JWT for session handling
     },
     callbacks: {
-        async session({ session, token }) {
-            if (token?.sub) {
-                session.user.id = token.sub; // token.sub is guaranteed to be a string in the jwt callback
-            } else {
-                session.user.id = ""; // Provide a fallback if token.sub is undefined
-            }
-            return session;
-        },
         async jwt({ token, user }) {
-            if (user?.id) {
-                token.sub = user.id.toString(); // Ensure user.id is always converted to a string
+            if (user) {
+                token.id = user.id;
+                token.name = user.name;
+                token.email = user.email;
             }
             return token;
+        },
+        async session({ session, token }) {
+            session.user = {
+                id: token.id as string,
+                name: token.name as string,
+                email: token.email as string,
+                emailVerified: token.emailVerified as Date | null,
+            };
+            return session;
         },
     },
     secret: process.env.NEXTAUTH_SECRET,

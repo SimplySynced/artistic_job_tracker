@@ -66,12 +66,12 @@ export default function SignupPage() {
                 </CardHeader>
                 <CardContent>
                     {error && (
-                        <Alert variant="destructive" className="mb-4">
+                        <Alert variant="destructive" className="mb-4 bg-red-100/40 text-red-800 font-medium border-red-100">
                             {error}
                         </Alert>
                     )}
                     {success && (
-                        <Alert className="mb-4">
+                        <Alert className="mb-4 bg-green-100/40 text-green-800 font-medium border-green-100">
                             {success}
                         </Alert>
                     )}

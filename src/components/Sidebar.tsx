@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "@/components/Link"
 import { LuChevronRight, LuUser2 } from "react-icons/lu";
-import { signOut } from "next-auth/react";
+import { SessionProvider, signOut } from "next-auth/react";
 
 const data = {
     user: {
@@ -83,7 +83,7 @@ const data = {
     ],
 }
 
-export default function SidebarComponent({ children }: any) {
+export default function SidebarComponent({ children, session }: any) {
     return (
         <SidebarProvider>
             <Sidebar>
@@ -154,7 +154,9 @@ export default function SidebarComponent({ children }: any) {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <SidebarMenuButton>
-                                        <LuUser2 /> Username
+                                        <LuUser2 />
+                                        {/* Show username dynamically */}
+                                        {session?.user?.name || "Guest"}
                                         <LuChevronRight className="ml-auto" />
                                     </SidebarMenuButton>
                                 </DropdownMenuTrigger>
@@ -162,6 +164,11 @@ export default function SidebarComponent({ children }: any) {
                                     side="top"
                                     className="w-[--radix-popper-anchor-width]"
                                 >
+                                    <DropdownMenuItem>
+                                        <Link href="/account">
+                                            Account
+                                        </Link>
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem>
                                         <Link onClick={() => signOut()} href="/">
                                             Sign Out
@@ -182,11 +189,13 @@ export default function SidebarComponent({ children }: any) {
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0 w-full">
                     <div className="w-full ">
-                        {children}
+                        <SessionProvider session={session}>
+                            {children}
+                        </SessionProvider>
                     </div>
                     <div className="flex-1 rounded-xl bg-muted/50" />
                 </div>
             </SidebarInset>
-        </SidebarProvider >
-    )
+        </SidebarProvider>
+    );
 }

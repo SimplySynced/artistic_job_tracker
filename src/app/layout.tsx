@@ -4,6 +4,7 @@ import Theme from './theme-provider'
 import logo from "../../public/images/logo_drop_shadow.png"
 import '@/styles/globals.css'
 import { auth } from "@/auth"
+import { SessionProvider } from 'next-auth/react'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,7 +32,9 @@ export default async function RootLayout({
       <body className="font-inter antialiased bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400">
         <Theme>
           {session ? ( // Render the app if authenticated
-            <Sidebar logo={logo}>{children}</Sidebar>
+            <Sidebar session={session} logo={logo}>
+              {children}
+            </Sidebar>
           ) : (
             <>{children}</>
           )}
