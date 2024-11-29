@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,12 @@ export default function LoginPage() {
             window.location.href = "/";
         }
     };
+
+    // Ensure any dynamic content is only set after mounting
+    useEffect(() => {
+        setEmail("");
+        setPassword("");
+    }, []);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
