@@ -47,7 +47,6 @@ model Jobs {
 
   // Relationships
   locationInfo  Locations?      @relation(fields: [job_location], references: [location])
-  JobLumberCost JobLumberCost[]
 }
 
 model JobLumberCost {
@@ -71,10 +70,6 @@ model JobLumberCost {
   entered_date    String
   updated_by      String?
   updated_date    String?
-
-  // Relationships
-  lumberType WoodTypes? @relation(fields: [wood_id, wood_type], references: [id, wood_type])
-  jobNumber  Jobs?      @relation(fields: [job_number], references: [job_number])
 }
 
 model JobLaborCodes {
@@ -98,7 +93,18 @@ model WoodTypes {
   wood_type String  @unique // Make wood_type unique for linking
   enabled   Boolean @default(true)
 
-  JobLumberCost JobLumberCost[]
-
   @@unique([id, wood_type])
+}
+
+model WoodCost {
+  id                  Int     @id @default(autoincrement())
+  replace_cost_id     Int
+  wood_id             Int
+  wood_type           String
+  thickness           Float
+  waste_factor        Float
+  unit                String
+  replacement         Float
+  last_update         String
+  price               Int
 }

@@ -246,7 +246,7 @@ export default function JobManagement({ params }: any) {
       thickness: Number(formData.thickness),
       length: Number(formData.length),
       width: Number(formData.width),
-      cost_over: Number(formData.cost_over),
+      cost_over: Number(0),
       total_cost: Number(formData.total_cost),
       ft_per_piece: Number(formData.ft_per_piece),
       price: Number(formData.price),
@@ -323,12 +323,20 @@ export default function JobManagement({ params }: any) {
   return (
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-        <div className="flex justify-between items-center">
+      {jobinfo.length > 0 ? (
+        <div className="justify-between items-center">
           <h1 className="text-xl md:text-3xl font-bold">
-            Lumber Cost Sheet for Job# {params.id}
+          Lumber Cost Sheet for Job #{params.id}
           </h1>
-          <h3 className="text-md font-bold">Job Name: {jobinfo.job_customer}</h3>
+          <h3 className="text-md md:text-lg">
+          Job Name: {jobinfo[0].job_customer}
+          </h3>
         </div>
+      ) : (
+        <div className="text-center">
+          <p>Loading employee information...</p>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <JobTable
@@ -355,8 +363,8 @@ export default function JobManagement({ params }: any) {
               <span className="text-xl font-bold">{editingLumberCost ? 'Edit Lumber Cost' : 'Add Lumber Cost'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'date_worked', label: 'Date Worked', type: 'text' },
-                  { name: 'job_number', label: 'Job Number', type: 'number' },
+                  { name: 'date', label: 'Date ', type: 'text' },
+                  { name: 'quantity', label: 'Quantity', type: 'number' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -365,7 +373,7 @@ export default function JobManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof LumberCostFormData]}
+                      value={formData[field.name as keyof LumberCostFormData]  || ''}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}
@@ -378,10 +386,10 @@ export default function JobManagement({ params }: any) {
                     )}
                   </div>
                 ))}
-                {/* LaborCode Dropdown */}
+                {/* Wood Cost Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Labor Code <span className="text-red-500">*</span>
+                    Wood <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="wood_id"
@@ -402,11 +410,10 @@ export default function JobManagement({ params }: any) {
                   </select>
                 </div>
                 {[
-                  { name: 'begin_time', label: 'Begin Time', type: 'text' },
-                  { name: 'end_time', label: 'End Time', type: 'text' },
-                  { name: 'hours', label: 'Hours', type: 'number' },
-                  { name: 'minutes', label: 'Minutes', type: 'number' },
-                  { name: 'added_by', label: 'Added By', type: 'text' },
+                  { name: 'thickness', label: 'Thickness', type: 'number' },
+                  { name: 'width', label: 'Width', type: 'number' },
+                  { name: 'length', label: 'Length', type: 'number' },
+                  { name: 'description', label: 'Description', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -415,7 +422,7 @@ export default function JobManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof LumberCostFormData]}
+                      value={formData[field.name as keyof LumberCostFormData]  || ''}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}

@@ -182,6 +182,30 @@ export type WoodFormData = {
 };
 
 
+// Zod schema for WoodCost
+export const WoodCostSchema = z.object({
+    id: z.number().optional(),
+    replace_cost_id: z.number(),
+    wood_id: z.number().min(1, "Wood ID is required"),
+    wood_type: z.string(),
+    thickness: z.number(),
+    waste_factor: z.number(),
+    unit: z.string().min(1, "Unit is required"),
+    replacement: z.number(),
+    price: z.number().min(1, "Price is required"),
+    updated_date: z.string().min(1, "Updated date name is required"),
+});
+
+// TypeScript types derived from Zod schema
+export type WoodCost = z.infer<typeof WoodCostSchema>;
+export type NewWoodCost = Omit<WoodCost, 'id'>;
+
+// Form data type (string values for input fields)
+export type WoodCostFormData = {
+    wood_type: string;
+};
+
+
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
     id: z.number().optional(),

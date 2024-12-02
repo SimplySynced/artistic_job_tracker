@@ -124,9 +124,8 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
-            meta: {
-                label: 'Wood Type'
-            } as ColumnMeta
+            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('wood_type') || ''}</span>,
+            meta: { label: 'Wood Type' } as ColumnMeta
         },
         {
             accessorKey: 'thickness',
@@ -196,9 +195,8 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
-            meta: {
-                label: 'Description'
-            } as ColumnMeta
+            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('description') || ''}</span>,
+            meta: { label: 'Description' } as ColumnMeta
         },
         {
             accessorKey: 'tbf',
