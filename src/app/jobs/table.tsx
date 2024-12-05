@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
+=======
+import * as React from 'react'
+import { Input } from '@/components/ui/input'
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 import {
     Table,
     TableBody,
@@ -13,6 +18,7 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
+<<<<<<< HEAD
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +34,11 @@ import {
     LuChevronRight,
     LuLoader2,
 } from 'react-icons/lu';
+=======
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPaperclip } from "react-icons/lu";
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 import {
     useReactTable,
     getCoreRowModel,
@@ -37,21 +48,33 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
+<<<<<<< HEAD
     getPaginationRowModel,
 } from '@tanstack/react-table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+=======
+    getPaginationRowModel
+} from '@tanstack/react-table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
 type ColumnMeta = {
     label: string;
 };
 
 type Job = {
+<<<<<<< HEAD
     id?: number; // Optional for new jobs
+=======
+    id?: number;
+    job_code: number;
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     job_number: number;
     job_location: string;
     job_customer: string;
     job_address: string;
+<<<<<<< HEAD
 };
 
 interface JobTableProps {
@@ -79,8 +102,44 @@ export function JobTable({
     const navigateToJob = (id: number) => {
         router.push(`/job/${id}`);
     };
+=======
+}
+
+interface JobTableProps {
+    data: Job[];
+    onEdit: (job: Job) => void;
+    onDelete: (jobId: number) => void;
+    onAddNew: () => void;
+    isLoading: boolean;
+}
+
+export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
+    const [sorting, setSorting] = React.useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = React.useState('')
+    const [columnVisibility, setColumnVisibility] = React.useState({})
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
     const columns: ColumnDef<Job, any>[] = [
+        {
+            accessorFn: (row) => `${row.job_number}`,
+            id: 'job_number',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Job Code
+                        <LuArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Job Code'
+            } as ColumnMeta
+        },
         {
             accessorFn: (row) => `${row.job_number}`,
             id: 'job_number',
@@ -170,10 +229,17 @@ export function JobTable({
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
+<<<<<<< HEAD
                             onClick={() => navigateToJob(job.job_number ?? 0)}
                             className="size-8 text-white bg-green-500 hover:bg-green-600"
                         >
                             <LuClipboard className="h-4 w-4" />
+=======
+                            onClick={() => onEdit(job)}
+                            className="size-8 text-white bg-green-500 hover:bg-green-600"
+                        >
+                            <LuPaperclip className="h-4 w-4" />
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                         </Button>
                         <Button
                             variant="outline"
@@ -217,7 +283,11 @@ export function JobTable({
                 pageSize: 10,
             },
         },
+<<<<<<< HEAD
     });
+=======
+    })
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
     return (
         <div className="space-y-2">
@@ -231,12 +301,17 @@ export function JobTable({
                     />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
+<<<<<<< HEAD
                             <Button variant="outline" className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+=======
+                            <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                 <LuSlidersHorizontal className="mr-1" />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-white">
+<<<<<<< HEAD
                             {table.getAllColumns().map((column) => (
                                 <DropdownMenuCheckboxItem
                                     key={column.id}
@@ -247,16 +322,40 @@ export function JobTable({
                                     {(column.columnDef.meta as ColumnMeta)?.label || column.id}
                                 </DropdownMenuCheckboxItem>
                             ))}
+=======
+                            {table
+                                .getAllColumns()
+                                .map((column) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="cursor-pointer"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                    >
+                                        {(column.columnDef.meta as ColumnMeta)?.label || column.id}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
+<<<<<<< HEAD
                     Add Employee
                 </Button>
             </div>
 
             {/* Table Rendering */}
+=======
+                    Add Job
+                </Button>
+            </div>
+
+            {/* Responsive table container */}
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
             <div className="overflow-x-auto">
                 <Table className="min-w-full border">
                     <TableHeader>
@@ -265,8 +364,12 @@ export function JobTable({
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
+<<<<<<< HEAD
                                         className={`bg-neutral-900 text-white text-center font-semibold ${['nick_name', 'location'].includes(header.column.id) ? 'hidden md:table-cell' : ''
                                             }`}
+=======
+                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_code', 'job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                     >
                                         {header.isPlaceholder
                                             ? null
@@ -288,12 +391,23 @@ export function JobTable({
                             </TableRow>
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
+<<<<<<< HEAD
                                 <TableRow key={row.id} className="hover:bg-neutral-50 bg-white">
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
                                             className={`font-medium text-center ${['nick_name', 'location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''
                                                 }`}
+=======
+                                <TableRow
+                                    key={row.id}
+                                    className="hover:bg-neutral-50 bg-white"
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell
+                                            key={cell.id}
+                                            className={`font-medium text-center ${['job_code', 'job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
@@ -302,7 +416,14 @@ export function JobTable({
                             ))
                         ) : (
                             <TableRow>
+<<<<<<< HEAD
                                 <TableCell colSpan={columns.length} className="h-24 text-center text-neutral-500">
+=======
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center text-neutral-500"
+                                >
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                     No results found.
                                 </TableCell>
                             </TableRow>
@@ -311,7 +432,11 @@ export function JobTable({
                 </Table>
             </div>
 
+<<<<<<< HEAD
             {/* Pagination */}
+=======
+            {/* Responsive pagination */}
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
             <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
                 <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
@@ -319,6 +444,7 @@ export function JobTable({
                 <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full lg:w-2/3 xl:w-1/2 justify-between lg:justify-end">
                     <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium">Rows per page</p>
+<<<<<<< HEAD
                         <Select
                             onValueChange={(value) => table.setPageSize(Number(value))}
                             defaultValue={table.getState().pagination.pageSize.toString()}
@@ -329,12 +455,22 @@ export function JobTable({
                             <SelectContent className="bg-white">
                                 {[5, 10, 20, 30, 40, 50].map((pageSize) => (
                                     <SelectItem key={pageSize} value={pageSize.toString()} className="cursor-pointer">
+=======
+                        <Select onValueChange={(value) => table.setPageSize(Number(value))} defaultValue={table.getState().pagination.pageSize.toString()}>
+                            <SelectTrigger className="h-10 w-20 rounded-md border border-neutral-200 bg-white focus:ring-0 focus:ring-offset-0">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className='bg-white'>
+                                {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={pageSize.toString()} className='cursor-pointer'>
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                         {pageSize}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
+<<<<<<< HEAD
                     <div className="flex items-center w-full sm:justify-between md:max-w-sm">
                         <div className="space-x-1">
                             <Button
@@ -351,12 +487,21 @@ export function JobTable({
                                 onClick={() => table.previousPage()}
                                 disabled={!table.getCanPreviousPage()}
                             >
+=======
+                    <div className='flex items-center w-full sm:justify-between md:max-w-sm'>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
+                                <LuChevronFirst />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                 <LuChevronLeft />
                             </Button>
                         </div>
                         <span className="text-sm font-medium px-2 grow sm:grow-0 text-center">
                             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                         </span>
+<<<<<<< HEAD
                         <div className="space-x-1">
                             <Button
                                 variant="outline"
@@ -372,6 +517,13 @@ export function JobTable({
                                 onClick={() => table.lastPage()}
                                 disabled={!table.getCanNextPage()}
                             >
+=======
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                                <LuChevronRight />
+                            </Button>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                                 <LuChevronLast />
                             </Button>
                         </div>

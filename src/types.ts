@@ -77,10 +77,18 @@ export type TimeSheetFormData = {
 // Updated Zod schema for Jobs
 export const JobSchema = z.object({
     id: z.number().optional(),
+<<<<<<< HEAD
     job_number: z.number().min(1, 'Job Number is required'),
     job_location: z.string().min(1, 'Job Location is required'),
     job_customer: z.string().min(1, 'Customer name is required'),
     job_address: z.string().min(1, 'Address is required'),
+=======
+    job_code: z.number().min(1, "Job Code is required"),
+    job_number: z.number().min(1, "Job Number is required"),
+    job_location: z.string().min(1, "Job Location is required"),
+    job_customer: z.string().min(1, "Customer name required"),
+    job_address: z.string(),
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 });
 
 // Updated TypeScript types derived from Zod schema
@@ -89,6 +97,7 @@ export type NewJobCode = Omit<Job, 'id'>;
 
 // Updated Form data type (string values for input fields)
 export type JobFormData = {
+<<<<<<< HEAD
     job_number: number;
     job_location: string;
     job_customer: string;
@@ -97,6 +106,13 @@ export type JobFormData = {
     city?: string;   // Optional field
     state?: string;  // Optional field
     zip?: string;    // Optional field
+=======
+    job_code: string,
+    job_number: string,
+    job_location: string,
+    job_customer: string,
+    job_address: string,
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 };
 
 // Updated Zod schema for JobLumberCost

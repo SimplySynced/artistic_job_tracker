@@ -22,6 +22,25 @@ export async function GET(
     }
 }
 
+<<<<<<< HEAD
+=======
+export async function POST(
+    request: Request,
+) {
+    try {
+        const data = await request.json();
+        const newEntry = await prisma.timeSheets.create({
+            data: {
+                ...data, // Default to pay_rate if not provided
+            },
+        });
+        return NextResponse.json(newEntry);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
+    }
+}
+
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }

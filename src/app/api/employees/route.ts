@@ -19,12 +19,19 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+<<<<<<< HEAD
 
     // Validate data using Zod
     const validationResult = EmployeeSchema.safeParse(data);
 
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
+=======
+    
+    // Validate data using Zod
+    const validationResult = EmployeeSchema.safeParse(data);
+    if (!validationResult.success) {
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       return NextResponse.json({ error: 'Invalid input data', details: validationResult.error.errors }, { status: 400 });
     }
 

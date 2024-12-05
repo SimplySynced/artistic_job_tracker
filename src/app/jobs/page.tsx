@@ -1,6 +1,10 @@
 'use client';
+<<<<<<< HEAD
 
 import React, { useEffect, useState } from 'react';
+=======
+import React, { useCallback, useEffect, useState } from 'react';
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +12,11 @@ import { toast } from '@/hooks/use-toast';
 import { Job, JobFormData, JobSchema } from '@/types';
 import { US_STATES } from '@/lib/utils';
 import { z } from 'zod';
+<<<<<<< HEAD
 import { JobTable } from './table';
+=======
+import { JobTable } from "./table"
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
 export default function JobsManagement() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -18,7 +26,12 @@ export default function JobsManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
+<<<<<<< HEAD
     job_number: 0,
+=======
+    job_code: '',
+    job_number: '',
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     job_location: '',
     job_customer: '',
     job_address: '',
@@ -29,6 +42,7 @@ export default function JobsManagement() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof JobFormData, string>>>({});
 
+<<<<<<< HEAD
   // Fetch jobs
   const fetchJobs = async (): Promise<void> => {
     try {
@@ -80,28 +94,54 @@ export default function JobsManagement() {
       if (!response.ok) throw new Error('Failed to fetch locations');
       const data = await response.json();
       setLocations(data); // Ensure `data` is an array of { id, location }
+=======
+  // Fetch jobs with loading state
+  const fetchJobs = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/jobs');
+      if (!response.ok) throw new Error('Failed to fetch jobs');
+      const data = await response.json();
+      const validatedData = z.array(JobSchema).parse(data);
+      setJobs(validatedData);
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     } catch (error) {
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to fetch locations',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchLocations();
   }, []);
 
   // Validate form
+=======
+    fetchJobs();
+  }, []);
+
+  // Validate form data using JobSchema
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
   const validateForm = (data: JobFormData): boolean => {
     try {
       // Preprocess form data to match JobSchema
       const numericData = {
+<<<<<<< HEAD
         job_number: Number(data.job_number),
         job_location: data.job_location,
         job_customer: data.job_customer,
         job_address: `${data.street || ''}, ${data.city || ''}, ${data.state || ''} ${data.zip || ''}`, // Combine address fields
+=======
+        ...data,
+        job_code: parseFloat(data.job_code),
+        job_number: parseFloat(data.job_number),
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       };
 
       // Validate using Zod schema
@@ -142,11 +182,16 @@ export default function JobsManagement() {
     setEditingJob(job);
     setFormData({
       ...job,
+<<<<<<< HEAD
       job_number: job.job_number,
       street,
       city,
       state,
       zip,
+=======
+      job_code: job.job_code.toString(),
+      job_number: job.job_number.toString(),
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     });
     setIsModalOpen(true);
   };
@@ -155,6 +200,7 @@ export default function JobsManagement() {
   const handleAddNew = (): void => {
     setEditingJob(null);
     setFormData({
+<<<<<<< HEAD
       job_number: 0,
       job_location: '',
       job_customer: '',
@@ -163,6 +209,13 @@ export default function JobsManagement() {
       city: '',
       state: '',
       zip: '',
+=======
+      job_code: '',
+      job_number: '',
+      job_location: '',
+      job_customer: '',
+      job_address: ''
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -170,6 +223,7 @@ export default function JobsManagement() {
 
   // Handle modal close
   const handleModalClose = (): void => {
+<<<<<<< HEAD
     if (isSaving) return;
     setIsModalOpen(false);
     setEditingJob(null);
@@ -182,6 +236,17 @@ export default function JobsManagement() {
       city: '',
       state: '',
       zip: '',
+=======
+    if (isSaving) return; // Prevent closing while saving
+    setIsModalOpen(false);
+    setEditingJob(null);
+    setFormData({
+      job_code: '',
+      job_number: '',
+      job_location: '',
+      job_customer: '',
+      job_address: ''
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     });
     setFormErrors({});
   };
@@ -213,7 +278,20 @@ export default function JobsManagement() {
 
     try {
       setIsSaving(true);
+<<<<<<< HEAD
       const url = editingJob ? `/api/jobs/${editingJob.id}` : '/api/jobs';
+=======
+      const submissionData = {
+        ...formData,
+        job_code: parseFloat(formData.job_code),
+        job_number: parseFloat(formData.job_number),
+      };
+
+      const url = editingJob
+        ? `/api/jobs/${editingJob.id}`
+        : '/api/jobs';
+
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       const method = editingJob ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -228,7 +306,11 @@ export default function JobsManagement() {
       handleModalClose();
 
       toast({
+<<<<<<< HEAD
         title: 'Success',
+=======
+        title: "Success",
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
         description: `Job ${editingJob ? 'updated' : 'added'} successfully`,
       });
     } catch (error) {
@@ -248,7 +330,14 @@ export default function JobsManagement() {
     if (!confirm('Are you sure you want to delete this job?')) return;
 
     try {
+<<<<<<< HEAD
       const response = await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
+=======
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE',
+      });
+
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       if (!response.ok) throw new Error('Failed to delete job');
 
       await fetchJobs();
@@ -288,6 +377,7 @@ export default function JobsManagement() {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
+<<<<<<< HEAD
             onClick={handleModalClose}
           >
             <div
@@ -298,6 +388,22 @@ export default function JobsManagement() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'job_number', label: 'Job Number', type: 'number' },
+=======
+            onClick={handleModalClose} // Close modal on clicking the backdrop
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            >
+              <span className="text-xl font-bold">
+                {editingJob ? 'Edit Job' : 'Add Job'}
+              </span>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {[
+                  { name: 'job_code', label: 'Job Code', type: 'number' },
+                  { name: 'job_number', label: 'Job Number', type: 'number' },
+                  { name: 'job_location', label: 'Location', type: 'text' },
+>>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                   { name: 'job_customer', label: 'Customer', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
