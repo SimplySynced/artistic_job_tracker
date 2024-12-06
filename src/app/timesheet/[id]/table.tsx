@@ -15,7 +15,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -28,7 +27,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal } from 'react-icons/lu'
+import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuTrash2, LuPencilLine } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
@@ -76,7 +75,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Date Worked
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -94,7 +93,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Job Number
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -112,7 +111,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Code
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -130,7 +129,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Begin Time
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -148,7 +147,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         End Time
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -166,7 +165,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Pay Rate
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -192,7 +191,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                         className="p-0 hover:bg-transparent"
                     >
                         Added By
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -215,14 +214,14 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                             onClick={() => onEdit(wood)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
-                            <PencilLine className="h-4 w-4" />
+                            <LuPencilLine className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => onDelete(wood.id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <LuTrash2 className="h-4 w-4" />
                         </Button>
                     </div>
                 )

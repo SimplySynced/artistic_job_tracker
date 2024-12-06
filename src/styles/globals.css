@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Additional styles
-@import 'additional-styles/utility-patterns.css';
-@import 'additional-styles/flatpickr.css'; */
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -15,51 +11,6 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-}
-
-.navbar {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  background-color: #333;
-  padding: 10px 0;
-  display: flex;
-  justify-content: center; /* Center the links */
-  align-items: center;
-  height: 125px;
-  z-index: 1000;
-}
-
-.logo-container {
-  position: absolute;
-  left: 20px; /* Move the logo to the left */
-}
-
-.nav-links ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.nav-links ul li {
-  margin: 0 15px;
-}
-
-.nav-links ul li a {
-  color: white;
-  text-decoration: none;
-  font-size: 18px;
-}
-
-.nav-links ul li a:hover {
-  text-decoration: underline;
-}
-
-.content {
-  padding: 20px;
 }
 
 h1 {
@@ -84,27 +35,6 @@ select {
 
 h2 {
   margin-top: 30px;
-}
-
-.employees-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.dropdown-container {
-  margin-bottom: 20px;
-}
-
-.employee-details {
-  margin-bottom: 20px;
-}
-
-.table-container {
-  width: 100%;
-  max-width: 800px; /* Limit table width */
 }
 
 table {
@@ -163,40 +93,6 @@ tr:nth-child(even) {
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }

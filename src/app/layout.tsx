@@ -29,7 +29,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
-      <body className="font-inter antialiased bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400">
+      <body className="font-inter antialiased bg-gray-100 text-gray-600">
         <Theme>
           {session ? ( // Render the app if authenticated
             <Sidebar session={session} logo={logo}>
