@@ -19,10 +19,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    
+
     // Validate data using Zod
     const validationResult = EmployeeSchema.safeParse(data);
+
     if (!validationResult.success) {
+      console.error('Validation Error:', validationResult.error.errors);
       return NextResponse.json({ error: 'Invalid input data', details: validationResult.error.errors }, { status: 400 });
     }
 

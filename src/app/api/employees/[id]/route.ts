@@ -21,6 +21,7 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
+        console.log(data)
         const employee = await prisma.employees.update({
             where: { id: parseInt(params.id) },
             data: {
@@ -35,6 +36,7 @@ export async function PUT(
 }
 
 export async function DELETE(
+    request: Request,
     { params }: { params: { id: string } }
 ) {
     try {

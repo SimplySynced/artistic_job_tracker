@@ -27,7 +27,7 @@ import {
     getPaginationRowModel
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuSlidersHorizontal, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPencilLine, LuPlus, LuTrash2, LuArrowUpDown } from 'react-icons/lu'
+import { LuSlidersHorizontal, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPencilLine, LuPlus, LuTrash2, LuArrowUpDown } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
@@ -194,7 +194,7 @@ export function WoodTable({ data, onEdit, onDelete, onAddNew, isLoading = false 
                             <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>

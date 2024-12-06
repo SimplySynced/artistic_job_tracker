@@ -7,15 +7,27 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPaperclip } from "react-icons/lu";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import {
+    LuPlus,
+    LuSlidersHorizontal,
+    LuArrowUpDown,
+    LuClipboard,
+    LuPencilLine,
+    LuTrash2,
+    LuChevronFirst,
+    LuChevronLast,
+    LuChevronLeft,
+    LuChevronRight,
+    LuLoader,
+} from 'react-icons/lu';
 import {
     useReactTable,
     getCoreRowModel,
@@ -25,22 +37,22 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
-    getPaginationRowModel
-} from '@tanstack/react-table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+    getPaginationRowModel,
+} from '@tanstack/react-table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 type ColumnMeta = {
-    label: string
-}
+    label: string;
+};
 
 type Job = {
-    id?: number;
-    job_code: number;
+    id?: number; // Optional for new jobs
     job_number: number;
     job_location: string;
     job_customer: string;
     job_address: string;
-}
+};
 
 interface JobTableProps {
     data: Job[];
@@ -50,32 +62,25 @@ interface JobTableProps {
     isLoading: boolean;
 }
 
-export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [globalFilter, setGlobalFilter] = React.useState('')
-    const [columnVisibility, setColumnVisibility] = React.useState({})
+export function JobTable({
+    data,
+    onEdit,
+    onDelete,
+    onAddNew,
+    isLoading = false,
+}: JobTableProps) {
+    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const [globalFilter, setGlobalFilter] = React.useState('');
+    const [columnVisibility, setColumnVisibility] = React.useState({});
+
+    const router = useRouter();
+
+    const navigateToJob = (id: number) => {
+        router.push(`/job/${id}`);
+    };
 
     const columns: ColumnDef<Job, any>[] = [
-        {
-            accessorFn: (row) => `${row.job_code}`,
-            id: 'job_code',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Job Code
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            meta: {
-                label: 'Job Code'
-            } as ColumnMeta
-        },
         {
             accessorFn: (row) => `${row.job_number}`,
             id: 'job_number',
@@ -91,9 +96,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Display "NULL" for undefined or null
             meta: {
                 label: 'Job Number'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_location',
@@ -109,9 +115,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Location'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_customer',
@@ -127,9 +134,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Customer'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             accessorKey: 'job_address',
@@ -145,9 +153,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ getValue }) => getValue() ?? "NULL", // Add similar handling here
             meta: {
                 label: 'Address'
-            } as ColumnMeta
+            } as ColumnMeta,
         },
         {
             id: 'actions',
@@ -161,10 +170,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => onEdit(job)}
+                            onClick={() => navigateToJob(job.job_number ?? 0)}
                             className="size-8 text-white bg-green-500 hover:bg-green-600"
                         >
-                            <LuPaperclip className="h-4 w-4" />
+                            <LuClipboard className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
@@ -184,7 +193,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 )
             },
         },
-    ]
+    ];
 
     const table = useReactTable({
         data,
@@ -208,7 +217,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 pageSize: 10,
             },
         },
-    })
+    });
 
     return (
         <div className="space-y-2">
@@ -222,26 +231,22 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+                            <Button variant="outline" className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
                                 <LuSlidersHorizontal className="mr-1" />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-white">
-                            {table
-                                .getAllColumns()
-                                .map((column) => (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="cursor-pointer"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                    >
-                                        {(column.columnDef.meta as ColumnMeta)?.label || column.id}
-                                    </DropdownMenuCheckboxItem>
-                                ))}
+                            {table.getAllColumns().map((column) => (
+                                <DropdownMenuCheckboxItem
+                                    key={column.id}
+                                    className="cursor-pointer"
+                                    checked={column.getIsVisible()}
+                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                >
+                                    {(column.columnDef.meta as ColumnMeta)?.label || column.id}
+                                </DropdownMenuCheckboxItem>
+                            ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -260,14 +265,11 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_code', 'job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
+                                        className={`bg-neutral-900 text-white text-center font-semibold ${['job_location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
                                     >
                                         {header.isPlaceholder
                                             ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
+                                            : flexRender(header.column.columnDef.header, header.getContext())}
                                     </TableHead>
                                 ))}
                             </TableRow>
@@ -278,7 +280,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                             <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>
@@ -292,7 +294,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
-                                            className={`font-medium text-center ${['job_code', 'job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
+                                            className={`font-medium text-center ${['job_location'].includes(cell.column.id) ? 'hidden md:table-cell' : ''}`}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
@@ -308,13 +310,14 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                                     No results found.
                                 </TableCell>
                             </TableRow>
-                        )}
+                        )
+                        }
                     </TableBody>
                 </Table>
             </div>
 
             {/* Responsive pagination */}
-            <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
+            < div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0" >
                 <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
                 </div>
@@ -355,8 +358,8 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                             </Button>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    )
+                </div >
+            </div >
+        </div >
+    );
 }

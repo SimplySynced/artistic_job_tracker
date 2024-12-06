@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const jobinfo = await prisma.jobs.findMany({
+            where: { job_number: parseInt(params.id) }
+        });
+        console.log(jobinfo)
+        return NextResponse.json(jobinfo);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to fetch lumber cost' }, { status: 500 });
+    }
+}
+
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
         const data = await request.json();
+
         const job = await prisma.jobs.update({
             where: { id: parseInt(params.id) },
             data: {
@@ -15,9 +31,11 @@ export async function PUT(
         });
         return NextResponse.json(job);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+        console.error("Error updating job:", error);
+        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 }
+
 
 export async function DELETE(
     request: Request,
