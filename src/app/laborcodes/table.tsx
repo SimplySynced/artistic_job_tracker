@@ -15,7 +15,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2 } from "react-icons/lu";
+import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader } from "react-icons/lu";
 import {
     useReactTable,
     getCoreRowModel,
@@ -212,7 +212,7 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                             <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>

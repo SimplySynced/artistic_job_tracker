@@ -28,7 +28,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPlus, LuSlidersHorizontal } from 'react-icons/lu'
+import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal, LuPrinter } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
@@ -71,6 +71,42 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
     const [columnVisibility, setColumnVisibility] = React.useState({})
+
+    const generateLumberCostReport = async () => {
+        const response = await fetch('/api/generate-lumber-cost-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data }),
+        });
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'report.pdf';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+
+    const generateTimeSheetReport = async () => {
+        const response = await fetch('/api/generate-timesheet-job-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data }),
+        });
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'report.pdf';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
 
     const columns: ColumnDef<LumberCost, any>[] = [
         {
@@ -343,6 +379,14 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+                <Button onClick={generateTimeSheetReport} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
+                    <LuPrinter className="mr-1" />
+                    Print Time Sheet Report
+                </Button>
+                <Button onClick={generateLumberCostReport} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
+                    <LuPrinter className="mr-1" />
+                    Print Lumber Cost
+                </Button>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
                     Add Time Entry
@@ -373,17 +417,17 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow className="hover:bg-neutral-50 bg-white">
+                            <TableRow className="hover:bg-neutral-50 bg-white text-black">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="hover:bg-neutral-50 bg-white">
+                                <TableRow key={row.id} className="hover:bg-neutral-50 bg-white text-black">
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="font-medium text-center">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}

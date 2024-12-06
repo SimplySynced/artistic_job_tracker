@@ -34,7 +34,7 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar"
 import Link from "@/components/Link"
-import { LuChevronRight, LuUser2 } from "react-icons/lu";
+import { LuChevronRight, LuUser } from "react-icons/lu";
 import { SessionProvider, signOut } from "next-auth/react";
 
 const data = {
@@ -154,7 +154,7 @@ export default function SidebarComponent({ children, session }: any) {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <SidebarMenuButton>
-                                        <LuUser2 />
+                                        <LuUser />
                                         {/* Show username dynamically */}
                                         {session?.user?.name || "Guest"}
                                         <LuChevronRight className="ml-auto" />

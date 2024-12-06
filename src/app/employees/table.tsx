@@ -26,7 +26,7 @@ import {
     LuChevronLast,
     LuChevronLeft,
     LuChevronRight,
-    LuLoader2,
+    LuLoader,
 } from 'react-icons/lu';
 import {
     useReactTable,
@@ -275,7 +275,7 @@ export function EmployeeTable({
                             <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>

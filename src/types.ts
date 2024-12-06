@@ -165,7 +165,6 @@ export type LocationFormData = {
     location: string;
 };
 
-
 // Zod schema for Woods
 export const WoodSchema = z.object({
     id: z.number().optional(),
@@ -179,6 +178,37 @@ export type NewWood = Omit<Wood, 'id'>;
 // Form data type (string values for input fields)
 export type WoodFormData = {
     wood_type: string;
+};
+
+// Zod schema for Wood Replacement
+export const WoodReplacementSchema = z.object({
+    id: z.number().optional(),
+    replace_cost_id: z.number().optional(),
+    wood_id: z.number().optional(),
+    wood_type: z.string().min(1, "Wood Replacement is required"),
+    thickness: z.number().optional(),
+    waste_factor: z.number().optional(),
+    unit: z.string().min(1, "Wood Replacement is required"),
+    replacement: z.number().optional(),
+    price: z.number().optional(),
+    updated_date: z.number().optional()
+});
+
+// TypeScript types derived from Zod schema
+export type WoodReplacement = z.infer<typeof WoodReplacementSchema>;
+export type NewWoodReplacement = Omit<WoodReplacement, 'id'>;
+
+// Form data type (string values for input fields)
+export type WoodReplacementFormData = {
+    replace_cost_id: number;
+    wood_id: number;
+    wood_type: string;
+    thickness: number;
+    waste_factor: number;
+    unit: string;
+    replacement: number;
+    price: number;
+    updated_date: string;
 };
 
 

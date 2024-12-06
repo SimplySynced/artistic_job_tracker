@@ -139,3 +139,16 @@ model WoodTypes {
   enabled   Boolean @default(true)
   id        Int     @id @default(autoincrement())
 }
+
+model WoodReplacement {
+  id                  Int     @id @default(autoincrement())
+  replace_cost_id     Int
+  wood_id             Int
+  wood_type           String
+  thickness           Float
+  waste_factor        Float
+  unit                String
+  replacement         Float
+  last_update         String
+  price               Int
+}

@@ -6,9 +6,10 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
+        const jobnum = Number(params.id)
         const lumbercost = await prisma.jobLumberCost.findMany({
-            where: {job_number: parseInt(params.id)}
-    });
+            where: { job_number: jobnum }
+        });
         return NextResponse.json(lumbercost);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch lumber cost' }, { status: 500 });

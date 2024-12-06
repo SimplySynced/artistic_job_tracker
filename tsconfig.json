@@ -36,7 +36,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "components/ui/logo.js"
-  ],
+, "src/app/api/generate-lumber-cost/route.js"  ],
   "exclude": [
     "node_modules"
   ]

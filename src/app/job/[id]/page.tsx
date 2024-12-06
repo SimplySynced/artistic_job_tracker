@@ -5,14 +5,14 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { LumberCostSchema, LumberCostFormData, LumberCost, Wood, Job } from '@/types';
+import { LumberCostSchema, LumberCostFormData, LumberCost, WoodReplacement, Job } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
 
 export default function JobManagement({ params }: any) {
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
-  const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null >(null);
-  const [woodtypes, setWoodTypes] = useState<Wood[]>([]);
+  const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
+  const [woodreplacement, setWoodTypes] = useState<WoodReplacement[]>([]);
   const [jobinfo, setJobInfo] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +46,6 @@ export default function JobManagement({ params }: any) {
       const response = await fetch(`/api/job/${params.id}`);
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
-      console.log(data)
       setLumberCost(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
@@ -63,9 +62,9 @@ export default function JobManagement({ params }: any) {
     fetchLumberCost();
   }, []);
 
-  const fetchWoodTypes = async (): Promise<void> => {
+  const fetchWoodReplacements = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/woods/`);
+      const response = await fetch(`/api/wood-replacement/`);
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
       console.log(data)
@@ -80,7 +79,7 @@ export default function JobManagement({ params }: any) {
   };
 
   useEffect(() => {
-    fetchWoodTypes();
+    fetchWoodReplacements();
   }, []);
 
   const fetchJobInfo = async (): Promise<void> => {
@@ -88,7 +87,6 @@ export default function JobManagement({ params }: any) {
       const response = await fetch(`/api/jobs/${params.id}`);
       if (!response.ok) throw new Error('Failed to fetch job info');
       const data = await response.json();
-      console.log(data)
       setJobInfo(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
@@ -102,10 +100,6 @@ export default function JobManagement({ params }: any) {
   useEffect(() => {
     fetchJobInfo();
   }, []);
-
-  console.log(jobinfo)
-
-  //console.log(jobinfo)
 
   // Validate form
   const validateForm = (data: LumberCostFormData): boolean => {
@@ -246,15 +240,13 @@ export default function JobManagement({ params }: any) {
       thickness: Number(formData.thickness),
       length: Number(formData.length),
       width: Number(formData.width),
-      cost_over: Number(formData.cost_over),
+      cost_over: Number(0),
       total_cost: Number(formData.total_cost),
       ft_per_piece: Number(formData.ft_per_piece),
       price: Number(formData.price),
       tbf: Number(formData.tbf),
       added_date: formattedDate,
     };
-    console.log(finalSubmissionData);
-
 
     if (!validateForm(finalSubmissionData)) {
       toast({
@@ -297,7 +289,6 @@ export default function JobManagement({ params }: any) {
     }
   };
 
-
   // Handle delete
   const handleDelete = async (lumbercostId: number): Promise<void> => {
     if (!confirm('Are you sure you want to delete this job?')) return;
@@ -319,27 +310,43 @@ export default function JobManagement({ params }: any) {
       });
     }
   };
+  const [jobnum, setJobNum] = useState("");
+
+  useEffect(() => {
+    const id = async () => {
+      const paramId = await params.id;
+      setJobNum(paramId);
+    };
+  }, [params])
 
   return (
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl md:text-3xl font-bold">
-            Lumber Cost Sheet for Job# {params.id}
-          </h1>
-          <h3 className="text-md font-bold">Job Name: {jobinfo.job_customer}</h3>
-        </div>
+        {jobinfo.length > 0 ? (
+          <div className="justify-between items-center">
+            <h1 className="text-xl md:text-3xl font-bold">
+              Lumber Cost Sheet for Job #{jobnum}
+            </h1>
+            <h3 className="text-md md:text-lg">
+              Job Name: {jobinfo[0].job_customer}
+            </h3>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p>Loading Job Information...</p>
+          </div>
+        )}
 
-      <div className="overflow-x-auto">
-        <JobTable
-          data={lumbercosts}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
-          isLoading={isLoading}
-        />
+        <div className="overflow-x-auto">
+          <JobTable
+            data={lumbercosts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAddNew={handleAddNew}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
-    </div>
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
@@ -355,8 +362,8 @@ export default function JobManagement({ params }: any) {
               <span className="text-xl font-bold">{editingLumberCost ? 'Edit Lumber Cost' : 'Add Lumber Cost'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'date_worked', label: 'Date Worked', type: 'text' },
-                  { name: 'job_number', label: 'Job Number', type: 'number' },
+                  { name: 'date', label: 'Date ', type: 'text' },
+                  { name: 'quantity', label: 'Quantity', type: 'number' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -365,7 +372,7 @@ export default function JobManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof LumberCostFormData]}
+                      value={formData[field.name as keyof LumberCostFormData] || ''}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}
@@ -378,10 +385,10 @@ export default function JobManagement({ params }: any) {
                     )}
                   </div>
                 ))}
-                {/* LaborCode Dropdown */}
+                {/* Wood Cost Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Labor Code <span className="text-red-500">*</span>
+                    Wood & Thickness <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="wood_id"
@@ -394,19 +401,17 @@ export default function JobManagement({ params }: any) {
                     <option value="" disabled>
                       Select Lumber
                     </option>
-                    {woodtypes.map((wt) => (
-                      <option key={wt.id} value={wt.id}>
-                        {wt.id} - {wt.wood_type}
+                    {woodreplacement.map((wr) => (
+                      <option key={wr.id} value={wr.replace_cost_id}>
+                        {wr.id} - {wr.wood_type}
                       </option>
                     ))}
                   </select>
                 </div>
                 {[
-                  { name: 'begin_time', label: 'Begin Time', type: 'text' },
-                  { name: 'end_time', label: 'End Time', type: 'text' },
-                  { name: 'hours', label: 'Hours', type: 'number' },
-                  { name: 'minutes', label: 'Minutes', type: 'number' },
-                  { name: 'added_by', label: 'Added By', type: 'text' },
+                  { name: 'width', label: 'Width', type: 'number' },
+                  { name: 'length', label: 'Length', type: 'number' },
+                  { name: 'description', label: 'Description', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium mb-1">
@@ -415,7 +420,7 @@ export default function JobManagement({ params }: any) {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof LumberCostFormData]}
+                      value={formData[field.name as keyof LumberCostFormData] || ''}
                       onChange={handleInputChange}
                       required
                       disabled={isSaving}
