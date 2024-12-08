@@ -3,14 +3,14 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const wood_replacement = await prisma.woodReplacement.findMany({
+    const woodreplacement = await prisma.woodReplacement.findMany({
       orderBy: {
-        wood_type: 'asc'
+        wood_type: 'asc',
       }
     });
-    return NextResponse.json(wood_replacement);
+    return NextResponse.json(woodreplacement);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch wood types' }, { status: 500 });
+    return NextResponse.json({error});
   }
 }
 

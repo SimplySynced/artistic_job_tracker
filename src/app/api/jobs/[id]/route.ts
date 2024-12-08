@@ -6,8 +6,9 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
+        const { id } = await params
         const jobinfo = await prisma.jobs.findMany({
-            where: { job_number: parseInt(params.id) }
+            where: { job_number: parseInt(id) }
         });
         console.log(jobinfo)
         return NextResponse.json(jobinfo);

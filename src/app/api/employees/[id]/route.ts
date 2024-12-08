@@ -3,17 +3,22 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: { id: number } } // Adjust the type to string
 ) {
     try {
-        const employee = await prisma.employees.findMany({
-            where: {id: parseInt(params.id)}
-    });
+        const { id } = await params
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: id }, // Use the converted number
+        });
+
         return NextResponse.json(employee);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch employee info' }, { status: 500 });
+        console.error(error);
+        return NextResponse.json({ error }, { status: 400 });
     }
 }
+
 
 export async function PUT(
     request: Request,
@@ -21,7 +26,6 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
         const employee = await prisma.employees.update({
             where: { id: parseInt(params.id) },
             data: {

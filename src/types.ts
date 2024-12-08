@@ -182,7 +182,6 @@ export type WoodFormData = {
 
 // Zod schema for Wood Replacement
 export const WoodReplacementSchema = z.object({
-    id: z.number().optional(),
     replace_cost_id: z.number().optional(),
     wood_id: z.number().optional(),
     wood_type: z.string().min(1, "Wood Replacement is required"),

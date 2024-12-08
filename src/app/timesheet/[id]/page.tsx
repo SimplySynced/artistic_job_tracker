@@ -35,9 +35,9 @@ export default function TimeManagement({ params }: any) {
   const fetchEmployeeInfo = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/employees/${params.id}`);
+      console.log(params.id)
       if (!response.ok) throw new Error('Failed to fetch employee info');
       const data = await response.json();
-      console.log(data)
       setEmployeeInfo(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
