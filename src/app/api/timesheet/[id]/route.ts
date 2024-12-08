@@ -6,6 +6,7 @@ export async function GET(
     { params }: { params: { id: number } } // Adjust the type to string
 ) {
     try {
+        console.log(params)
         const {id } = await params;
 
         const timeSheet = await prisma.timeSheets.findMany({
