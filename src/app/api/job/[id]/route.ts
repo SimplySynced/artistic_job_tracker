@@ -9,7 +9,7 @@ export async function GET(
         const { id } = await params
         const jobnum = Number(id)
         const lumbercost = await prisma.jobLumberCost.findMany({
-            where: {job_number: jobnum}
+            where: { job_number: jobnum }
         });
         return NextResponse.json(lumbercost);
     } catch (error) {

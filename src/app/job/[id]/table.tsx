@@ -15,7 +15,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SlidersHorizontal, ArrowUpDown, PencilLine, Trash2, Plus } from 'lucide-react'
 import {
     useReactTable,
     getCoreRowModel,
@@ -28,7 +27,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal, LuPrinter } from 'react-icons/lu'
+import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal, LuPrinter, LuArrowUpDown, LuTrash2, LuPencilLine } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
@@ -77,7 +76,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-        },
+            },
             body: JSON.stringify({ data }),
         });
 
@@ -95,7 +94,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-        },
+            },
             body: JSON.stringify({ data }),
         });
 
@@ -120,7 +119,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Date
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -138,7 +137,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Quantity
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -156,13 +155,12 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Wood Type
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            meta: {
-                label: 'Wood Type'
-            } as ColumnMeta
+            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('wood_type') || ''}</span>,
+            meta: { label: 'Wood Type' } as ColumnMeta
         },
         {
             accessorKey: 'thickness',
@@ -174,7 +172,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Thickness
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -192,7 +190,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Width
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -210,7 +208,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Length
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -228,13 +226,12 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Description
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
-            meta: {
-                label: 'Description'
-            } as ColumnMeta
+            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('description') || ''}</span>,
+            meta: { label: 'Description' } as ColumnMeta
         },
         {
             accessorKey: 'tbf',
@@ -246,7 +243,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Total Board Feet
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -264,7 +261,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         FT/P
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -282,7 +279,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         className="p-0 hover:bg-transparent"
                     >
                         Price
-                        <ArrowUpDown className="ml-1" />
+                        <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
@@ -305,14 +302,14 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                             onClick={() => onEdit(lumbercost)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
-                            <PencilLine className="h-4 w-4" />
+                            <LuPencilLine className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
                             onClick={() => onDelete(lumbercost.id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <LuTrash2 className="h-4 w-4" />
                         </Button>
                     </div>
                 )
@@ -448,7 +445,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
 
             {/* Responsive pagination */}
             <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
-                <div className="text-sm text-white">
+                <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
                 </div>
                 <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full lg:w-2/3 xl:w-1/2 justify-between lg:justify-end">

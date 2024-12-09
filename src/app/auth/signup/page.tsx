@@ -50,7 +50,7 @@ export default function SignupPage() {
     }, []);
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <Card className="w-full max-w-md p-4 shadow-lg bg-white">
                 <CardHeader>
                     <CardTitle className="text-center text-xl">
@@ -77,7 +77,7 @@ export default function SignupPage() {
                     )}
                     <form onSubmit={handleSignup} className="space-y-4">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                 Name
                             </label>
                             <Input
@@ -89,7 +89,7 @@ export default function SignupPage() {
                             />
                         </div>
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email
                             </label>
                             <Input
@@ -101,7 +101,7 @@ export default function SignupPage() {
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                 Password
                             </label>
                             <Input
@@ -118,7 +118,7 @@ export default function SignupPage() {
                     </form>
                 </CardContent>
                 <CardFooter className="flex justify-center">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500">
                         Already have an account?{" "}
                         <a href="/auth/login" className="text-blue-500 hover:underline">
                             Log in

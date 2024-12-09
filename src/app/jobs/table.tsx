@@ -13,21 +13,9 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import {
-    LuPlus,
-    LuSlidersHorizontal,
-    LuArrowUpDown,
-    LuClipboard,
-    LuPencilLine,
-    LuTrash2,
-    LuChevronFirst,
-    LuChevronLast,
-    LuChevronLeft,
-    LuChevronRight,
-    LuLoader,
-} from 'react-icons/lu';
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClipboard, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPaperclip } from "react-icons/lu";
 import {
     useReactTable,
     getCoreRowModel,
@@ -237,16 +225,20 @@ export function JobTable({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-white">
-                            {table.getAllColumns().map((column) => (
-                                <DropdownMenuCheckboxItem
-                                    key={column.id}
-                                    className="cursor-pointer"
-                                    checked={column.getIsVisible()}
-                                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                >
-                                    {(column.columnDef.meta as ColumnMeta)?.label || column.id}
-                                </DropdownMenuCheckboxItem>
-                            ))}
+                            {table
+                                .getAllColumns()
+                                .map((column) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="cursor-pointer"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                    >
+                                        {(column.columnDef.meta as ColumnMeta)?.label || column.id}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -317,7 +309,7 @@ export function JobTable({
             </div>
 
             {/* Responsive pagination */}
-            < div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0" >
+            <div className="flex flex-col-reverse gap-6 items-center lg:flex-row lg:justify-between lg:space-y-0">
                 <div className="text-sm text-neutral-700">
                     {table.getFilteredRowModel().rows.length} total rows
                 </div>

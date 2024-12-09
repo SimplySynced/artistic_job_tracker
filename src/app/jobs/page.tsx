@@ -1,6 +1,5 @@
 'use client';
-
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,6 +85,8 @@ export default function JobsManagement() {
         description: error instanceof Error ? error.message : 'Failed to fetch locations',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -288,16 +289,20 @@ export default function JobsManagement() {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
-            onClick={handleModalClose}
+            onClick={handleModalClose} // Close modal on clicking the backdrop
           >
             <div
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
             >
-              <span className="text-xl font-bold">{editingJob ? 'Edit Job' : 'Add Job'}</span>
+              <span className="text-xl font-bold">
+                {editingJob ? 'Edit Job' : 'Add Job'}
+              </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
+                  { name: 'job_code', label: 'Job Code', type: 'number' },
                   { name: 'job_number', label: 'Job Number', type: 'number' },
+                  { name: 'job_location', label: 'Location', type: 'text' },
                   { name: 'job_customer', label: 'Customer', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>

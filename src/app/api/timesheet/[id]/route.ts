@@ -7,7 +7,7 @@ export async function GET(
 ) {
     try {
         console.log(params)
-        const {id } = await params;
+        const { id } = await params;
 
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
