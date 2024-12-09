@@ -5,14 +5,27 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
+<<<<<<< HEAD
 import { LumberCostSchema, LumberCostFormData, LumberCost, WoodReplacement, Job } from '@/types';
+=======
+import { LumberCostSchema, LumberCostFormData, LumberCost, WoodCost, Job } from '@/types';
+>>>>>>> origin/rob/develop
 import { z } from 'zod';
 import { JobTable } from './table';
 
-export default function JobManagement({ params }: any) {
+export default function JobManagement({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
+<<<<<<< HEAD
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
   const [woodreplacement, setWoodTypes] = useState<WoodReplacement[]>([]);
+=======
+  const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null >(null);
+  const [woods, setWoodTypes] = useState<WoodCost[]>([]);
+>>>>>>> origin/rob/develop
   const [jobinfo, setJobInfo] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +78,11 @@ export default function JobManagement({ params }: any) {
 
   const fetchWoodReplacements = async (): Promise<void> => {
     try {
+<<<<<<< HEAD
       const response = await fetch(`/api/wood-replacement/`);
+=======
+      const response = await fetch(`/api/woodcost/`);
+>>>>>>> origin/rob/develop
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
       console.log(data)
@@ -326,6 +343,7 @@ export default function JobManagement({ params }: any) {
   return (
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+<<<<<<< HEAD
         {jobinfo.length > 0 ? (
           <div className="justify-between items-center">
             <h1 className="text-xl md:text-3xl font-bold">
@@ -340,6 +358,22 @@ export default function JobManagement({ params }: any) {
             <p>Loading Job Information...</p>
           </div>
         )}
+=======
+      {jobinfo.length > 0 ? (
+        <div className="justify-between items-center">
+          <h1 className="text-xl md:text-3xl font-bold">
+          Lumber Cost Sheet for Job #{params.id}
+          </h1>
+          <h3 className="text-md md:text-lg">
+          Job Name: {jobinfo[0].job_customer}
+          </h3>
+        </div>
+      ) : (
+        <div className="text-center">
+          <p>Loading employee information...</p>
+        </div>
+      )}
+>>>>>>> origin/rob/develop
 
         <div className="overflow-x-auto">
           <JobTable
@@ -392,10 +426,10 @@ export default function JobManagement({ params }: any) {
                 {/* Wood Cost Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Wood & Thickness <span className="text-red-500">*</span>
+                    Wood Type & Thickness <span className="text-red-500">*</span>
                   </label>
                   <select
-                    name="wood_id"
+                    name="replace_id"
                     value={formData.wood_replace_id || ''} // Safely handle nullable values
                     onChange={handleInputChange}
                     required
@@ -405,7 +439,7 @@ export default function JobManagement({ params }: any) {
                     <option value="" disabled>
                       Select Lumber
                     </option>
-                    {woodreplacement.map((wr) => (
+                    {woods.map((wr) => (
                       <option key={wr.replace_cost_id} value={wr.replace_cost_id}>
                         {wr.wood_type} - {wr.thickness}
                       </option>

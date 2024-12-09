@@ -134,19 +134,19 @@ model Locations {
 }
 
 model WoodTypes {
+  id        Int     @id @default(autoincrement())
   wood_type String  @unique
   enabled   Boolean @default(true)
-  id        Int     @id @default(autoincrement())
 }
 
 model WoodReplacement {
-  replace_cost_id     Int       @id
-  wood_id             Int?
-  wood_type           String?
-  thickness           Float?
-  waste_factor        Float?
-  unit                String
-  replacement         Float?
-  updated_date        String
-  price               Int
+  replace_cost_id       Int      @id
+  wood_id               Int?
+  wood_type             String?
+  thickness             Float?
+  waste_factor          Float?
+  unit                  String
+  replacement           Float?
+  price                 Int
+  updated_date          String
 }

@@ -2001,6 +2001,10 @@ __metadata:
     "@auth/prisma-adapter": "npm:^2.7.4"
     "@headlessui/react": "npm:^2.1.10"
     "@prisma/client": "npm:^6.0.0"
+<<<<<<< HEAD
+=======
+    "@radix-ui/react-avatar": "npm:^1.1.1"
+>>>>>>> origin/rob/develop
     "@radix-ui/react-collapsible": "npm:^1.1.1"
     "@radix-ui/react-dialog": "npm:^1.1.2"
     "@radix-ui/react-dropdown-menu": "npm:^2.1.2"

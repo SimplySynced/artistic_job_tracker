@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { TimeSheetTable } from './table';
+import { TimeSheetTable } from "./table"
 
 export default function TimeManagement({ params }: any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);

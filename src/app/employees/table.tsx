@@ -13,21 +13,9 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import {
-    LuPlus,
-    LuSlidersHorizontal,
-    LuArrowUpDown,
-    LuClock,
-    LuPencilLine,
-    LuTrash2,
-    LuChevronFirst,
-    LuChevronLast,
-    LuChevronLeft,
-    LuChevronRight,
-    LuLoader,
-} from 'react-icons/lu';
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader } from "react-icons/lu";
 import {
     useReactTable,
     getCoreRowModel,
@@ -78,11 +66,11 @@ export function EmployeeTable({
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [columnVisibility, setColumnVisibility] = React.useState({});
 
-    const router = useRouter();
+    const router = useRouter()
 
     const navigateToTimesheet = (id: number) => {
-        router.push(`/timesheet/${id}`);
-    };
+        router.push(`/timesheet/${id}`)
+    }
 
     const columns: ColumnDef<Employee, any>[] = [
         {
@@ -225,7 +213,7 @@ export function EmployeeTable({
                     />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
+                            <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
                                 <LuSlidersHorizontal className="mr-1" />
                                 View
                             </Button>
@@ -259,8 +247,7 @@ export function EmployeeTable({
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className={`bg-neutral-900 text-white text-center font-semibold ${['nick_name', 'location'].includes(header.column.id) ? 'hidden md:table-cell' : ''
-                                            }`}
+                                        className={`bg-neutral-900 text-white text-center font-semibold ${['nick_name', 'location'].includes(header.column.id) ? 'hidden md:table-cell' : ''}`}
                                     >
                                         {header.isPlaceholder
                                             ? null
@@ -313,59 +300,36 @@ export function EmployeeTable({
                 <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full lg:w-2/3 xl:w-1/2 justify-between lg:justify-end">
                     <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium">Rows per page</p>
-                        <Select
-                            onValueChange={(value) => table.setPageSize(Number(value))}
-                            defaultValue={table.getState().pagination.pageSize.toString()}
-                        >
+                        <Select onValueChange={(value) => table.setPageSize(Number(value))} defaultValue={table.getState().pagination.pageSize.toString()}>
                             <SelectTrigger className="h-10 w-20 rounded-md border border-neutral-200 bg-white focus:ring-0 focus:ring-offset-0">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent className='bg-white'>
                                 {[5, 10, 20, 30, 40, 50].map((pageSize) => (
-                                    <SelectItem key={pageSize} value={pageSize.toString()} className="cursor-pointer">
+                                    <SelectItem key={pageSize} value={pageSize.toString()} className='cursor-pointer'>
                                         {pageSize}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex items-center w-full sm:justify-between md:max-w-sm">
-                        <div className="space-x-1">
-                            <Button
-                                variant="outline"
-                                className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700"
-                                onClick={() => table.firstPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
+                    <div className='flex items-center w-full sm:justify-between md:max-w-sm'>
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
                                 <LuChevronFirst />
                             </Button>
-                            <Button
-                                variant="outline"
-                                className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
                                 <LuChevronLeft />
                             </Button>
                         </div>
                         <span className="text-sm font-medium px-2 grow sm:grow-0 text-center">
                             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                         </span>
-                        <div className="space-x-1">
-                            <Button
-                                variant="outline"
-                                className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
+                        <div className='space-x-1'>
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                                 <LuChevronRight />
                             </Button>
-                            <Button
-                                variant="outline"
-                                className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700"
-                                onClick={() => table.lastPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
+                            <Button variant="outline" className="size-10 p-0 bg-neutral-900 text-white hover:bg-neutral-700" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
                                 <LuChevronLast />
                             </Button>
                         </div>

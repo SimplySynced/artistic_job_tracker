@@ -75,6 +75,8 @@ export default function EmployeePage() {
         description: error instanceof Error ? error.message : 'Failed to fetch locations',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,7 +119,6 @@ export default function EmployeePage() {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
-
 
   const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
