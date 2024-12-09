@@ -6,7 +6,8 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const jobnum = Number(params.id)
+        const { id } = await params
+        const jobnum = Number(id)
         const lumbercost = await prisma.jobLumberCost.findMany({
             where: { job_number: jobnum }
         });

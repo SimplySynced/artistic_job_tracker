@@ -3,13 +3,15 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: { id: number } } // Adjust the type to string
 ) {
     try {
-        const empid = params.id;
+        console.log(params)
+        const {id } = await params;
+
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
-                employee_id: parseFloat(empid),
+                employee_id: id,
             },
             orderBy: {
                 date_worked: 'desc'

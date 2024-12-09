@@ -42,8 +42,9 @@ export default function JobManagement({ params }: any) {
 
   const fetchLumberCost = async (): Promise<void> => {
     try {
+      const { id } = await params
       setIsLoading(true)
-      const response = await fetch(`/api/job/${params.id}`);
+      const response = await fetch(`/api/job/${id}`);
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
       setLumberCost(data); // Ensure `data` is an array of { id, location }
@@ -84,7 +85,8 @@ export default function JobManagement({ params }: any) {
 
   const fetchJobInfo = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/jobs/${params.id}`);
+      const { id } = await params
+      const response = await fetch(`/api/jobs/${id}`);
       if (!response.ok) throw new Error('Failed to fetch job info');
       const data = await response.json();
       setJobInfo(data); // Ensure `data` is an array of { id, location }
@@ -219,6 +221,8 @@ export default function JobManagement({ params }: any) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
+    const { id } = await params
+
     const currentDate = new Date().toISOString();
     const formatDate = (isoDate: string | number | Date) => {
       const date = new Date(isoDate);
@@ -233,7 +237,7 @@ export default function JobManagement({ params }: any) {
 
     const finalSubmissionData = {
       ...formData,
-      job_number: Number(params.id),
+      job_number: Number(id),
       wood_id: Number(formData.wood_id),
       wood_replace_id: Number(formData.wood_replace_id),
       quantity: Number(formData.quantity),
@@ -392,7 +396,7 @@ export default function JobManagement({ params }: any) {
                   </label>
                   <select
                     name="wood_id"
-                    value={formData.wood_id || ''} // Safely handle nullable values
+                    value={formData.wood_replace_id || ''} // Safely handle nullable values
                     onChange={handleInputChange}
                     required
                     disabled={isSaving}
@@ -402,8 +406,8 @@ export default function JobManagement({ params }: any) {
                       Select Lumber
                     </option>
                     {woodreplacement.map((wr) => (
-                      <option key={wr.id} value={wr.replace_cost_id}>
-                        {wr.id} - {wr.wood_type}
+                      <option key={wr.replace_cost_id} value={wr.replace_cost_id}>
+                        {wr.wood_type} - {wr.thickness}
                       </option>
                     ))}
                   </select>

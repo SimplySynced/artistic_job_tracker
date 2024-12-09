@@ -63,7 +63,7 @@ model VerificationToken {
 
 model Employees {
   id           Int     @id @default(autoincrement())
-  first_name    String
+  first_name   String
   last_name    String?
   nick_name    String?
   location     String?
@@ -87,7 +87,6 @@ model TimeSheets {
   pay_rate    Float
   added_by    String
   added_date  String
-  column10    String? @db.VarChar(50)
 }
 
 model Jobs {
@@ -141,14 +140,13 @@ model WoodTypes {
 }
 
 model WoodReplacement {
-  id                  Int     @id @default(autoincrement())
-  replace_cost_id     Int
-  wood_id             Int
-  wood_type           String
-  thickness           Float
-  waste_factor        Float
+  replace_cost_id     Int       @id
+  wood_id             Int?
+  wood_type           String?
+  thickness           Float?
+  waste_factor        Float?
   unit                String
-  replacement         Float
-  last_update         String
+  replacement         Float?
+  updated_date        String
   price               Int
 }
