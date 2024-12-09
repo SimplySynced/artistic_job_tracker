@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-<<<<<<< HEAD
 
 export async function GET(
     request: Request,
@@ -16,8 +15,6 @@ export async function GET(
         return NextResponse.json({ error: 'Failed to fetch lumber cost' }, { status: 500 });
     }
 }
-=======
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
 export async function PUT(
     request: Request,

@@ -8,19 +8,70 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Employees {
-  id         Int     @id @default(autoincrement())
-  first_name String
-  last_name  String?
-  nick_name  String?
-  location   String?
-  pay_rate   Float?
-  added_by   String?
-  updated_by String?
-  active     Boolean @default(true)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  emailVerified  DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
 
-  // Relationships
-  locationInfo Locations?   @relation(fields: [location], references: [location])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Employees {
+  id           Int     @id @default(autoincrement())
+  first_name   String
+  last_name    String?
+  nick_name    String?
+  location     String?
+  pay_rate     Float?
+  added_by     String?
+  updated_by   String?
+  active       Boolean    @default(true)
+  locationInfo Locations? @relation(fields: [location], references: [location])
 }
 
 model TimeSheets {
@@ -33,41 +84,38 @@ model TimeSheets {
   end_time    String? @default("")
   hours       Int     @default(0)
   minutes     Int     @default(0)
-  pay_rate    Float // This will be populated from Employees
+  pay_rate    Float
   added_by    String
   added_date  String
 }
 
 model Jobs {
   id           Int     @id @default(autoincrement())
-  job_number   Int     @unique // Make job_number unique for linking
+  job_number   Int     @unique
   job_location String
   job_customer String
   job_address  String?
-
-  // Relationships
-  locationInfo  Locations?      @relation(fields: [job_location], references: [location])
 }
 
 model JobLumberCost {
-  id              Int     @id @default(autoincrement())
+  id              Int  @id @default(autoincrement())
   date            String
   job_number      Int
   wood_id         Int
-  wood_type       String
+  wood_type       String?
   wood_replace_id Int
-  quantity        Float // Changed to Float if this can be a decimal
-  description     String
+  quantity        Float
+  description     String?
   thickness       Float
   length          Float
   width           Float
-  cost_over       Float // Changed to Float if this can be a decimal
-  total_cost      Float // Changed to Float if this can be a decimal
-  ft_per_piece    Float // Changed to Float if this can be a decimal
+  cost_over       Float?
+  total_cost      Float
+  ft_per_piece    Float
   price           Float
   tbf             Float
-  entered_by      String
-  entered_date    String
+  entered_by      String?
+  entered_date    String?
   updated_by      String?
   updated_date    String?
 }
@@ -79,32 +127,26 @@ model JobLaborCodes {
 }
 
 model Locations {
-  id       Int     @id @default(autoincrement())
-  location String  @unique // Make location unique for linking
-  enabled  Boolean @default(true)
-
-  // Relationships
+  id        Int         @id @default(autoincrement())
+  location  String      @unique
+  enabled   Boolean     @default(true)
   employees Employees[]
-  jobs      Jobs[]
 }
 
 model WoodTypes {
   id        Int     @id @default(autoincrement())
-  wood_type String  @unique // Make wood_type unique for linking
+  wood_type String  @unique
   enabled   Boolean @default(true)
-
-  @@unique([id, wood_type])
 }
 
-model WoodCost {
-  id                  Int     @id @default(autoincrement())
-  replace_cost_id     Int
-  wood_id             Int
-  wood_type           String
-  thickness           Float
-  waste_factor        Float
-  unit                String
-  replacement         Float
-  last_update         String
-  price               Int
+model WoodReplacement {
+  replace_cost_id       Int      @id
+  wood_id               Int?
+  wood_type             String?
+  thickness             Float?
+  waste_factor          Float?
+  unit                  String
+  replacement           Float?
+  price                 Int
+  updated_date          String
 }

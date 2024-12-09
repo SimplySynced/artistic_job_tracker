@@ -5,14 +5,18 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { LumberCostSchema, LumberCostFormData, LumberCost, Wood, Job } from '@/types';
+import { LumberCostSchema, LumberCostFormData, LumberCost, WoodCost, Job } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
 
-export default function JobManagement({ params }: any) {
+export default function JobManagement({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null >(null);
-  const [woodtypes, setWoodTypes] = useState<Wood[]>([]);
+  const [woods, setWoodTypes] = useState<WoodCost[]>([]);
   const [jobinfo, setJobInfo] = useState<Job[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +69,7 @@ export default function JobManagement({ params }: any) {
 
   const fetchWoodTypes = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/woods/`);
+      const response = await fetch(`/api/woodcost/`);
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
       console.log(data)
@@ -389,11 +393,11 @@ export default function JobManagement({ params }: any) {
                 {/* Wood Cost Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Wood <span className="text-red-500">*</span>
+                    Wood Type & Thickness <span className="text-red-500">*</span>
                   </label>
                   <select
-                    name="wood_id"
-                    value={formData.wood_id || ''} // Safely handle nullable values
+                    name="replace_id"
+                    value={formData.wood_replace_id || ''} // Safely handle nullable values
                     onChange={handleInputChange}
                     required
                     disabled={isSaving}
@@ -402,15 +406,14 @@ export default function JobManagement({ params }: any) {
                     <option value="" disabled>
                       Select Lumber
                     </option>
-                    {woodtypes.map((wt) => (
-                      <option key={wt.id} value={wt.id}>
-                        {wt.id} - {wt.wood_type}
+                    {woods.map((wr) => (
+                      <option key={wr.replace_cost_id} value={wr.replace_cost_id}>
+                        {wr.wood_type} - {wr.thickness}
                       </option>
                     ))}
                   </select>
                 </div>
                 {[
-                  { name: 'thickness', label: 'Thickness', type: 'number' },
                   { name: 'width', label: 'Width', type: 'number' },
                   { name: 'length', label: 'Length', type: 'number' },
                   { name: 'description', label: 'Description', type: 'text' },

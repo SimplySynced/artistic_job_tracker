@@ -22,8 +22,6 @@ export async function GET(
     }
 }
 
-<<<<<<< HEAD
-=======
 export async function POST(
     request: Request,
 ) {
@@ -40,7 +38,6 @@ export async function POST(
     }
 }
 
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }

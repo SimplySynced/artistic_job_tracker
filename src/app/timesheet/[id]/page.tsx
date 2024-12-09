@@ -1,21 +1,13 @@
 'use client';
 
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-=======
 import React, { useCallback, useEffect, useState } from 'react';
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-<<<<<<< HEAD
-import { TimeSheetTable } from './table';
-=======
 import { TimeSheetTable } from "./table"
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
 export default function TimeManagement({ params }: any) {
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
@@ -40,7 +32,6 @@ export default function TimeManagement({ params }: any) {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
 
-<<<<<<< HEAD
   const fetchEmployeeInfo = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/employees/${params.id}`);
@@ -81,8 +72,6 @@ export default function TimeManagement({ params }: any) {
   }, []);
 
   // Fetch TimeSheets
-=======
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
   const fetchTimeSheets = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -106,11 +95,7 @@ export default function TimeManagement({ params }: any) {
     fetchTimeSheets();
   }, []);
 
-<<<<<<< HEAD
   // Validate form
-=======
-  // Validate form data using TimeSheetSchema
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
   const validateForm = (data: TimeSheetFormData): boolean => {
     try {
       const numericData = {
@@ -151,14 +136,7 @@ export default function TimeManagement({ params }: any) {
     }
   };
 
-<<<<<<< HEAD
-  // Handle edit job
-  const handleEdit = (timesheet: TimeSheet): void => {
-
-
-=======
   const handleEdit = useCallback((timesheet: TimeSheet): void => {
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
     setEditingTimeSheet(timesheet);
     setFormData({
       ...timesheet,
@@ -170,7 +148,6 @@ export default function TimeManagement({ params }: any) {
   const handleAddNew = (): void => {
     setEditingTimeSheet(null);
     setFormData({
-<<<<<<< HEAD
       employee_id: 0,
       date_worked: '',
       job_number: 0,
@@ -180,17 +157,6 @@ export default function TimeManagement({ params }: any) {
       hours: 0,
       minutes: 0,
       pay_rate: 0,
-=======
-      employee_id: '',
-      date_worked: '',
-      job_number: '',
-      job_code: '',
-      begin_time: '',
-      end_time: '',
-      hours: '',
-      minutes: '',
-      pay_rate: '',
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       added_by: '',
       added_date: '',
     });
@@ -200,7 +166,6 @@ export default function TimeManagement({ params }: any) {
 
   // Handle modal close
   const handleModalClose = (): void => {
-<<<<<<< HEAD
     if (isSaving) return;
     setIsModalOpen(false);
     setEditingTimeSheet(null);
@@ -214,21 +179,6 @@ export default function TimeManagement({ params }: any) {
       hours: 0,
       minutes: 0,
       pay_rate: 0,
-=======
-    if (isSaving) return; // Prevent closing while saving
-    setIsModalOpen(false);
-    setEditingTimeSheet(null);
-    setFormData({
-      employee_id: '',
-      date_worked: '',
-      job_number: '',
-      job_code: '',
-      begin_time: '',
-      end_time: '',
-      hours: '',
-      minutes: '',
-      pay_rate: '',
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       added_by: '',
       added_date: '',
     });
@@ -275,17 +225,7 @@ export default function TimeManagement({ params }: any) {
 
     try {
       setIsSaving(true);
-<<<<<<< HEAD
       const url = editingTimeSheet ? `/api/timesheet/${editingTimeSheet.id}` : '/api/timesheet/';
-=======
-      const submissionData = {
-        ...formData,
-      };
-
-      const url = editingTimeSheet
-        ? `/api/timesheet/${editingTimeSheet.id}`
-        : `/api/timesheet/${params.id}`;
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
@@ -341,7 +281,6 @@ export default function TimeManagement({ params }: any) {
   return (
     <>
       <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-<<<<<<< HEAD
       {employeeinfo.length > 0 ? (
         <div className="justify-between items-center">
           <h1 className="text-xl md:text-3xl font-bold">
@@ -356,11 +295,6 @@ export default function TimeManagement({ params }: any) {
           <p>Loading employee information...</p>
         </div>
       )}
-=======
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl md:text-3xl font-bold">Timesheets</h1>
-        </div>
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
 
         <div className="overflow-x-auto">
           <TimeSheetTable
@@ -378,7 +312,6 @@ export default function TimeManagement({ params }: any) {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
-<<<<<<< HEAD
             onClick={handleModalClose}
           >
             <div
@@ -386,17 +319,6 @@ export default function TimeManagement({ params }: any) {
               onClick={(e) => e.stopPropagation()}
             >
               <span className="text-xl font-bold">{editingTimeSheet ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
-=======
-            onClick={handleModalClose} // Close modal on clicking the backdrop
-          >
-            <div
-              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
-            >
-              <span className="text-xl font-bold">
-                {editingTimeSheet ? 'Edit Time Sheet' : 'Add Time Sheet'}
-              </span>
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'date_worked', label: 'Date Worked', type: 'text' },
@@ -422,7 +344,6 @@ export default function TimeManagement({ params }: any) {
                     )}
                   </div>
                 ))}
-<<<<<<< HEAD
                 {/* LaborCode Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -474,9 +395,6 @@ export default function TimeManagement({ params }: any) {
                   </div>
                 ))}
 
-=======
-                <Input name="employee_id" type="hidden" value={params.id} />
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button
                     type="button"

@@ -28,7 +28,7 @@ import {
     getPaginationRowModel,
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader2, LuPlus, LuSlidersHorizontal } from 'react-icons/lu'
+import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
@@ -322,7 +322,7 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                             <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <LuLoader2 className="h-6 w-6 animate-spin" />
+                                        <LuLoader className="h-6 w-6 animate-spin" />
                                         <span className="ml-2">Loading...</span>
                                     </div>
                                 </TableCell>

@@ -27,7 +27,6 @@ export default function EmployeePage() {
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
 
-<<<<<<< HEAD
   const fetchEmployees = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -68,14 +67,6 @@ export default function EmployeePage() {
     try {
       const response = await fetch('/api/locations');
       if (!response.ok) throw new Error('Failed to fetch locations');
-=======
-  // Fetch employees with loading state
-  const fetchEmployees = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/employees');
-      if (!response.ok) throw new Error('Failed to fetch employees');
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
       const data = await response.json();
       setLocations(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
@@ -90,11 +81,7 @@ export default function EmployeePage() {
   };
 
   useEffect(() => {
-<<<<<<< HEAD
     fetchLocations();
-=======
-    fetchEmployees();
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
   }, []);
 
   // Validate form data using EmployeeSchema
@@ -133,10 +120,6 @@ export default function EmployeePage() {
     }
   };
 
-<<<<<<< HEAD
-
-=======
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
   const handleEdit = useCallback((employee: Employee): void => {
     setEditingEmployee(employee);
     setFormData({
@@ -283,19 +266,11 @@ export default function EmployeePage() {
           <div className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
           <div
             className="fixed z-50 inset-0 flex items-center justify-center px-4"
-<<<<<<< HEAD
             onClick={handleModalClose}
           >
             <div
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
               onClick={(e) => e.stopPropagation()}
-=======
-            onClick={handleModalClose} // Close modal on clicking the backdrop
-          >
-            <div
-              className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
             >
               <span className="text-xl font-bold">
                 {editingEmployee ? 'Edit Employee' : 'Add Employee'}
@@ -318,11 +293,7 @@ export default function EmployeePage() {
                       step={field.step}
                       value={formData[field.name as keyof EmployeeFormData] || ''} // Safely handle nullable values
                       onChange={handleInputChange}
-<<<<<<< HEAD
                       required={field.name !== 'nick_name'} // Optional if field is `nick_name`
-=======
-                      required={field.name !== 'nick_name'}
->>>>>>> a52f28c (added a global prisma client and update api routes (#4))
                       disabled={isSaving}
                       className={formErrors[field.name as keyof EmployeeFormData] ? 'border-red-500' : ''}
                     />
