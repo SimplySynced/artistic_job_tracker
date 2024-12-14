@@ -22,6 +22,7 @@ export const EmployeeSchema = z.object({
     pay_rate: z.number().nonnegative("Pay rate must be positive"), // Required and must be non-negative
     added_by: z.string().nullable(), // Optional, can be null
     updated_by: z.string().nullable(), // Optional, can be null
+    active: z.boolean(),
 });
 
 // TypeScript types derived from Zod schema
@@ -37,6 +38,7 @@ export type EmployeeFormData = {
     pay_rate: string; // Form fields always handle numbers as strings
     added_by: string | null;
     updated_by: string | null;
+    active: boolean
 };
 
 // Zod schema for runtime validation
@@ -209,30 +211,6 @@ export type WoodReplacementFormData = {
     price: number;
     updated_date: string;
 };
-
-
-// Zod schema for WoodCost
-export const WoodCostSchema = z.object({
-    replace_cost_id: z.number(),
-    wood_id: z.number().min(1, "Wood ID is required"),
-    wood_type: z.string(),
-    thickness: z.number(),
-    waste_factor: z.number(),
-    unit: z.string().min(1, "Unit is required"),
-    replacement: z.number(),
-    price: z.number().min(1, "Price is required"),
-    updated_date: z.string().min(1, "Updated date name is required"),
-});
-
-// TypeScript types derived from Zod schema
-export type WoodCost = z.infer<typeof WoodCostSchema>;
-export type NewWoodCost = Omit<WoodCost, 'id'>;
-
-// Form data type (string values for input fields)
-export type WoodCostFormData = {
-    wood_type: string;
-};
-
 
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({

@@ -1,5 +1,6 @@
-import * as React from 'react'
+import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input'
+import { TimeSheet } from '@/types';
 import {
     Table,
     TableBody,
@@ -32,22 +33,6 @@ import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader,
 type ColumnMeta = {
     label: string
 }
-
-// The main data structure used for time sheet entries
-type TimeSheet = {
-    id?: number;
-    employee_id: number;
-    date_worked: string;
-    job_number: number;
-    job_code: number;
-    begin_time: string;
-    end_time: string;
-    hours: number;
-    minutes: number;
-    pay_rate: number;
-    added_by: string;
-    added_date: string;
-};
 
 interface TimesheetTableProps {
     data: TimeSheet[];
@@ -103,21 +88,36 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
         },
         {
             accessorKey: 'job_code',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Code
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="p-0 hover:bg-transparent"
+                >
+                    Code
+                    <LuArrowUpDown className="ml-1" />
+                </Button>
+            ),
+            meta: { label: 'Code' } as ColumnMeta,
+            cell: ({ row }) => {
+                const [codeName, setcodeName] = useState<string>('Loading...');
+                const jobCode = row.getValue('job_code') as string;
+
+                useEffect(() => {
+                    console.log(jobCode);
+                    if (jobCode) {
+                        // Fetch job name from the API
+                        fetch(`/api/laborcodes/${jobCode}`)
+                            .then((response) => response.json())
+                            .then((data) => setcodeName(`${data.id} - ${data.description}` || 'Unknown'))
+                            .catch(() => setcodeName('Error fetching name'));
+                    } else {
+                        setcodeName('No Code');
+                    }
+                }, [jobCode]);
+
+                return <span>{codeName}</span>;
             },
-            meta: {
-                label: 'Code'
-            } as ColumnMeta
         },
         {
             accessorKey: 'begin_time',

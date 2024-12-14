@@ -1,3 +1,4 @@
+import { JobLaborCodes } from './../../../../node_modules/.prisma/client/index.d';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -37,5 +38,24 @@ export async function PUT(
     } catch (error) {
         console.error("Error updating job:", error);
         return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
+    }
+}
+
+export async function POST(
+    request: Request,
+) {
+    try {
+        const data = await request.json();
+
+        const newEntry = await prisma.jobLumberCost.create({
+            data: {
+                ...data,
+            },
+        });
+
+        return NextResponse.json(newEntry);
+    } catch (error) {
+        console.error('Error adding timesheet:', error);
+        return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
     }
 }

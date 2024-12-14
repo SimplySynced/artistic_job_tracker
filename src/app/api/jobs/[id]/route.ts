@@ -10,32 +10,13 @@ export async function GET(
         const jobinfo = await prisma.jobs.findMany({
             where: { job_number: parseInt(id) }
         });
-        console.log(jobinfo)
         return NextResponse.json(jobinfo);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch lumber cost' }, { status: 500 });
     }
 }
 
-export async function PUT(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
-    try {
-        const data = await request.json();
 
-        const job = await prisma.jobs.update({
-            where: { id: parseInt(params.id) },
-            data: {
-                ...data,
-            },
-        });
-        return NextResponse.json(job);
-    } catch (error) {
-        console.error("Error updating job:", error);
-        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
-    }
-}
 
 
 export async function DELETE(

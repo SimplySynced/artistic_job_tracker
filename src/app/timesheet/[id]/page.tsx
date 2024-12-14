@@ -34,14 +34,16 @@ export default function TimeManagement({ params }: any) {
 
   const fetchEmployeeInfo = async (): Promise<void> => {
     try {
-      const response = await fetch(`/api/employees/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch employee info');
+      const { id } = await params
+      const response = await fetch(`/api/employees/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch job info');
       const data = await response.json();
+      console.log(data)
       setEmployeeInfo(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch locations',
+        description: error instanceof Error ? error.message : 'Failed to fetch employee info',
         variant: 'destructive',
       });
     }
@@ -74,7 +76,8 @@ export default function TimeManagement({ params }: any) {
   const fetchTimeSheets = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/timesheet/${params.id}`);
+      const { id } = await params
+      const response = await fetch(`/api/timesheet/${id}`);
       if (!response.ok) throw new Error('Failed to fetch timesheets');
       const data = await response.json();
       const validatedData = z.array(TimeSheetSchema).parse(data);

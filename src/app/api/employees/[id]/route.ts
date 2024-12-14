@@ -7,9 +7,9 @@ export async function GET(
 ) {
     try {
         const { id } = await params
-
-        const employee = await prisma.employees.findUnique({
-            where: { id: id }, // Use the converted number
+        const empid = Number(id)
+        const employee = await prisma.employees.findMany({
+            where: { id: empid }, // Use the converted number
         });
 
         return NextResponse.json(employee);

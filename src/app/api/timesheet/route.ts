@@ -19,7 +19,6 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log(data)
 
     // Validate data using Zod
     const validationResult = TimeSheetSchema.safeParse(data);
