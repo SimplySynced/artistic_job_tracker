@@ -52,7 +52,6 @@ export default function JobManagement({
       const response = await fetch(`/api/job/${id}`);
       if (!response.ok) throw new Error('Failed to fetch wood types');
       const data = await response.json();
-      console.log(data)
       setLumberCost(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
@@ -94,7 +93,6 @@ export default function JobManagement({
       const response = await fetch(`/api/jobs/${id}`);
       if (!response.ok) throw new Error('Failed to fetch job info');
       const data = await response.json();
-      console.log(data)
       setJobInfo(data); // Ensure `data` is an array of { id, location }
     } catch (error) {
       toast({
@@ -271,9 +269,7 @@ export default function JobManagement({
     try {
         setIsSaving(true);
 
-        const url = editingLumberCost && editingLumberCost.id 
-          ? `/api/job/${editingLumberCost.id}` 
-          : '/api/job/';
+        const url = editingLumberCost ? `/api/job/${editingLumberCost.id}` : '/api/job/';
         const method = editingLumberCost ? 'PUT' : 'POST';
 
         console.log('Final submission data:', finalSubmissionData);
@@ -329,7 +325,7 @@ export default function JobManagement({
       });
     }
   };
-  
+
   const [jobnum, setJobNum] = useState("");
 
   return (
@@ -459,7 +455,7 @@ export default function JobManagement({
                   <Button
                     type="submit"
                     className="bg-neutral-900 text-white"
-                    disabled={isSaving}
+                    //disabled={isSaving}
                   >
                     {isSaving ? 'Saving...' : editingLumberCost ? 'Update' : 'Save'}
                   </Button>

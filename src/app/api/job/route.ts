@@ -46,7 +46,7 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
-
+        console.log(data)
         const newEntry = await prisma.jobLumberCost.create({
             data: {
                 ...data,

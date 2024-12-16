@@ -39,3 +39,34 @@ export async function PUT(
         return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
     }
 }
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const { id } = await params
+        const entryid = Number(id)
+        await prisma.employees.delete({
+            where: { id: entryid },
+        });
+        return NextResponse.json({ message: 'Employee deleted successfully' });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 });
+    }
+}
+
+export async function POST(request: Request) {
+    try {
+      const data = await request.json();
+      console.log(data)
+      const job = await prisma.jobLumberCost.create({
+        data: {
+          ...data,
+        },
+      });
+      return NextResponse.json(job);
+    } catch (error) {
+      return NextResponse.json({ error: 'Failed to add lumber cost' }, { status: 500 });
+    }
+  }
