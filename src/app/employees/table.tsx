@@ -14,6 +14,8 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button'
 import { LuPlus, LuSlidersHorizontal, LuArrowUpDown, LuClock, LuPencilLine, LuTrash2, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader } from "react-icons/lu";
 import {
@@ -66,12 +68,18 @@ export function EmployeeTable({
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [columnVisibility, setColumnVisibility] = React.useState({});
+    const [showAll, setShowAll] = React.useState(false);
 
     const router = useRouter()
 
     const navigateToTimesheet = (id: number) => {
         router.push(`/timesheet/${id}`)
     }
+
+    // Filter data dynamically based on `showAll`
+    const filteredData = React.useMemo(() => {
+        return showAll ? data : data.filter((employee) => employee.active);
+    }, [data, showAll]);
 
     const columns: ColumnDef<Employee, any>[] = [
         {
@@ -198,7 +206,7 @@ export function EmployeeTable({
     ];
 
     const table = useReactTable({
-        data,
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -234,7 +242,7 @@ export function EmployeeTable({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant='outline' className="ml-2 bg-neutral-900 text-white hover:bg-neutral-700">
-                                <LuSlidersHorizontal className="mr-1" />
+                                <LuSlidersHorizontal />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
@@ -252,10 +260,21 @@ export function EmployeeTable({
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
-                    <LuPlus className="mr-1" />
-                    Add Employee
-                </Button>
+                <div className='flex gap-4'>
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="active-only"
+                            checked={!showAll}
+                            onCheckedChange={() => setShowAll((prev) => !prev)}
+                            className='data-[state=checked]:bg-neutral-900 data-[state=unchecked]:bg-neutral-300'
+                        />
+                        <Label htmlFor="active-only">Active Only</Label>
+                    </div>
+                    <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
+                        <LuPlus />
+                        Add
+                    </Button>
+                </div>
             </div>
 
             {/* Table Rendering */}
