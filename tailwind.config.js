@@ -4,6 +4,7 @@ import plugin from "tailwindcss/plugin";
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: false,
   theme: {
     extend: {
       boxShadow: {

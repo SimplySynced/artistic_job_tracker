@@ -43,6 +43,7 @@ export type Employee = {
     pay_rate: number;
     added_by: string | null;
     updated_by: string | null;
+    active: boolean;
 };
 
 
@@ -138,6 +139,25 @@ export function EmployeeTable({
                     currency: 'USD',
                 }).format(pay_rate);
             },
+        },
+        {
+            accessorKey: 'active',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="p-0 hover:bg-transparent"
+                >
+                    Status
+                    <LuArrowUpDown className="ml-1" />
+                </Button>
+            ),
+            meta: { label: 'Status' } as ColumnMeta,
+            cell: ({ row }) => (
+                <span className={`font-medium ${row.getValue('active') ? 'text-green-600' : 'text-red-600'}`}>
+                    {row.getValue('active') ? 'Active' : 'Inactive'}
+                </span>
+            ),
         },
         {
             id: 'actions',
