@@ -3,38 +3,48 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: number } } // Adjust the type to string
+    { params }: { params: { id: string } } // Ensure id is a string
 ) {
     try {
-        const { id } = await params
-        const empid = Number(id)
-        const employee = await prisma.employees.findMany({
-            where: { id: empid }, // Use the converted number
+        const empid = Number(params.id); // Convert id to a number
+        if (isNaN(empid)) throw new Error('Invalid employee ID');
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: empid },
         });
+
+        if (!employee) {
+            return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+        }
 
         return NextResponse.json(employee);
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error }, { status: 400 });
+        return NextResponse.json({ error: 'Failed to retrieve employee' }, { status: 400 });
     }
 }
-
 
 export async function PUT(
     request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
+        const empid = Number(params.id);
+        if (isNaN(empid)) throw new Error('Invalid employee ID');
+
         const data = await request.json();
+
         const employee = await prisma.employees.update({
-            where: { id: parseInt(params.id) },
+            where: { id: empid },
             data: {
                 ...data,
                 updated_by: data.updated_by || 'system', // Default value
             },
         });
+
         return NextResponse.json(employee);
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
     }
 }
@@ -44,11 +54,16 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
+        const empid = Number(params.id);
+        if (isNaN(empid)) throw new Error('Invalid employee ID');
+
         await prisma.employees.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: empid },
         });
+
         return NextResponse.json({ message: 'Employee deleted successfully' });
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 });
     }
 }
