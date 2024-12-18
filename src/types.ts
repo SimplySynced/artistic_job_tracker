@@ -110,7 +110,7 @@ export const LumberCostSchema = z.object({
     wood_type: z.string().min(1, 'Customer name is required'),
     wood_replace_id: z.number().min(1, 'Address is required'),
     quantity: z.number().min(1, 'Quantity required'),
-    description: z.string().min(1,'Job Description'),
+    description: z.string().min(1, 'Job Description'),
     thickness: z.number().min(1, 'Thickness is required'),
     length: z.number().min(1, 'Length is required'),
     width: z.number().min(1, 'Width is required'),

@@ -104,7 +104,6 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                 const jobCode = row.getValue('job_code') as string;
 
                 useEffect(() => {
-                    console.log(jobCode);
                     if (jobCode) {
                         // Fetch job name from the API
                         fetch(`/api/laborcodes/${jobCode}`)

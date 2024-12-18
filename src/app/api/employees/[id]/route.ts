@@ -3,10 +3,10 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } } // Ensure id is a string
+    { params }: { params: { id: string } }
 ) {
     try {
-        const empid = Number(params.id); // Convert id to a number
+        const empid = Number(params.id); // Convert id to number
         if (isNaN(empid)) throw new Error('Invalid employee ID');
 
         const employee = await prisma.employees.findUnique({
@@ -14,13 +14,19 @@ export async function GET(
         });
 
         if (!employee) {
-            return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+            return NextResponse.json(
+                { data: null, error: 'Employee not found' },
+                { status: 404 }
+            );
         }
 
-        return NextResponse.json(employee);
+        return NextResponse.json({ data: employee, error: null });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error: 'Failed to retrieve employee' }, { status: 400 });
+        return NextResponse.json(
+            { data: null, error: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 400 }
+        );
     }
 }
 
@@ -34,6 +40,16 @@ export async function PUT(
 
         const data = await request.json();
 
+        // Validate request body using a schema (example: zod)
+        // You can define a Zod schema for `data` and validate it here.
+        // For example:
+        // const EmployeeSchema = z.object({
+        //     first_name: z.string().min(1),
+        //     last_name: z.string().optional(),
+        //     // ... other fields
+        // });
+        // const validatedData = EmployeeSchema.parse(data);
+
         const employee = await prisma.employees.update({
             where: { id: empid },
             data: {
@@ -42,10 +58,13 @@ export async function PUT(
             },
         });
 
-        return NextResponse.json(employee);
+        return NextResponse.json({ data: employee, error: null });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error: 'Failed to update employee' }, { status: 500 });
+        return NextResponse.json(
+            { data: null, error: error instanceof Error ? error.message : 'Failed to update employee' },
+            { status: 500 }
+        );
     }
 }
 
@@ -61,9 +80,12 @@ export async function DELETE(
             where: { id: empid },
         });
 
-        return NextResponse.json({ message: 'Employee deleted successfully' });
+        return NextResponse.json({ data: 'Employee deleted successfully', error: null });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 });
+        return NextResponse.json(
+            { data: null, error: error instanceof Error ? error.message : 'Failed to delete employee' },
+            { status: 500 }
+        );
     }
 }

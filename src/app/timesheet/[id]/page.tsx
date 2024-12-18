@@ -5,190 +5,116 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { EmployeeSchema, Employee, LaborCode, LaborCodeSchema, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { Employee, LaborCode, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
-import { TimeSheetTable } from "./table"
+import { TimeSheetTable } from './table';
+import { useParams } from 'next/navigation';
 
-export default function TimeManagement({ params }: any) {
+const defaultFormData: TimeSheetFormData = {
+  employee_id: 0,
+  date_worked: '',
+  job_number: 0,
+  job_code: 0,
+  begin_time: '',
+  end_time: '',
+  hours: 0,
+  minutes: 0,
+  pay_rate: 0,
+  added_by: '',
+  added_date: '',
+};
+
+export default function TimeManagement() {
+  const { id } = useParams(); // Get employee ID from the route params
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
-  const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
-  const [employeeinfo, setEmployeeInfo] = useState<Employee[]>([]);
+  const [laborCodes, setLaborCodes] = useState<LaborCode[]>([]);
+  const [employeeInfo, setEmployeeInfo] = useState<Employee | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
-  const [formData, setFormData] = useState<TimeSheetFormData>({
-    employee_id: 0,
-    date_worked: '',
-    job_number: 0,
-    job_code: 0,
-    begin_time: '',
-    end_time: '',
-    hours: 0,
-    minutes: 0,
-    pay_rate: 0,
-    added_by: '',
-    added_date: '',
-  });
+  const [formData, setFormData] = useState<TimeSheetFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
+  const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchEmployeeInfo = async (): Promise<void> => {
-    try {
-      const { id } = await params
-      const response = await fetch(`/api/employees/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch job info');
-      const data = await response.json();
-      console.log(data)
-      setEmployeeInfo(data); // Ensure `data` is an array of { id, location }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch employee info',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployeeInfo();
-  }, []);
-
-  const fetchLaborCodes = async (): Promise<void> => {
-    try {
-      const response = await fetch(`/api/laborcodes/`);
-      if (!response.ok) throw new Error('Failed to fetch employee info');
-      const data = await response.json();
-      setLaborCodes(data); // Ensure `data` is an array of { id, location }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch locations',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchLaborCodes();
-  }, []);
-
-  // Fetch TimeSheets
-  const fetchTimeSheets = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      const { id } = await params
-      const response = await fetch(`/api/timesheet/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch timesheets');
-      const data = await response.json();
-      const validatedData = z.array(TimeSheetSchema).parse(data);
-      setTimeSheets(validatedData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch timesheet",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTimeSheets();
-  }, []);
-
-  // Validate form data using TimeSheetSchema
-  const validateForm = (data: TimeSheetFormData): boolean => {
-    try {
-      const numericData = {
-        ...data,
-        employee_id: Number(data.employee_id),
-        job_number: Number(data.job_number),
-        job_code: Number(data.job_code),
-        hours: Number(data.hours),
-        minutes: Number(data.minutes),
-        pay_rate: Number(data.pay_rate),
-      };
-      TimeSheetSchema.parse(numericData);
-      setFormErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors: Partial<Record<keyof TimeSheetFormData, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path) {
-            errors[err.path[0] as keyof TimeSheetFormData] = err.message;
-          }
+  const fetchData = useCallback(
+    async (url: string, setter: (data: any) => void, schema?: z.ZodSchema<any>) => {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to fetch data from ${url}`);
+        const data = await response.json();
+        setter(schema ? schema.parse(data) : data);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error instanceof Error ? error.message : 'An error occurred.',
+          variant: 'destructive',
         });
-        setFormErrors(errors);
       }
-      return false;
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (id) {
+      // Fetch employee info first
+      const fetchAllData = async () => {
+        try {
+          await fetchData(`/api/employees/${id}`, setEmployeeInfo);
+          await fetchData(`/api/laborcodes`, setLaborCodes);
+          await fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAllData();
     }
+  }, [id, fetchData]);
+
+  if (isLoading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (!employeeInfo) {
+    return <div className="text-center">Employee information not found.</div>;
+  }
+
+  const resetForm = () => {
+    setFormData(defaultFormData);
+    setFormErrors({});
+    setEditingTimeSheet(null);
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ): void => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
 
-    // Clear error when field is edited
+    // Convert value to number for numeric fields
+    const newValue = type === 'number' ? Number(value) || 0 : value;
+
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
     if (formErrors[name as keyof TimeSheetFormData]) {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleEdit = useCallback((timesheet: TimeSheet): void => {
+  const handleEdit = (timesheet: TimeSheet) => {
     setEditingTimeSheet(timesheet);
-    setFormData({
-      ...timesheet,
-    });
-    setIsModalOpen(true);
-  }, []);
-
-  // Handle add new job
-  const handleAddNew = (): void => {
-    setEditingTimeSheet(null);
-    setFormData({
-      employee_id: 0,
-      date_worked: '',
-      job_number: 0,
-      job_code: 0,
-      begin_time: '',
-      end_time: '',
-      hours: 0,
-      minutes: 0,
-      pay_rate: 0,
-      added_by: '',
-      added_date: '',
-    });
-    setFormErrors({});
+    setFormData(timesheet);
     setIsModalOpen(true);
   };
 
-  // Handle modal close
-  const handleModalClose = (): void => {
-    if (isSaving) return;
-    setIsModalOpen(false);
-    setEditingTimeSheet(null);
-    setFormData({
-      employee_id: 0,
-      date_worked: '',
-      job_number: 0,
-      job_code: 0,
-      begin_time: '',
-      end_time: '',
-      hours: 0,
-      minutes: 0,
-      pay_rate: 0,
-      added_by: '',
-      added_date: '',
-    });
-    setFormErrors({});
+  const handleAddNew = () => {
+    resetForm();
+    setIsModalOpen(true);
   };
 
-  // Handle submit
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleModalClose = () => {
+    if (!isSaving) {
+      setIsModalOpen(false);
+      resetForm();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const currentDate = new Date().toISOString();
@@ -203,55 +129,51 @@ export default function TimeManagement({ params }: any) {
     // Example usage
     const formattedDate = formatDate(currentDate);
 
-    const finalSubmissionData = {
+    const finalData = {
       ...formData,
-      employee_id: Number(employeeinfo[0].id),
+      employee_id: employeeInfo?.data.id || 0,
+      pay_rate: employeeInfo?.data.pay_rate || 0,
       job_number: Number(formData.job_number),
       job_code: Number(formData.job_code),
       hours: Number(formData.hours),
       minutes: Number(formData.minutes),
-      pay_rate: Number(employeeinfo[0].pay_rate),
       added_date: formattedDate,
     };
-    console.log(finalSubmissionData);
-
-
-    if (!validateForm(finalSubmissionData)) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please check the form for errors',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     try {
+      TimeSheetSchema.parse(finalData);
       setIsSaving(true);
-      const url = editingTimeSheet ? `/api/timesheet/${editingTimeSheet.id}` : '/api/timesheet/';
 
+      const url = editingTimeSheet
+        ? `/api/timesheet/${editingTimeSheet.id}`
+        : '/api/timesheet/';
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalSubmissionData),
+        body: JSON.stringify(finalData),
       });
 
-      if (!response.ok) throw new Error('Failed to save job');
-
-      await fetchTimeSheets();
-      handleModalClose();
+      if (!response.ok) throw new Error('Failed to save timesheet.');
 
       toast({
         title: 'Success',
-        description: `Job ${editingTimeSheet ? 'updated' : 'added'} successfully`,
+        description: `Timesheet ${editingTimeSheet ? 'updated' : 'added'} successfully.`,
       });
+
+      fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+      handleModalClose();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: 'destructive',
-      });
+      if (error instanceof z.ZodError) {
+        setFormErrors(error.flatten().fieldErrors);
+      } else {
+        toast({
+          title: 'Error',
+          description: error instanceof Error ? error.message : 'An error occurred.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -281,33 +203,21 @@ export default function TimeManagement({ params }: any) {
   };
 
   return (
-    <>
-      <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-        {employeeinfo.length > 0 ? (
-          <div className="justify-between items-center">
-            <h1 className="text-xl md:text-3xl font-bold">
-              TimeSheet for {employeeinfo[0].first_name} {employeeinfo[0].last_name}
-            </h1>
-            <h3 className="text-md md:text-lg">
-              Location: {employeeinfo[0].location}
-            </h3>
-          </div>
-        ) : (
-          <div className="text-center">
-            <p>Loading employee information...</p>
-          </div>
-        )}
+    <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
+      <div className="justify-between items-center">
+        <h1 className="text-xl md:text-3xl font-bold">
+          Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.last_name}
+        </h1>
+        <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
+      </div>
 
-        <div className="overflow-x-auto">
-          <TimeSheetTable
-            data={timeSheets}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAddNew={handleAddNew}
-            isLoading={isLoading}
-          />
-        </div>
-      </div >
+      <TimeSheetTable
+        data={timeSheets}
+        onEdit={handleEdit}
+        onDelete={() => { }}
+        onAddNew={handleAddNew}
+        isLoading={isLoading}
+      />
 
       {isModalOpen && (
         <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
@@ -323,103 +233,61 @@ export default function TimeManagement({ params }: any) {
               <span className="text-xl font-bold">{editingTimeSheet ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'date_worked', label: 'Date Worked', type: 'text' },
+                  { name: 'date_worked', label: 'Date Worked', type: 'date' },
                   { name: 'job_number', label: 'Job Number', type: 'number' },
+                  { name: 'begin_time', label: 'Begin Time', type: 'time' },
+                  { name: 'end_time', label: 'End Time', type: 'time' },
+                  { name: 'hours', label: 'Hours', type: 'number' },
+                  { name: 'minutes', label: 'Minutes', type: 'number' },
+                  { name: 'added_by', label: 'Added By', type: 'text' }
                 ].map((field) => (
                   <div key={field.name}>
-                    <label className="block text-sm font-medium mb-1">
-                      {field.label} <span className="text-red-500">*</span>
-                    </label>
+                    <label className="block text-sm font-medium">{field.label}</label>
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]}
+                      value={formData[field.name as keyof TimeSheetFormData] || ''}
                       onChange={handleInputChange}
                       required
-                      disabled={isSaving}
-                      className={formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}
                     />
                     {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof TimeSheetFormData]}
-                      </p>
+                      <p className="text-red-500 text-sm">{formErrors[field.name]}</p>
                     )}
                   </div>
                 ))}
-                {/* LaborCode Dropdown */}
+
+                {/* Labor Code */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Labor Code <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium">Labor Code</label>
                   <select
                     name="job_code"
-                    value={formData.job_code || ''} // Safely handle nullable values
+                    value={formData.job_code || ''}
                     onChange={handleInputChange}
                     required
-                    disabled={isSaving}
-                    className="block w-full border rounded-md px-3 py-2"
                   >
-                    <option value="" disabled>
-                      Select a Labor Code
-                    </option>
-                    {laborcodes.map((lc) => (
+                    <option value="">Select a Labor Code</option>
+                    {laborCodes.map((lc) => (
                       <option key={lc.id} value={lc.id}>
                         {lc.id} - {lc.description}
                       </option>
                     ))}
                   </select>
                 </div>
-                {[
-                  { name: 'begin_time', label: 'Begin Time', type: 'text' },
-                  { name: 'end_time', label: 'End Time', type: 'text' },
-                  { name: 'hours', label: 'Hours', type: 'number' },
-                  { name: 'minutes', label: 'Minutes', type: 'number' },
-                  { name: 'added_by', label: 'Added By', type: 'text' },
-                ].map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium mb-1">
-                      {field.label} <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      name={field.name}
-                      type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSaving}
-                      className={formErrors[field.name as keyof TimeSheetFormData] ? 'border-red-500' : ''}
-                    />
-                    {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {formErrors[field.name as keyof TimeSheetFormData]}
-                      </p>
-                    )}
-                  </div>
-                ))}
 
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleModalClose}
-                    disabled={isSaving}
-                  >
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={handleModalClose}>
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    className="bg-neutral-900 text-white"
-                    disabled={isSaving}
-                  >
+                  <Button type="submit" className="bg-neutral-900 text-white">
                     {isSaving ? 'Saving...' : editingTimeSheet ? 'Update' : 'Save'}
                   </Button>
                 </div>
-              </form >
+              </form>
             </div >
           </div >
-        </Dialog >
+        </Dialog>
       )
       }
-    </>
+    </div>
   );
 }
