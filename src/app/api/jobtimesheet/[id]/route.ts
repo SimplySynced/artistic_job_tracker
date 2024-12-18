@@ -8,7 +8,6 @@ export async function GET(
     try {
         const { id } = await params
         const jobid = Number(id)
-        console.log(jobid)
         const timeSheet = await prisma.timeSheets.findMany({
             where: {
                 job_number: jobid,
