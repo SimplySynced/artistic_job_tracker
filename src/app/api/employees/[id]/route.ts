@@ -6,7 +6,8 @@ export async function GET(
     { params }: { params: { id: string } } // Ensure id is a string
 ) {
     try {
-        const empid = Number(params.id); // Convert id to a number
+        const { id } = await params
+        const empid = Number(id); // Convert id to a number
         if (isNaN(empid)) throw new Error('Invalid employee ID');
 
         const employee = await prisma.employees.findUnique({
@@ -29,7 +30,8 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
-        const empid = Number(params.id);
+        const { id } = await params
+        const empid = Number(id);
         if (isNaN(empid)) throw new Error('Invalid employee ID');
 
         const data = await request.json();
@@ -54,7 +56,8 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        const empid = Number(params.id);
+        const { id } = await params
+        const empid = Number(id);
         if (isNaN(empid)) throw new Error('Invalid employee ID');
 
         await prisma.employees.delete({

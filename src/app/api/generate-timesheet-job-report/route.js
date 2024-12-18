@@ -2,26 +2,61 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function POST(req) {
   const body = await req.json();
-  const data = body.data;
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
-  const jobnum = body.data[0].job_number
+  const fnDate = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-${today.getFullYear()}`;
+  const fnTime = `${String(today.getHours()).padStart(2, '0')}-${String(today.getMinutes()).padStart(2, '0')}`;
+  const jobnum = body.data[0]?.job_number;
+
+  // Fetch job information from /api/jobs/[id]
+  let jobInfo = {};
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jobnum}`);
+    if (response.ok) {
+      jobInfo = await response.json();
+    } else {
+      console.error(`Failed to fetch job info for job number ${jobnum}`);
+    }
+  } catch (error) {
+    console.error(`Error fetching job info: ${error.message}`);
+  }
+
+  const jobDetails = jobInfo
+    ? `${jobInfo[0].job_number || 'N/A'} - ${jobInfo[0].job_location || 'N/A'} - ${jobInfo[0].job_customer || 'N/A'} - ${jobInfo[0].job_address || 'N/A'}`
+    : 'Job Information Unavailable';
+
+  // Fetch job information from /api/jobs/[id]
+  let timesheetInfo = {};
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/jobtimesheet/${jobnum}`);
+    if (response.ok) {
+      timesheetInfo = await response.json();
+    } else {
+      console.error(`Failed to fetch job info for job ${jobnum} timesheet`);
+    }
+  } catch (error) {
+    console.error(`Error fetching job info: ${error.message}`);
+  }
+  //console.log(timesheetInfo)
 
   // Group by `wood_type`
   const groupedData = {};
-  let grandTotal = 0;
+  let grandTotalHours = 0;
+  let grandTotalCost = 0;
 
-  data.forEach((item) => {
-    if (!groupedData[item.wood_type]) {
-      groupedData[item.wood_type] = { rows: [], subtotal: 0 };
+  timesheetInfo.forEach((item) => {
+    if (!groupedData[item.employee_id]) {
+      groupedData[item.employee_id] = { rows: [], subtotalHours: 0, subtotalCost: 0 };
     }
-    groupedData[item.wood_type].rows.push(item);
-    groupedData[item.wood_type].subtotal += item.total_cost || 0; // Handle null total_cost
-    grandTotal += item.total_cost || 0; // Handle null total_cost
+    groupedData[item.employee_id].rows.push(item);
+    groupedData[item.employee_id].subtotalHours += item.hours || 0; // Handle null total_cost
+    groupedData[item.employee_id].subtotalCost += item.pay_rate || 0; // Handle null TBF
+    grandTotalHours += item.hours || 0; // Handle null total_cost
+    grandTotalCost += item.pay_rate || 0; // Handle null TBF
   });
 
   // Create PDF
@@ -38,31 +73,27 @@ export async function POST(req) {
   };
 
   // Title
-  drawText(`Artistic Doors and Windows Lumber Report As Of ${formattedDate}`, 125, yPosition, 14);
+  drawText(`Artistic Doors and Windows Timesheet Report As Of ${formattedDate}`, 125, yPosition, 14);
   yPosition -= 20;
 
   // Job Info
-  drawText(`Artistic Doors and Windows Lumber Report As Of ${formattedDate}`, margin, yPosition, 14);
+  drawText(`Job: ${jobDetails}`, margin, yPosition, 12);
   yPosition -= 20;
 
   // Generate table
-  for (const [woodType, details] of Object.entries(groupedData)) {
-    drawText(`Wood Type: ${woodType || 'N/A'}`, margin, yPosition);
+  for (const [employee, details] of Object.entries(groupedData)) {
+    //console.log(employee)
+    drawText(`Employee: ${employee || 'N/A'}`, margin, yPosition);
     yPosition -= 15;
 
     // Table headers
     const headers = [
-      "Wood",
-      "Quantity",
-      "Thickness",
-      "Length",
-      "Width",
+      "Date Worked",
       "Description",
-      "Ft Per Piece",
-      "TBF",
-      "Cost",
-      "Replace",
-      "Entered By",
+      "Hours",
+      "Labor",
+      "Added By",
+      "Added Date",
     ];
     let xPosition = margin;
 
@@ -72,20 +103,15 @@ export async function POST(req) {
     });
 
     yPosition -= 15;
-
+    
     details.rows.forEach((row) => {
       const values = [
-        row.wood_type,
-        row.quantity,
-        row.thickness,
-        row.length,
-        row.width,
-        row.description,
-        row.ft_per_piece,
-        row.tbf?.toFixed(2),
-        row.total_cost?.toFixed(2),
-        row.wood_replace_id,
-        row.entered_by,
+        row.date_worked,
+        row.job_code,
+        row.hours,
+        row.pay_rate,
+        row.added_by,
+        row.added_date,
       ];
 
       xPosition = margin;
@@ -103,18 +129,34 @@ export async function POST(req) {
       }
     });
 
-    drawText(`Subtotal: ${details.subtotal.toFixed(2)}`, margin + 500, yPosition);
+    // Subtotals for the wood type
+    drawText(
+      `Subtotals: ${details.subtotalHours.toFixed(2)}      $${details.subtotalCost.toFixed(2)}`,
+      margin + 390,
+      yPosition
+    );
     yPosition -= 20;
   }
 
-  drawText(`Grand Total: ${grandTotal.toFixed(2)}`, margin + 500, yPosition);
+  // Grand totals
+  drawText(
+    `Grand Totals: ${grandTotalHours.toFixed(2)}      $${grandTotalCost.toFixed(2)}`,
+    margin + 390,
+    yPosition
+  );
 
   const pdfBytes = await pdfDoc.save();
 
-  return new Response(pdfBytes, {
+  // Set the filename dynamically
+  const jobNumber = jobInfo[0]?.job_number || 'unknown';
+  const customer = jobInfo[0]?.job_customer?.replace(/\s+/g, '_') || 'unknown';
+  const filename = `${customer}_${jobNumber}_timesheet_${fnDate}_${fnTime}.pdf`;
+  console.log(jobNumber)
+  console.log(customer)
+  console.log(filename)
+  return new Response(JSON.stringify({ filename, pdf: Buffer.from(pdfBytes).toString('base64') }), {
     headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=report.pdf',
+      'Content-Type': 'application/json',
     },
   });
 }

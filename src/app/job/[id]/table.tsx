@@ -98,21 +98,29 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
     };
 
     const generateTimeSheetReport = async () => {
-        const response = await fetch('/api/generate-timesheet-job-report', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ data }),
-        });
+        try {
+            const response = await fetch('/api/generate-timesheet-job-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data }),
+            });
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'report.pdf';
-        a.click();
-        window.URL.revokeObjectURL(url);
+            if (response.ok) {
+                const { filename, pdf } = await response.json();
+                // Create a Blob and trigger download
+                const pdfBlob = new Blob([Uint8Array.from(atob(pdf), (c) => c.charCodeAt(0))], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(pdfBlob);
+                link.download = filename;
+                link.click();
+            } else {
+                console.error('Failed to generate PDF');
+            }
+        } catch (error) {
+            console.log(`Error: ${error}`);
+        }
     };
 
     const columns: ColumnDef<LumberCost, any>[] = [

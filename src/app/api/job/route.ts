@@ -1,4 +1,3 @@
-import { JobLaborCodes } from './../../../../node_modules/.prisma/client/index.d';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
