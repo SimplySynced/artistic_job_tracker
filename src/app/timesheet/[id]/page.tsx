@@ -17,8 +17,8 @@ const defaultFormData: TimeSheetFormData = {
   job_code: 0,
   begin_time: '',
   end_time: '',
-  hours: 0,
-  minutes: 0,
+  hours: 0, // Calculated
+  minutes: 0, // Calculated
   pay_rate: 0,
   added_by: '',
   added_date: '',
@@ -80,6 +80,29 @@ export default function TimeManagement() {
     return <div className="text-center">Employee information not found.</div>;
   }
 
+  const calculateTimeDifference = (start: string, end: string) => {
+    const [startHour, startMinute] = start.split(':').map(Number);
+    const [endHour, endMinute] = end.split(':').map(Number);
+
+    const startDate = new Date();
+    const endDate = new Date();
+
+    startDate.setHours(startHour, startMinute);
+    endDate.setHours(endHour, endMinute);
+
+    const diffMs = endDate.getTime() - startDate.getTime();
+
+    if (diffMs < 0) {
+      throw new Error('End time must be later than start time');
+    }
+
+    const diffMinutes = Math.floor(diffMs / 60000); // Convert milliseconds to minutes
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+
+    return { hours, minutes };
+  };
+
   const resetForm = () => {
     setFormData(defaultFormData);
     setFormErrors({});
@@ -90,7 +113,7 @@ export default function TimeManagement() {
     const { name, value, type } = e.target;
 
     // Convert value to number for numeric fields
-    const newValue = type === 'number' ? Number(value) || 0 : value;
+    const newValue = type === 'number' ? (value === '' ? 0 : Number(value)) : value;
 
     setFormData((prev) => ({ ...prev, [name]: newValue }));
     if (formErrors[name as keyof TimeSheetFormData]) {
@@ -119,31 +142,25 @@ export default function TimeManagement() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const currentDate = new Date().toISOString();
-    const formatDate = (isoDate: string | number | Date) => {
-      const date = new Date(isoDate);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    // Example usage
-    const formattedDate = formatDate(currentDate);
-
-    const finalData = {
-      ...formData,
-      employee_id: employeeInfo?.data.id || 0,
-      pay_rate: employeeInfo?.data.pay_rate || 0,
-      job_number: Number(formData.job_number),
-      job_code: Number(formData.job_code),
-      hours: Number(formData.hours),
-      minutes: Number(formData.minutes),
-      added_date: formattedDate,
-    };
-
     try {
-      TimeSheetSchema.parse(finalData);
+      // Calculate hours and minutes from begin_time and end_time
+      const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
+
+      // Update the formData with calculated hours and minutes
+      const updatedFormData = {
+        ...formData,
+        hours,
+        minutes,
+        employee_id: employeeInfo?.data.id || 0,
+        pay_rate: employeeInfo?.data.pay_rate || 0,
+        job_number: Number(formData.job_number),
+        job_code: Number(formData.job_code),
+        added_date: new Date().toISOString().split('T')[0], // Set current date
+      };
+
+      // Validate the updated formData
+      TimeSheetSchema.parse(updatedFormData);
+
       setIsSaving(true);
 
       const url = editingTimeSheet
@@ -154,7 +171,7 @@ export default function TimeManagement() {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalData),
+        body: JSON.stringify(updatedFormData),
       });
 
       if (!response.ok) throw new Error('Failed to save timesheet.');
@@ -169,10 +186,10 @@ export default function TimeManagement() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.flatten().fieldErrors);
-      } else {
+      } else if (error instanceof Error) {
         toast({
           title: 'Error',
-          description: error instanceof Error ? error.message : 'An error occurred.',
+          description: error.message,
           variant: 'destructive',
         });
       }
@@ -190,7 +207,7 @@ export default function TimeManagement() {
       const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete job');
 
-      await fetchTimeSheets();
+      await fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
       toast({
         title: 'Success',
         description: 'Job deleted successfully',
@@ -216,7 +233,7 @@ export default function TimeManagement() {
       <TimeSheetTable
         data={timeSheets}
         onEdit={handleEdit}
-        onDelete={() => { }}
+        onDelete={handleDelete}
         onAddNew={handleAddNew}
         isLoading={isLoading}
       />
@@ -239,8 +256,6 @@ export default function TimeManagement() {
                   { name: 'job_number', label: 'Job Number', type: 'number' },
                   { name: 'begin_time', label: 'Begin Time', type: 'time' },
                   { name: 'end_time', label: 'End Time', type: 'time' },
-                  { name: 'hours', label: 'Hours', type: 'number' },
-                  { name: 'minutes', label: 'Minutes', type: 'number' },
                   { name: 'added_by', label: 'Added By', type: 'text' }
                 ].map((field) => (
                   <div key={field.name}>
@@ -248,7 +263,7 @@ export default function TimeManagement() {
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData] || ''}
+                      value={formData[field.name as keyof TimeSheetFormData]?.toString() || ''}
                       onChange={handleInputChange}
                       required
                     />
