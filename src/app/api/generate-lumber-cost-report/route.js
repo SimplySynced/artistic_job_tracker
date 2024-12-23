@@ -106,7 +106,7 @@ export async function POST(req) {
         row.ft_per_piece,
         row.tbf?.toFixed(2),
         row.total_cost?.toFixed(2),
-        row.wood_replace_id,
+        row.price,
         row.entered_by,
       ];
 

@@ -402,7 +402,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 </Button>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
-                    Add Time Entry
+                    Add Lumber Cost
                 </Button>
             </div>
 

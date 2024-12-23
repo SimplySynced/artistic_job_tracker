@@ -74,6 +74,8 @@ export default function TimeManagement() {
     return <div className="text-center">Loading...</div>;
   }
 
+  console.log(employeeInfo)
+
   if (!employeeInfo) {
     return <div className="text-center">Employee information not found.</div>;
   }

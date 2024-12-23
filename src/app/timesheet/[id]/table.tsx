@@ -205,19 +205,19 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
                 label: 'Actions'
             } as ColumnMeta,
             cell: ({ row }) => {
-                const wood = row.original
+                const timesheet = row.original
                 return (
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => onEdit(wood)}
+                            onClick={() => onEdit(timesheet)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
                             <LuPencilLine className="h-4 w-4" />
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => onDelete(wood.id ?? 0)}
+                            onClick={() => onDelete(timesheet.id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
                             <LuTrash2 className="h-4 w-4" />

@@ -2,6 +2,8 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function POST(req) {
   const body = await req.json();
+  const data = body.data;
+  console.log(body.data)
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -29,43 +31,66 @@ export async function POST(req) {
     ? `${jobInfo[0].job_number || 'N/A'} - ${jobInfo[0].job_location || 'N/A'} - ${jobInfo[0].job_customer || 'N/A'} - ${jobInfo[0].job_address || 'N/A'}`
     : 'Job Information Unavailable';
 
-  // Fetch job information from /api/jobs/[id]
-  let timesheetInfo = {};
+  // Fetch timesheet information
+  let timesheetInfo = [];
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/jobtimesheet/${jobnum}`);
     if (response.ok) {
       timesheetInfo = await response.json();
     } else {
-      console.error(`Failed to fetch job info for job ${jobnum} timesheet`);
+      console.error(`Failed to fetch job timesheet for job ${jobnum}`);
     }
   } catch (error) {
-    console.error(`Error fetching job info: ${error.message}`);
+    console.error(`Error fetching job timesheet info: ${error.message}`);
   }
-  //console.log(timesheetInfo)
 
-  // Group by `wood_type`
+  // Fetch job code descriptions
+  const fetchJobCodeDescription = async (jobCode) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/laborcodes/${jobCode}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.description || "No Description";
+      } else {
+        console.error(`Failed to fetch labor code description for job code ${jobCode}`);
+      }
+    } catch (error) {
+      console.error(`Error fetching labor code description: ${error.message}`);
+    }
+    return "Description Unavailable";
+  };
+
+  // Group by `employee_id`
   const groupedData = {};
   let grandTotalHours = 0;
   let grandTotalCost = 0;
 
-  timesheetInfo.forEach((item) => {
+  for (const item of timesheetInfo) {
     if (!groupedData[item.employee_id]) {
       groupedData[item.employee_id] = { rows: [], subtotalHours: 0, subtotalCost: 0 };
     }
+
+    // Convert hours and minutes to a single decimal value
+    const hoursDecimal = (item.hours || 0) + (item.minutes || 0) / 60;
+    const laborCost = hoursDecimal * (item.pay_rate || 0);
+    item.hoursDecimal = hoursDecimal.toFixed(2);
+    item.laborCost = laborCost.toFixed(2);
+
+    item.description = await fetchJobCodeDescription(item.job_code); // Fetch and assign description
     groupedData[item.employee_id].rows.push(item);
-    groupedData[item.employee_id].subtotalHours += item.hours || 0; // Handle null total_cost
-    groupedData[item.employee_id].subtotalCost += item.pay_rate || 0; // Handle null TBF
-    grandTotalHours += item.hours || 0; // Handle null total_cost
-    grandTotalCost += item.pay_rate || 0; // Handle null TBF
-  });
+    groupedData[item.employee_id].subtotalHours += hoursDecimal;
+    groupedData[item.employee_id].subtotalCost += laborCost;
+    grandTotalHours += hoursDecimal;
+    grandTotalCost += laborCost;
+  }
 
   // Create PDF
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([700, 800]);
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 8;
-  const margin = 20;
-  const columnWidths = [80, 50, 50, 50, 50, 100, 50, 50, 50, 50, 100];
+  const margin = 30;
+  const columnWidths = [130, 150, 100, 100, 100, 100];
   let yPosition = 760;
 
   const drawText = (text, x, y, size = fontSize) => {
@@ -82,16 +107,30 @@ export async function POST(req) {
 
   // Generate table
   for (const [employee, details] of Object.entries(groupedData)) {
-    //console.log(employee)
-    drawText(`Employee: ${employee || 'N/A'}`, margin, yPosition);
+    let employeeInfo = {};
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/employees/${employee}`);
+      if (response.ok) {
+        employeeInfo = await response.json();
+      } else {
+        console.error(`Failed to fetch info for employee ${employee}`);
+      }
+    } catch (error) {
+      console.error(`Error fetching employee info: ${error.message}`);
+    }
+    const empDetails = employeeInfo
+      ? `${employeeInfo.data.first_name || ''} ${employeeInfo.data.nick_name || 'N/A'} ${employeeInfo.data.last_name || 'N/A'}`
+      : 'Employee Information Unavailable';
+
+    drawText(`Employee: ${empDetails || 'N/A'}`, margin, yPosition);
     yPosition -= 15;
 
     // Table headers
     const headers = [
       "Date Worked",
       "Description",
-      "Hours",
-      "Labor",
+      "Hours (decimal)",
+      "Labor Cost",
       "Added By",
       "Added Date",
     ];
@@ -103,13 +142,13 @@ export async function POST(req) {
     });
 
     yPosition -= 15;
-    
+
     details.rows.forEach((row) => {
       const values = [
         row.date_worked,
-        row.job_code,
-        row.hours,
-        row.pay_rate,
+        row.description,
+        row.hoursDecimal,
+        `$${row.laborCost}`,
         row.added_by,
         row.added_date,
       ];
@@ -129,10 +168,10 @@ export async function POST(req) {
       }
     });
 
-    // Subtotals for the wood type
+    // Subtotals for each employee
     drawText(
-      `Subtotals: ${details.subtotalHours.toFixed(2)}      $${details.subtotalCost.toFixed(2)}`,
-      margin + 390,
+      `Subtotals: ${details.subtotalHours.toFixed(2)} hours           $${details.subtotalCost.toFixed(2)}`,
+      margin + 160,
       yPosition
     );
     yPosition -= 20;
@@ -140,8 +179,8 @@ export async function POST(req) {
 
   // Grand totals
   drawText(
-    `Grand Totals: ${grandTotalHours.toFixed(2)}      $${grandTotalCost.toFixed(2)}`,
-    margin + 390,
+    `Grand Totals: ${grandTotalHours.toFixed(2)} hours           $${grandTotalCost.toFixed(2)}`,
+    margin + 160,
     yPosition
   );
 
@@ -151,9 +190,7 @@ export async function POST(req) {
   const jobNumber = jobInfo[0]?.job_number || 'unknown';
   const customer = jobInfo[0]?.job_customer?.replace(/\s+/g, '_') || 'unknown';
   const filename = `${customer}_${jobNumber}_timesheet_${fnDate}_${fnTime}.pdf`;
-  console.log(jobNumber)
-  console.log(customer)
-  console.log(filename)
+
   return new Response(JSON.stringify({ filename, pdf: Buffer.from(pdfBytes).toString('base64') }), {
     headers: {
       'Content-Type': 'application/json',
