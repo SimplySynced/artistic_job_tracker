@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 import { LumberCostSchema, LumberCostFormData, LumberCost, WoodReplacement, Job } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
@@ -14,6 +14,7 @@ export default function JobManagement({
 }: {
   params: Promise<{ id: string }>
 }) {
+  const { toast } = useToast()
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
   const [woods, setWoodTypes] = useState<WoodReplacement[]>([]);
@@ -158,10 +159,10 @@ export default function JobManagement({
   const handleEdit = (lumbercost: LumberCost): void => {
     setEditingLumberCost(lumbercost); // Ensure valid lumbercost object
     setFormData({
-        ...lumbercost,
+      ...lumbercost,
     });
     setIsModalOpen(true);
-};
+  };
 
   // Handle add new job
   const handleAddNew = (): void => {
@@ -232,75 +233,76 @@ export default function JobManagement({
     const fpp = 1;
 
     const formatDate = (isoDate: string | number | Date) => {
-        const date = new Date(isoDate);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const date = new Date(isoDate);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     };
     const formattedDate = formatDate(currentDate);
 
     const finalSubmissionData = {
-        ...formData,
-        job_number: Number(id),
-        wood_id: Number(formData.wood_id),
-        wood_replace_id: Number(formData.wood_replace_id),
-        quantity: Number(formData.quantity),
-        thickness: Number(thickness),
-        length: Number(formData.length),
-        width: Number(formData.width),
-        cost_over: Number(0),
-        total_cost: Number(total_cost),
-        ft_per_piece: Number(fpp),
-        price: Number(formData.price),
-        tbf: Number(totalboardfoot),
-        entered_by: 'TEST',
-        entered_date: formattedDate,
-        updated_by: 'TEST',
-        updated_date: formattedDate
+      ...formData,
+      job_number: Number(id),
+      wood_id: Number(formData.wood_id),
+      wood_replace_id: Number(formData.wood_replace_id),
+      quantity: Number(formData.quantity),
+      thickness: Number(thickness),
+      length: Number(formData.length),
+      width: Number(formData.width),
+      cost_over: Number(0),
+      total_cost: Number(total_cost),
+      ft_per_piece: Number(fpp),
+      price: Number(formData.price),
+      tbf: Number(totalboardfoot),
+      entered_by: 'TEST',
+      entered_date: formattedDate,
+      updated_by: 'TEST',
+      updated_date: formattedDate
     };
 
     if (!validateForm(finalSubmissionData)) {
-        toast({
-            title: 'Validation Error',
-            description: 'Please check the form for errors',
-            variant: 'destructive',
-        });
-        return;
+      toast({
+        title: 'Validation Error',
+        description: 'Please check the form for errors',
+        variant: 'destructive',
+      });
+      return;
     }
 
     try {
-        setIsSaving(true);
+      setIsSaving(true);
 
-        const url = editingLumberCost ? `/api/job/${editingLumberCost.id}` : '/api/job/';
-        const method = editingLumberCost ? 'PUT' : 'POST';
+      const url = editingLumberCost ? `/api/job/${editingLumberCost.id}` : '/api/job/';
+      const method = editingLumberCost ? 'PUT' : 'POST';
 
-        console.log('Final submission data:', finalSubmissionData);
-        console.log('Editing Lumber Cost:', editingLumberCost);
-        console.log('API URL:', url);
-        console.log('HTTP Method:', method);
+      console.log('Final submission data:', finalSubmissionData);
+      console.log('Editing Lumber Cost:', editingLumberCost);
+      console.log('API URL:', url);
+      console.log('HTTP Method:', method);
 
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(finalSubmissionData),
-        });
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalSubmissionData),
+      });
 
-        if (!response.ok) throw new Error('Failed to save job');
+      if (!response.ok) throw new Error('Failed to save job');
 
-        await fetchLumberCost();
-        handleModalClose();
+      await fetchLumberCost();
+      handleModalClose();
 
-        toast({
-            title: 'Success',
-            description: `Job ${editingLumberCost ? 'updated' : 'added'} successfully`,
-        });
+      toast({
+        title: 'Success',
+        description: `Job ${editingLumberCost ? 'updated' : 'added'} successfully`,
+        variant: 'success'
+      });
     } catch (error) {
-        console.error('Error while saving:', error);
-        toast({
-            title: 'Error',
-            description: error instanceof Error ? error.message : 'An error occurred',
-            variant: 'destructive',
-        });
+      console.error('Error while saving:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
+      });
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -316,6 +318,7 @@ export default function JobManagement({
       toast({
         title: 'Success',
         description: 'Lumber cost deleted successfully',
+        variant: 'success'
       });
     } catch (error) {
       toast({
@@ -455,7 +458,7 @@ export default function JobManagement({
                   <Button
                     type="submit"
                     className="bg-neutral-900 text-white"
-                    //disabled={isSaving}
+                  //disabled={isSaving}
                   >
                     {isSaving ? 'Saving...' : editingLumberCost ? 'Update' : 'Save'}
                   </Button>

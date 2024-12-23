@@ -5,6 +5,7 @@ import logo from "../../public/images/logo_drop_shadow.png"
 import '@/styles/globals.css'
 import { auth } from "@/auth"
 import { SessionProvider } from 'next-auth/react'
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
   subsets: ['latin'],
@@ -38,6 +39,7 @@ export default async function RootLayout({
           ) : (
             <>{children}</>
           )}
+          <Toaster />
         </Theme>
       </body>
     </html>
