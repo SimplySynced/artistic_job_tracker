@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { EmployeeSchema } from '@/types'; // Assume this is the path to your Zod schema
 import prisma from '@/lib/prisma';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function GET() {
   try {

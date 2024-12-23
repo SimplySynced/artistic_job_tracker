@@ -32,7 +32,7 @@ const defaultFormData: LumberCostFormData = {
   updated_date: ''
 };
 
-export default function TimeManagement(session:any) {
+export default function TimeManagement(session: any) {
   const { id } = useParams(); // Get employee ID from the route params
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
@@ -59,7 +59,7 @@ export default function TimeManagement(session:any) {
           variant: 'destructive',
         });
       }
-    },[]
+    }, []
   );
 
   useEffect(() => {
