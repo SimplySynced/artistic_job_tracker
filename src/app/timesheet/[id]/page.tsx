@@ -144,7 +144,7 @@ export default function TimeManagement() {
     try {
       // Calculate hours and minutes from begin_time and end_time
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
-      const laborDescription = laborCodes.find((item) => item.id ===  Number(formData.job_code));
+      const laborDescription = laborCodes.find((item) => item.id === Number(formData.job_code));
       const jcd = laborDescription?.description
 
       // Update the formData with calculated hours and minutes

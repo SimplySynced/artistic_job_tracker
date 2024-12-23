@@ -243,7 +243,7 @@ export default function TimeManagement(session:any) {
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
-        Lumber Cost Sheet for Job #{id}
+          Lumber Cost Sheet for Job #{id}
         </h1>
         <h3 className="text-md md:text-lg">Job Name: {jobinfo[0].job_customer}</h3>
       </div>
