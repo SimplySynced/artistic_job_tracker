@@ -4,9 +4,12 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const woodreplacement = await prisma.woodReplacement.findMany({
-      orderBy: {
+      orderBy: [{
         wood_type: 'asc',
-      }
+      },
+      {
+        thickness: 'asc',
+      }],
     });
     return NextResponse.json(woodreplacement);
   } catch (error) {

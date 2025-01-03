@@ -137,7 +137,7 @@ export async function POST(req) {
   // Grand totals
   drawText(
     `Grand Totals: ${grandTotalTBF.toFixed(2)}      $${grandTotalCost.toFixed(2)}`,
-    margin + 390,
+    margin + 370,
     yPosition
   );
 

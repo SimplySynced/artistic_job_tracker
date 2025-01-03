@@ -8,7 +8,7 @@ export async function GET(
     try {
         const { id } = await params;
         const replaceid = Number(id)
-        const data = await request.json();
+        //console.log(replaceid)
         const wood = await prisma.woodReplacement.findMany({
             where: { replace_cost_id: replaceid },
         });

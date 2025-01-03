@@ -23,7 +23,7 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
+        //console.log(data)
         const { id } = await params
         const entryid = Number(id)
 

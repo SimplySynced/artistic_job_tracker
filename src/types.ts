@@ -113,7 +113,7 @@ export const LumberCostSchema = z.object({
     description: z.string().min(1, 'Job Description'),
     thickness: z.number().min(1, 'Thickness is required'),
     length: z.number().min(1, 'Length is required'),
-    width: z.number().min(1, 'Width is required'),
+    width: z.number().nonnegative("Width is required and must be positive"),
     cost_over: z.number(),
     total_cost: z.number(),
     ft_per_piece: z.number(),

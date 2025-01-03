@@ -263,6 +263,10 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
+            cell: ({ row }) => {
+                const tbf = row.getValue('tbf');
+                return tbf ? Number(tbf).toFixed(2) : '0.00';
+            },
             meta: {
                 label: 'Total Board Feet'
             } as ColumnMeta
@@ -287,21 +291,24 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
         },
         {
             accessorKey: 'price',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Price
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            meta: {
-                label: 'Price'
-            } as ColumnMeta
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="p-0 hover:bg-transparent"
+                >
+                    Price
+                    <LuArrowUpDown className="ml-1" />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <span>
+                    {row.getValue('price') !== undefined
+                        ? `$${Number(row.getValue('price')).toFixed(2)}`
+                        : ''}
+                </span>
+            ),
+            meta: { label: 'Price' } as ColumnMeta,
         },
         {
             id: 'actions',
