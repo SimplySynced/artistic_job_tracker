@@ -9,6 +9,7 @@ import { Employee, LaborCode, TimeSheet, TimeSheetFormData, TimeSheetSchema } fr
 import { z } from 'zod';
 import { TimeSheetTable } from './table';
 import { useParams } from 'next/navigation';
+import { LaborCodeFormData } from '../../../types';
 
 const defaultFormData: TimeSheetFormData = {
   employee_id: 0,
@@ -143,6 +144,8 @@ export default function TimeManagement() {
     try {
       // Calculate hours and minutes from begin_time and end_time
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
+      const laborDescription = laborCodes.find((item) => item.id ===  Number(formData.job_code));
+      const jcd = laborDescription?.description
 
       // Update the formData with calculated hours and minutes
       const updatedFormData = {
@@ -153,6 +156,7 @@ export default function TimeManagement() {
         pay_rate: employeeInfo?.data.pay_rate || 0,
         job_number: Number(formData.job_number),
         job_code: Number(formData.job_code),
+        job_code_description: jcd,
         added_date: new Date().toISOString().split('T')[0], // Set current date
       };
 

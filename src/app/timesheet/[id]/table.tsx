@@ -87,37 +87,20 @@ export function TimeSheetTable({ data, onEdit, onDelete, onAddNew, isLoading = f
             } as ColumnMeta
         },
         {
-            accessorKey: 'job_code',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="p-0 hover:bg-transparent"
-                >
-                    Code
-                    <LuArrowUpDown className="ml-1" />
-                </Button>
-            ),
-            meta: { label: 'Code' } as ColumnMeta,
-            cell: ({ row }) => {
-                const [codeName, setcodeName] = useState<string>('Loading...');
-                const jobCode = row.getValue('job_code') as string;
-
-                useEffect(() => {
-                    if (jobCode) {
-                        // Fetch job name from the API
-                        fetch(`/api/laborcodes/${jobCode}`)
-                            .then((response) => response.json())
-                            .then((data) => setcodeName(`${data.id} - ${data.description}` || 'Unknown'))
-                            .catch(() => setcodeName('Error fetching name'));
-                    } else {
-                        setcodeName('No Code');
-                    }
-                }, [jobCode]);
-
-                return <span>{codeName}</span>;
-            },
-        },
+                    accessorFn: (row) => `${row.job_code} - ${row.job_code_description || ''}`,
+                    id: 'jobCode',
+                    header: ({ column }) => (
+                        <Button
+                            variant="ghost"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                            className="p-0 hover:bg-transparent"
+                        >
+                            Job Code
+                            <LuArrowUpDown className="ml-1" />
+                        </Button>
+                    ),
+                    meta: { label: 'Job Code' } as ColumnMeta,
+                },
         {
             accessorKey: 'begin_time',
             header: ({ column }) => {
