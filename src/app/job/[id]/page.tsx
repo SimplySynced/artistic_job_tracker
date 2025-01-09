@@ -32,7 +32,7 @@ const defaultFormData: LumberCostFormData = {
   updated_date: ''
 };
 
-export default function TimeManagement() {
+export default function TimeManagement(session:any) {
   const { id } = useParams(); // Get employee ID from the route params
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
@@ -43,6 +43,7 @@ export default function TimeManagement() {
   const [formData, setFormData] = useState<LumberCostFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LumberCostFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
+  console.log(session?.user?.name)
 
   const fetchData = useCallback(
     async (url: string, setter: (data: any) => void, schema?: z.ZodSchema<any>) => {
@@ -147,9 +148,12 @@ export default function TimeManagement() {
     const formattedDate = formatDate(currentDate);
     const thickness = replaceData[0].thickness;
     const itbf = ((formData.width || 0) * (thickness || 0) * (formData.length || 0) * (1 + replaceData[0].waste_factor)) / 144
-    const fpp = Math.round(itbf);
+    const fpp = Math.round(itbf + .5);
     const totalboardfoot = itbf * formData.quantity;
     const total_cost = formData.quantity * fpp * replaceData[0].replacement;
+    console.log(total_cost
+
+    )
 
     const finalData = {
       ...formData,
@@ -164,7 +168,7 @@ export default function TimeManagement() {
       cost_over: Number(0),
       total_cost: Number(total_cost),
       ft_per_piece: Number(fpp),
-      price: Number(0),
+      price: Number(replaceData[0].replacement),
       tbf: Number(totalboardfoot),
       entered_by: 'TEST',
       entered_date: formattedDate,
@@ -248,7 +252,7 @@ export default function TimeManagement() {
       <JobTable
         data={lumbercosts}
         onEdit={handleEdit}
-        onDelete={() => { }}
+        onDelete={handleDelete}
         onAddNew={handleAddNew}
         isLoading={isLoading}
       />

@@ -60,6 +60,32 @@ export async function POST(req) {
     return "Description Unavailable";
   };
 
+  function timeDifferenceInDecimal(beginTime, endTime) {
+    // Split the time strings into [hours, minutes, seconds]
+    const [beginHours, beginMinutes, beginSeconds] = beginTime.split(':').map(Number);
+    const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
+
+    // Convert both times into total seconds
+    const beginTotalSeconds = beginHours * 3600 + beginMinutes * 60 + beginSeconds;
+    const endTotalSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
+
+    // Calculate the difference in seconds
+    let differenceInSeconds = endTotalSeconds - beginTotalSeconds;
+
+    // Handle crossing midnight (optional)
+    if (differenceInSeconds < 0) {
+        differenceInSeconds += 24 * 3600; // Add 24 hours in seconds
+    }
+
+    // Convert the difference to hours in decimal form
+    const differenceInHours = differenceInSeconds / 3600;
+
+    // Round to the nearest quarter hour
+    const roundedDifference = Math.round(differenceInHours * 4) / 4;
+
+    return roundedDifference;
+  }
+
   // Group by `employee_id`
   const groupedData = {};
   let grandTotalHours = 0;
@@ -71,12 +97,11 @@ export async function POST(req) {
     }
 
     // Convert hours and minutes to a single decimal value
-    const hoursDecimal = (item.hours || 0) + (item.minutes || 0) / 60;
+    const hoursDecimal = timeDifferenceInDecimal(item.begin_time, item.end_time);
+    console.log(item.begin_time)
     const laborCost = hoursDecimal * (item.pay_rate || 0);
-    item.hoursDecimal = hoursDecimal.toFixed(2);
+    item.hoursDecimal = hoursDecimal;
     item.laborCost = laborCost.toFixed(2);
-
-    item.description = await fetchJobCodeDescription(item.job_code); // Fetch and assign description
     groupedData[item.employee_id].rows.push(item);
     groupedData[item.employee_id].subtotalHours += hoursDecimal;
     groupedData[item.employee_id].subtotalCost += laborCost;
@@ -146,7 +171,7 @@ export async function POST(req) {
     details.rows.forEach((row) => {
       const values = [
         row.date_worked,
-        row.description,
+        row.job_code_description,
         row.hoursDecimal,
         `$${row.laborCost}`,
         row.added_by,
@@ -170,8 +195,8 @@ export async function POST(req) {
 
     // Subtotals for each employee
     drawText(
-      `Subtotals: ${details.subtotalHours.toFixed(2)} hours           $${details.subtotalCost.toFixed(2)}`,
-      margin + 160,
+      `Subtotals: ${details.subtotalHours.toFixed(2)} hours                             $${details.subtotalCost.toFixed(2)}`,
+      margin + 240,
       yPosition
     );
     yPosition -= 20;
@@ -179,8 +204,8 @@ export async function POST(req) {
 
   // Grand totals
   drawText(
-    `Grand Totals: ${grandTotalHours.toFixed(2)} hours           $${grandTotalCost.toFixed(2)}`,
-    margin + 160,
+    `Grand Totals: ${grandTotalHours.toFixed(2)} hours                             $${grandTotalCost.toFixed(2)}`,
+    margin + 240,
     yPosition
   );
 

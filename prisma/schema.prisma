@@ -75,18 +75,19 @@ model Employees {
 }
 
 model TimeSheets {
-  id          Int     @id @default(autoincrement())
-  employee_id Int
-  date_worked String
-  job_number  Int
-  job_code    Int
-  begin_time  String? @default("")
-  end_time    String? @default("")
-  hours       Int     @default(0)
-  minutes     Int     @default(0)
-  pay_rate    Float
-  added_by    String
-  added_date  String
+  id                    Int     @id @default(autoincrement())
+  employee_id           Int
+  date_worked           String
+  job_number            Int
+  job_code              Int
+  job_code_description  String
+  begin_time            String?   @default("")
+  end_time              String?   @default("")
+  hours                 Int       @default(0)
+  minutes               Int       @default(0)
+  pay_rate              Float
+  added_by              String
+  added_date            String
 }
 
 model Jobs {
