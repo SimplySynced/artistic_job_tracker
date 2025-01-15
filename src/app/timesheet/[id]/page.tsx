@@ -18,8 +18,8 @@ const defaultFormData: TimeSheetFormData = {
   job_code: 0,
   begin_time: '',
   end_time: '',
-  hours: 0, // Calculated
-  minutes: 0, // Calculated
+  hours: 0,
+  minutes: 0,
   pay_rate: 0,
   added_by: '',
   added_date: '',
