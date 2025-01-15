@@ -177,7 +177,7 @@ export default function EmployeePage() {
                     <Input
                       name={field}
                       type={field === 'pay_rate' ? 'number' : 'text'}
-                      value={formData[field as keyof EmployeeFormData] || ''}
+                      value={field === 'active' ? (formData.active ? 'true' : 'false') : String(formData[field as keyof EmployeeFormData] || '')}
                       onChange={handleInputChange}
                       required={field !== 'nick_name'}
                     />

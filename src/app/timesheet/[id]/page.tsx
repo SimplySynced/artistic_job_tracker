@@ -18,8 +18,8 @@ const defaultFormData: TimeSheetFormData = {
   job_code: 0,
   begin_time: '',
   end_time: '',
-  hours: 0, // Calculated
-  minutes: 0, // Calculated
+  hours: 0,
+  minutes: 0,
   pay_rate: 0,
   added_by: '',
   added_date: '',
@@ -140,6 +140,29 @@ export default function TimeManagement() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const currentDate = new Date().toISOString();
+    const formatDate = (isoDate: string | number | Date) => {
+      const date = new Date(isoDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    // Example usage
+    const formattedDate = formatDate(currentDate);
+
+    const finalData = {
+      ...formData,
+      employee_id: employeeInfo?.id || 0,
+      pay_rate: employeeInfo?.pay_rate || 0,
+      job_number: Number(formData.job_number),
+      job_code: Number(formData.job_code),
+      hours: Number(formData.hours),
+      minutes: Number(formData.minutes),
+      added_date: formattedDate,
+    };
 
     try {
       // Calculate hours and minutes from begin_time and end_time
