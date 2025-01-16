@@ -152,6 +152,8 @@ export default function TimeManagement() {
         ...formData,
         hours,
         minutes,
+        begin_time: formData.begin_time + ':00',
+        end_time: formData.end_time + ':00',
         employee_id: employeeInfo?.data.id || 0,
         pay_rate: employeeInfo?.data.pay_rate || 0,
         job_number: Number(formData.job_number),
