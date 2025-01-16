@@ -48,7 +48,7 @@ export const TimeSheetSchema = z.object({
     date_worked: z.string(),
     job_number: z.number(),
     job_code: z.number(),
-    job_code_description: z.string(),
+    job_code_description: z.string().optional(),
     begin_time: z.string(),
     end_time: z.string(),
     hours: z.number(),
@@ -186,12 +186,12 @@ export type WoodFormData = {
 
 // Zod schema for Wood Replacement
 export const WoodReplacementSchema = z.object({
-    replace_cost_id: z.number().optional(),
-    wood_id: z.number().optional(),
+    replace_cost_id: z.number(),
+    wood_id: z.number(),
     wood_type: z.string().min(1, "Wood Replacement is required"),
-    thickness: z.number().optional(),
-    waste_factor: z.number().optional(),
-    unit: z.string().min(1, "Wood Replacement is required"),
+    thickness: z.number(),
+    waste_factor: z.number(),
+    unit: z.string().min(1, "Wood Replacement Unit is required"),
     replacement: z.number().optional(),
     price: z.number().optional(),
     updated_date: z.number().optional()

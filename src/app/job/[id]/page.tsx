@@ -59,8 +59,7 @@ export default function TimeManagement(session:any) {
           variant: 'destructive',
         });
       }
-    },
-    []
+    },[]
   );
 
   useEffect(() => {

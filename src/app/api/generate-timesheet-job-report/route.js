@@ -3,7 +3,6 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 export async function POST(req) {
   const body = await req.json();
   const data = body.data;
-  console.log(body.data)
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -14,7 +13,7 @@ export async function POST(req) {
   const fnTime = `${String(today.getHours()).padStart(2, '0')}-${String(today.getMinutes()).padStart(2, '0')}`;
   const jobnum = body.data[0]?.job_number;
 
-  // Fetch job information from /api/jobs/[id]
+  // Fetch job information
   let jobInfo = {};
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jobnum}`);
@@ -44,46 +43,15 @@ export async function POST(req) {
     console.error(`Error fetching job timesheet info: ${error.message}`);
   }
 
-  // Fetch job code descriptions
-  const fetchJobCodeDescription = async (jobCode) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/laborcodes/${jobCode}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.description || "No Description";
-      } else {
-        console.error(`Failed to fetch labor code description for job code ${jobCode}`);
-      }
-    } catch (error) {
-      console.error(`Error fetching labor code description: ${error.message}`);
-    }
-    return "Description Unavailable";
-  };
-
   function timeDifferenceInDecimal(beginTime, endTime) {
-    // Split the time strings into [hours, minutes, seconds]
     const [beginHours, beginMinutes, beginSeconds] = beginTime.split(':').map(Number);
     const [endHours, endMinutes, endSeconds] = endTime.split(':').map(Number);
-
-    // Convert both times into total seconds
     const beginTotalSeconds = beginHours * 3600 + beginMinutes * 60 + beginSeconds;
     const endTotalSeconds = endHours * 3600 + endMinutes * 60 + endSeconds;
-
-    // Calculate the difference in seconds
     let differenceInSeconds = endTotalSeconds - beginTotalSeconds;
-
-    // Handle crossing midnight (optional)
-    if (differenceInSeconds < 0) {
-        differenceInSeconds += 24 * 3600; // Add 24 hours in seconds
-    }
-
-    // Convert the difference to hours in decimal form
+    if (differenceInSeconds < 0) differenceInSeconds += 24 * 3600;
     const differenceInHours = differenceInSeconds / 3600;
-
-    // Round to the nearest quarter hour
-    const roundedDifference = Math.round(differenceInHours * 4) / 4;
-
-    return roundedDifference;
+    return Math.round(differenceInHours * 4) / 4;
   }
 
   // Group by `employee_id`
@@ -95,10 +63,7 @@ export async function POST(req) {
     if (!groupedData[item.employee_id]) {
       groupedData[item.employee_id] = { rows: [], subtotalHours: 0, subtotalCost: 0 };
     }
-
-    // Convert hours and minutes to a single decimal value
     const hoursDecimal = timeDifferenceInDecimal(item.begin_time, item.end_time);
-    console.log(item.begin_time)
     const laborCost = hoursDecimal * (item.pay_rate || 0);
     item.hoursDecimal = hoursDecimal;
     item.laborCost = laborCost.toFixed(2);
@@ -111,26 +76,28 @@ export async function POST(req) {
 
   // Create PDF
   const pdfDoc = await PDFDocument.create();
-  let page = pdfDoc.addPage([700, 800]);
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 8;
   const margin = 30;
   const columnWidths = [130, 150, 100, 100, 100, 100];
   let yPosition = 760;
 
-  const drawText = (text, x, y, size = fontSize) => {
+  const drawText = (text, x, y, size = fontSize, page) => {
     page.drawText(String(text || 'N/A'), { x, y, size, font, color: rgb(0, 0, 0) });
   };
 
-  // Title
-  drawText(`Artistic Doors and Windows Timesheet Report As Of ${formattedDate}`, 125, yPosition, 14);
-  yPosition -= 20;
+  const drawHeader = (page) => {
+    let headerY = 760;
+    drawText(`Artistic Doors and Windows Timesheet Report As Of ${formattedDate}`, 125, headerY, 14, page);
+    headerY -= 20;
+    drawText(`Job: ${jobDetails}`, margin, headerY, 12, page);
+    headerY -= 20;
+    return headerY;
+  };
 
-  // Job Info
-  drawText(`Job: ${jobDetails}`, margin, yPosition, 12);
-  yPosition -= 20;
+  let page = pdfDoc.addPage([700, 800]);
+  yPosition = drawHeader(page);
 
-  // Generate table
   for (const [employee, details] of Object.entries(groupedData)) {
     let employeeInfo = {};
     try {
@@ -147,28 +114,25 @@ export async function POST(req) {
       ? `${employeeInfo.data.first_name || ''} ${employeeInfo.data.nick_name || 'N/A'} ${employeeInfo.data.last_name || 'N/A'}`
       : 'Employee Information Unavailable';
 
-    drawText(`Employee: ${empDetails || 'N/A'}`, margin, yPosition);
+    drawText(`Employee: ${empDetails || 'N/A'}`, margin, yPosition, fontSize, page);
     yPosition -= 15;
 
-    // Table headers
-    const headers = [
-      "Date Worked",
-      "Description",
-      "Hours (decimal)",
-      "Labor Cost",
-      "Added By",
-      "Added Date",
-    ];
+    const headers = ["Date Worked", "Description", "Hours (decimal)", "Labor Cost", "Added By", "Added Date"];
     let xPosition = margin;
 
     headers.forEach((header, index) => {
-      drawText(header, xPosition, yPosition);
+      drawText(header, xPosition, yPosition, fontSize, page);
       xPosition += columnWidths[index];
     });
 
     yPosition -= 15;
 
     details.rows.forEach((row) => {
+      if (yPosition < 50) {
+        page = pdfDoc.addPage([700, 800]);
+        yPosition = drawHeader(page);
+      }
+
       const values = [
         row.date_worked,
         row.job_code_description,
@@ -179,39 +143,34 @@ export async function POST(req) {
       ];
 
       xPosition = margin;
-
       values.forEach((value, index) => {
-        drawText(value, xPosition, yPosition);
+        drawText(value, xPosition, yPosition, fontSize, page);
         xPosition += columnWidths[index];
       });
 
       yPosition -= 15;
-
-      if (yPosition < 50) {
-        page = pdfDoc.addPage([700, 800]);
-        yPosition = 760;
-      }
     });
 
-    // Subtotals for each employee
     drawText(
       `Subtotals: ${details.subtotalHours.toFixed(2)} hours                             $${details.subtotalCost.toFixed(2)}`,
       margin + 240,
-      yPosition
+      yPosition,
+      fontSize,
+      page
     );
     yPosition -= 20;
   }
 
-  // Grand totals
   drawText(
     `Grand Totals: ${grandTotalHours.toFixed(2)} hours                             $${grandTotalCost.toFixed(2)}`,
     margin + 240,
-    yPosition
+    yPosition,
+    fontSize,
+    page
   );
 
   const pdfBytes = await pdfDoc.save();
 
-  // Set the filename dynamically
   const jobNumber = jobInfo[0]?.job_number || 'unknown';
   const customer = jobInfo[0]?.job_customer?.replace(/\s+/g, '_') || 'unknown';
   const filename = `${customer}_${jobNumber}_timesheet_${fnDate}_${fnTime}.pdf`;
