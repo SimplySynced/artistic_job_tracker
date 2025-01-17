@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Job, LaborCode, LumberCost, LumberCostFormData, LumberCostSchema, WoodReplacement } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
@@ -33,6 +33,7 @@ const defaultFormData: LumberCostFormData = {
 };
 
 export default function TimeManagement(session: any) {
+  const { toast } = useToast();
   const { id } = useParams(); // Get employee ID from the route params
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);

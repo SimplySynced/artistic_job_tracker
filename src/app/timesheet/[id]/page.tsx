@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Employee, LaborCode, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
 import { z } from 'zod';
 import { TimeSheetTable } from './table';
@@ -26,6 +26,7 @@ const defaultFormData: TimeSheetFormData = {
 };
 
 export default function TimeManagement() {
+  const { toast } = useToast();
   const { id } = useParams(); // Get employee ID from the route params
   const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
   const [laborCodes, setLaborCodes] = useState<LaborCode[]>([]);
@@ -57,19 +58,39 @@ export default function TimeManagement() {
 
   useEffect(() => {
     if (id) {
-      // Fetch employee info first
+      setIsLoading(true);
       const fetchAllData = async () => {
         try {
-          await fetchData(`/api/employees/${id}`, setEmployeeInfo);
-          await fetchData(`/api/laborcodes`, setLaborCodes);
-          await fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+          const [employeeResponse, laborCodesResponse, timesheetResponse] = await Promise.all([
+            fetch(`/api/employees/${id}`),
+            fetch(`/api/laborcodes`),
+            fetch(`/api/timesheet/${id}`)
+          ]);
+
+          if (!employeeResponse.ok || !laborCodesResponse.ok || !timesheetResponse.ok) {
+            throw new Error('Failed to fetch data');
+          }
+
+          const employeeData = await employeeResponse.json();
+          const laborCodesData = await laborCodesResponse.json();
+          const timesheetData = await timesheetResponse.json();
+
+          setEmployeeInfo(employeeData);
+          setLaborCodes(laborCodesData);
+          setTimeSheets(timesheetData);
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'An error occurred.',
+            variant: 'destructive',
+          });
         } finally {
           setIsLoading(false);
         }
       };
       fetchAllData();
     }
-  }, [id, fetchData]);
+  }, [id]);
 
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
@@ -177,8 +198,8 @@ export default function TimeManagement() {
         minutes,
         begin_time: formData.begin_time + ':00',
         end_time: formData.end_time + ':00',
-        employee_id: employeeInfo?.data.id || 0,
-        pay_rate: employeeInfo?.data.pay_rate || 0,
+        employee_id: employeeInfo?.id || 0,
+        pay_rate: employeeInfo?.pay_rate || 0,
         job_number: Number(formData.job_number),
         job_code: Number(formData.job_code),
         job_code_description: jcd,
@@ -252,8 +273,10 @@ export default function TimeManagement() {
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
+          {/* @ts-ignore */}
           Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.last_name}
         </h1>
+        {/* @ts-ignore */}
         <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
       </div>
 
@@ -295,7 +318,7 @@ export default function TimeManagement() {
                       required
                     />
                     {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm">{formErrors[field.name]}</p>
+                      <p className="text-red-500 text-sm">{formErrors[field.name as keyof TimeSheetFormData]}</p>
                     )}
                   </div>
                 ))}

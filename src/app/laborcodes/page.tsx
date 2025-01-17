@@ -3,12 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { LaborCode, LaborCodeFormData, LaborCodeSchema } from '@/types';
 import { z } from 'zod';
 import { LaborCodeTable } from "./table"
 
 export default function LaborCodesManagement() {
+  const { toast } = useToast();
   const [laborcodes, setLaborCodes] = useState<LaborCode[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLaborCode, setEditingLaborCode] = useState<LaborCode | null>(null);
