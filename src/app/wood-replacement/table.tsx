@@ -40,8 +40,8 @@ type WoodReplacement = {
     thickness: number;
     waste_factor: number;
     unit: string;
-    replacement: number;
-    price: number;
+    replacement?: number;
+    price?: number;
     updated_date: string;
 };
 

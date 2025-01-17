@@ -68,7 +68,7 @@ export type TimeSheetFormData = {
     date_worked: string;
     job_number: number;
     job_code: number;
-    job_code_description: string;
+    job_code_description?: string;
     begin_time: string;
     end_time: string;
     hours: number;
@@ -194,12 +194,12 @@ export const WoodReplacementSchema = z.object({
     unit: z.string().min(1, "Wood Replacement Unit is required"),
     replacement: z.number().optional(),
     price: z.number().optional(),
-    updated_date: z.number().optional()
+    updated_date: z.string()
 });
 
 // TypeScript types derived from Zod schema
 export type WoodReplacement = z.infer<typeof WoodReplacementSchema>;
-export type NewWoodReplacement = Omit<WoodReplacement, 'id'>;
+export type NewWoodReplacement = Omit<WoodReplacement, 'replace_cost_id'>;
 
 // Form data type (string values for input fields)
 export type WoodReplacementFormData = {
@@ -209,8 +209,8 @@ export type WoodReplacementFormData = {
     thickness: number;
     waste_factor: number;
     unit: string;
-    replacement: number;
-    price: number;
+    replacement?: number;
+    price?: number;
     updated_date: string;
 };
 

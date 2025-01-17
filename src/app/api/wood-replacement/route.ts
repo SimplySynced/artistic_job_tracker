@@ -11,6 +11,7 @@ export async function GET() {
         thickness: 'asc',
       }],
     });
+    console.log(woodreplacement)
     return NextResponse.json(woodreplacement);
   } catch (error) {
     return NextResponse.json({error});

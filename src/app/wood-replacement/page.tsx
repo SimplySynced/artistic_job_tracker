@@ -5,35 +5,32 @@ import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Employee, LaborCode, TimeSheet, TimeSheetFormData, TimeSheetSchema } from '@/types';
+import { Wood, WoodReplacement, WoodReplacementFormData, WoodReplacementSchema } from '@/types';
 import { z } from 'zod';
 import { WoodReplacementTable } from './table';
 import { useParams } from 'next/navigation';
 
-const defaultFormData: TimeSheetFormData = {
-  employee_id: 0,
-  date_worked: '',
-  job_number: 0,
-  job_code: 0,
-  begin_time: '',
-  end_time: '',
-  hours: 0, // Calculated
-  minutes: 0, // Calculated
-  pay_rate: 0,
-  added_by: '',
-  added_date: '',
+const defaultFormData: WoodReplacementFormData = {
+  replace_cost_id: 0,
+  wood_id: 0,
+  wood_type: '',
+  thickness: 0,
+  waste_factor: 0,
+  unit: '',
+  replacement: 0,
+  price: 0,
+  updated_date: '',
 };
 
 export default function TimeManagement() {
   const { id } = useParams(); // Get employee ID from the route params
-  const [timeSheets, setTimeSheets] = useState<TimeSheet[]>([]);
-  const [laborCodes, setLaborCodes] = useState<LaborCode[]>([]);
-  const [employeeInfo, setEmployeeInfo] = useState<Employee | null>(null);
+  const [WoodReplacement, setWoodReplacement] = useState<WoodReplacement[]>([]);
+  const [editingWoodReplacement, setEditingWoodReplacement] = useState<WoodReplacement | null>(null);
+  const [woods, setWoods] = useState<Wood[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<TimeSheetFormData>(defaultFormData);
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof TimeSheetFormData, string>>>({});
-  const [editingTimeSheet, setEditingTimeSheet] = useState<TimeSheet | null>(null);
+  const [formData, setFormData] = useState<WoodReplacementFormData>(defaultFormData);
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof WoodReplacementFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(
@@ -55,56 +52,28 @@ export default function TimeManagement() {
   );
 
   useEffect(() => {
-    if (id) {
-      // Fetch employee info first
       const fetchAllData = async () => {
         try {
-          await fetchData(`/api/employees/${id}`, setEmployeeInfo);
-          await fetchData(`/api/laborcodes`, setLaborCodes);
-          await fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+          await fetchData(`/api/woods`, setWoods);
+          await fetchData(`/api/wood-replacement`, setWoodReplacement);
         } finally {
           setIsLoading(false);
         }
       };
       fetchAllData();
-    }
-  }, [id, fetchData]);
+  }, [fetchData]);
+
+  console.log(woods)
+  console.log(WoodReplacement)
 
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
 
-  if (!employeeInfo) {
-    return <div className="text-center">Employee information not found.</div>;
-  }
-
-  const calculateTimeDifference = (start: string, end: string) => {
-    const [startHour, startMinute] = start.split(':').map(Number);
-    const [endHour, endMinute] = end.split(':').map(Number);
-
-    const startDate = new Date();
-    const endDate = new Date();
-
-    startDate.setHours(startHour, startMinute);
-    endDate.setHours(endHour, endMinute);
-
-    const diffMs = endDate.getTime() - startDate.getTime();
-
-    if (diffMs < 0) {
-      throw new Error('End time must be later than start time');
-    }
-
-    const diffMinutes = Math.floor(diffMs / 60000); // Convert milliseconds to minutes
-    const hours = Math.floor(diffMinutes / 60);
-    const minutes = diffMinutes % 60;
-
-    return { hours, minutes };
-  };
-
   const resetForm = () => {
     setFormData(defaultFormData);
     setFormErrors({});
-    setEditingTimeSheet(null);
+    setEditingWoodReplacement(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -114,14 +83,14 @@ export default function TimeManagement() {
     const newValue = type === 'number' ? (value === '' ? 0 : Number(value)) : value;
 
     setFormData((prev) => ({ ...prev, [name]: newValue }));
-    if (formErrors[name as keyof TimeSheetFormData]) {
+    if (formErrors[name as keyof WoodReplacementFormData]) {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleEdit = (timesheet: TimeSheet) => {
-    setEditingTimeSheet(timesheet);
-    setFormData(timesheet);
+  const handleEdit = (woodreplacement: WoodReplacement) => {
+    setEditingWoodReplacement(woodreplacement);
+    setFormData(woodreplacement);
     setIsModalOpen(true);
   };
 
@@ -141,33 +110,22 @@ export default function TimeManagement() {
     e.preventDefault();
 
     try {
-      // Calculate hours and minutes from begin_time and end_time
-      const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
-      const laborDescription = laborCodes.find((item) => item.id ===  Number(formData.job_code));
-      const jcd = laborDescription?.description
-
       // Update the formData with calculated hours and minutes
       const updatedFormData = {
         ...formData,
-        hours,
-        minutes,
-        employee_id: employeeInfo?.data.id || 0,
-        pay_rate: employeeInfo?.data.pay_rate || 0,
-        job_number: Number(formData.job_number),
-        job_code: Number(formData.job_code),
-        job_code_description: jcd,
-        added_date: new Date().toISOString().split('T')[0], // Set current date
+        price: 0,
+        updated_date: new Date().toISOString().split('T')[0], // Set current date,
       };
 
       // Validate the updated formData
-      TimeSheetSchema.parse(updatedFormData);
+      WoodReplacementSchema.parse(updatedFormData);
 
       setIsSaving(true);
 
-      const url = editingTimeSheet
-        ? `/api/timesheet/${editingTimeSheet.id}`
+      const url = editingWoodReplacement
+        ? `/api/timesheet/${editingWoodReplacement.replace_cost_id}`
         : '/api/timesheet/';
-      const method = editingTimeSheet ? 'PUT' : 'POST';
+      const method = editingWoodReplacement ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -179,10 +137,10 @@ export default function TimeManagement() {
 
       toast({
         title: 'Success',
-        description: `Timesheet ${editingTimeSheet ? 'updated' : 'added'} successfully.`,
+        description: `Timesheet ${editingWoodReplacement ? 'updated' : 'added'} successfully.`,
       });
 
-      fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+      fetchData(`/api/timesheet/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -208,7 +166,7 @@ export default function TimeManagement() {
       const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete job');
 
-      await fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+      await fetchData(`/api/wood-replacement/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
       toast({
         title: 'Success',
         description: 'Job deleted successfully',
@@ -224,15 +182,9 @@ export default function TimeManagement() {
 
   return (
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
-      <div className="justify-between items-center">
-        <h1 className="text-xl md:text-3xl font-bold">
-          Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.last_name}
-        </h1>
-        <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
-      </div>
 
       <WoodReplacementTable
-        data={timeSheets}
+        data={WoodReplacement}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onAddNew={handleAddNew}
@@ -250,54 +202,55 @@ export default function TimeManagement() {
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-xl font-bold">{editingTimeSheet ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
+              <span className="text-xl font-bold">{editingWoodReplacement ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
+
+                {/* Wood ID*/}
+                <div>
+                  <label className="block text-sm font-medium">Wood Type</label>
+                  <select
+                    name="wood_id"
+                    value={formData.wood_id || ''}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select a Wood Type</option>
+                    {woods.map((wt) => (
+                      <option key={wt.id} value={wt.id}>
+                        {wt.wood_type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {[
-                  { name: 'date_worked', label: 'Date Worked', type: 'date' },
-                  { name: 'job_number', label: 'Job Number', type: 'number' },
-                  { name: 'begin_time', label: 'Begin Time', type: 'time' },
-                  { name: 'end_time', label: 'End Time', type: 'time' },
-                  { name: 'added_by', label: 'Added By', type: 'text' }
+                  { name: 'replace_cost_id', label: 'Replace Cost ID', type: 'number' },
+                  { name: 'thickness', label: 'Thickness', type: 'number' },
+                  { name: 'waste_factor', label: 'Waste Factor', type: 'number' },
+                  { name: 'unit', label: 'Unit', type: 'text' },
+                  { name: 'replacement', label: 'Replacement', type: 'number' }
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium">{field.label}</label>
                     <Input
                       name={field.name}
                       type={field.type}
-                      value={formData[field.name as keyof TimeSheetFormData]?.toString() || ''}
+                      value={formData[field.name as keyof WoodReplacementFormData]?.toString() || ''}
                       onChange={handleInputChange}
                       required
                     />
-                    {formErrors[field.name as keyof TimeSheetFormData] && (
+                    {formErrors[field.name as keyof WoodReplacementFormData] && (
                       <p className="text-red-500 text-sm">{formErrors[field.name]}</p>
                     )}
                   </div>
                 ))}
-
-                {/* Labor Code */}
-                <div>
-                  <label className="block text-sm font-medium">Labor Code</label>
-                  <select
-                    name="job_code"
-                    value={formData.job_code || ''}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select a Labor Code</option>
-                    {laborCodes.map((lc) => (
-                      <option key={lc.id} value={lc.id}>
-                        {lc.id} - {lc.description}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={handleModalClose}>
                     Cancel
                   </Button>
                   <Button type="submit" className="bg-neutral-900 text-white">
-                    {isSaving ? 'Saving...' : editingTimeSheet ? 'Update' : 'Save'}
+                    {isSaving ? 'Saving...' : editingWoodReplacement ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>
