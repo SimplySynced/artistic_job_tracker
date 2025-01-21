@@ -63,9 +63,6 @@ export default function TimeManagement() {
       fetchAllData();
   }, [fetchData]);
 
-  console.log(woods)
-  console.log(WoodReplacement)
-
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -108,11 +105,16 @@ export default function TimeManagement() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const woodInfo = woods.find((item) => item.id ===  Number(formData.wood_id));
+    console.log(woodInfo)
+    //console.log(formData)
 
     try {
       // Update the formData with calculated hours and minutes
       const updatedFormData = {
         ...formData,
+        wood_type: woodInfo?.wood_type,
+        wood_id: woodInfo?.id,
         price: 0,
         updated_date: new Date().toISOString().split('T')[0], // Set current date,
       };
@@ -123,8 +125,8 @@ export default function TimeManagement() {
       setIsSaving(true);
 
       const url = editingWoodReplacement
-        ? `/api/timesheet/${editingWoodReplacement.replace_cost_id}`
-        : '/api/timesheet/';
+        ? `/api/wood-replacement/${editingWoodReplacement.replace_cost_id}`
+        : '/api/wood-replacement/';
       const method = editingWoodReplacement ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -133,14 +135,14 @@ export default function TimeManagement() {
         body: JSON.stringify(updatedFormData),
       });
 
-      if (!response.ok) throw new Error('Failed to save timesheet.');
+      if (!response.ok) throw new Error('Failed to save Wood Replacement.');
 
       toast({
         title: 'Success',
-        description: `Timesheet ${editingWoodReplacement ? 'updated' : 'added'} successfully.`,
+        description: `Wood Replacement ${editingWoodReplacement ? 'updated' : 'added'} successfully.`,
       });
 
-      fetchData(`/api/timesheet/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
+      fetchData(`/api/wood-replacement/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -159,12 +161,12 @@ export default function TimeManagement() {
 
 
   // Handle delete
-  const handleDelete = async (timesheetId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+  const handleDelete = async (woodreplacementId: number): Promise<void> => {
+    if (!confirm('Are you sure you want to delete this wood replacement?')) return;
 
     try {
-      const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete job');
+      const response = await fetch(`/api/wood-replacement/${woodreplacementId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete wood replacement');
 
       await fetchData(`/api/wood-replacement/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
       toast({
@@ -202,7 +204,7 @@ export default function TimeManagement() {
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-xl font-bold">{editingWoodReplacement ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
+              <span className="text-xl font-bold">{editingWoodReplacement ? 'Edit Wood Replacement' : 'Add Wood Replacement'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
 
                 {/* Wood ID*/}

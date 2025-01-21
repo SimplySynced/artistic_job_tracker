@@ -11,7 +11,6 @@ export async function GET() {
         thickness: 'asc',
       }],
     });
-    console.log(woodreplacement)
     return NextResponse.json(woodreplacement);
   } catch (error) {
     return NextResponse.json({error});
@@ -21,14 +20,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    console.log(data)
     const wood_type = await prisma.woodReplacement.create({
       data: {
         ...data, // Default to pay_rate if not provided
-        wood_type: data.wood_type || 'NEW WOOD'
+        wood_type: data.wood_type || 'NEW WOOD REPLACEMENT'
       },
     });
     return NextResponse.json(wood_type);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create wood type' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create wood replacement' }, { status: 500 });
   }
 }

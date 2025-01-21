@@ -8,7 +8,6 @@ export async function GET(
     try {
         const { id } = await params;
         const replaceid = Number(id)
-        //console.log(replaceid)
         const wood = await prisma.woodReplacement.findMany({
             where: { replace_cost_id: replaceid },
         });
@@ -42,8 +41,8 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        await prisma.woodTypes.delete({
-            where: { id: parseInt(params.id) },
+        await prisma.woodReplacement.delete({
+            where: { replace_cost_id: parseInt(params.id) },
         });
         return NextResponse.json({ message: 'Wood Type deleted successfully' });
     } catch (error) {

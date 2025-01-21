@@ -322,7 +322,7 @@ export function WoodReplacementTable({ data, onEdit, onDelete, onAddNew, isLoadi
                 </div>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
-                    Add Time Entry
+                    Add Wood Replacement
                 </Button>
             </div>
 
