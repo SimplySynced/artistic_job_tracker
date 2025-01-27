@@ -118,7 +118,7 @@ export function WoodReplacementTable({ data, onEdit, onDelete, onAddNew, isLoadi
             } as ColumnMeta
         },
         {
-            accessorFn: (row) => `${row.thickness}`,
+            accessorFn: (row) => `${row.thickness}/4`,
             id: 'thickness',
             header: ({ column }) => {
                 return (

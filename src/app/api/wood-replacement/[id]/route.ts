@@ -22,12 +22,13 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
+        const { id } = await params;
+        const replaceid = Number(id)
         const data = await request.json();
-        const wood = await prisma.woodTypes.update({
-            where: { id: parseInt(params.id) },
+        const wood = await prisma.woodReplacement.update({
+            where: { replace_cost_id: replaceid },
             data: {
                 ...data,
-                updated_by: data.updated_by || 'system', // Default value
             },
         });
         return NextResponse.json(wood);
@@ -41,8 +42,10 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
+        const { id } = await params;
+        const replaceid = Number(id)
         await prisma.woodReplacement.delete({
-            where: { replace_cost_id: parseInt(params.id) },
+            where: { replace_cost_id: replaceid },
         });
         return NextResponse.json({ message: 'Wood Type deleted successfully' });
     } catch (error) {
