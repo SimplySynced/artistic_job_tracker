@@ -102,7 +102,7 @@ export async function POST(req) {
       const values = [
         row.wood_type,
         row.quantity,
-        row.thickness,
+        `${row.thickness}`,
         row.length,
         row.width,
         row.description,
