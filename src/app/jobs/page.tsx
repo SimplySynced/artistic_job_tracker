@@ -302,9 +302,7 @@ export default function JobsManagement() {
               </span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'job_code', label: 'Job Code', type: 'number' },
                   { name: 'job_number', label: 'Job Number', type: 'number' },
-                  { name: 'job_location', label: 'Location', type: 'text' },
                   { name: 'job_customer', label: 'Customer', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
@@ -327,6 +325,7 @@ export default function JobsManagement() {
                     )}
                   </div>
                 ))}
+
                 {/* Location Dropdown */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -349,7 +348,6 @@ export default function JobsManagement() {
                       </option>
                     ))}
                   </select>
-
                 </div>
 
                 {/* Address fields */}
