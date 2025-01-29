@@ -32,7 +32,7 @@ const defaultFormData: LumberCostFormData = {
   updated_date: ''
 };
 
-export default function TimeManagement() {
+export default function TimeManagement(session:any) {
   const { id } = useParams(); // Get employee ID from the route params
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
@@ -43,6 +43,7 @@ export default function TimeManagement() {
   const [formData, setFormData] = useState<LumberCostFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LumberCostFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
+  console.log(session?.user?.name)
 
   const fetchData = useCallback(
     async (url: string, setter: (data: any) => void, schema?: z.ZodSchema<any>) => {
@@ -58,8 +59,7 @@ export default function TimeManagement() {
           variant: 'destructive',
         });
       }
-    },
-    []
+    },[]
   );
 
   useEffect(() => {
@@ -134,18 +134,31 @@ export default function TimeManagement() {
       return `${year}-${month}-${day}`;
     };
 
+    const wri = formData.wood_replace_id
+    const response = await fetch(`/api/wood-replacement/${wri}`)
+    if (!response.ok) {
+      const replaceData = await response.json();
+      console.log(replaceData.error || "Something went wrong. Please try again.");
+      return;
+    }
+    const replaceData = await response.json();
+
     // Example usage
     const formattedDate = formatDate(currentDate);
-    const thickness = 1;
-    const totalboardfoot = 1;
-    const total_cost = 1;
-    const fpp = 1;
+    const thickness = replaceData[0].thickness;
+    const itbf = ((formData.width || 0) * (thickness || 0) * (formData.length || 0) * (1 + replaceData[0].waste_factor)) / 144
+    const fpp = Math.round(itbf + .5);
+    const totalboardfoot = itbf * formData.quantity;
+    const total_cost = formData.quantity * fpp * replaceData[0].replacement;
+    console.log(total_cost
+
+    )
 
     const finalData = {
       ...formData,
       job_number: Number(id),
-      wood_id: Number(1),
-      wood_type: 'TEST',
+      wood_id: Number(replaceData[0].wood_id),
+      wood_type: replaceData[0].wood_type,
       wood_replace_id: Number(formData.wood_replace_id),
       quantity: Number(formData.quantity),
       thickness: Number(thickness),
@@ -154,7 +167,7 @@ export default function TimeManagement() {
       cost_over: Number(0),
       total_cost: Number(total_cost),
       ft_per_piece: Number(fpp),
-      price: Number(0),
+      price: Number(replaceData[0].replacement),
       tbf: Number(totalboardfoot),
       entered_by: 'TEST',
       entered_date: formattedDate,
@@ -176,7 +189,7 @@ export default function TimeManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalData),
       });
-      console.log(response)
+      //console.log(response)
 
       if (!response.ok) throw new Error('Failed to save lumber cost.');
 
@@ -188,7 +201,7 @@ export default function TimeManagement() {
       fetchData(`/api/job/${id}`, setLumberCost, z.array(LumberCostSchema));
       handleModalClose();
     } catch (error) {
-      console.log(error)
+      //console.log(error)
       if (error instanceof z.ZodError) {
         setFormErrors(error.flatten().fieldErrors);
       } else {
@@ -238,7 +251,7 @@ export default function TimeManagement() {
       <JobTable
         data={lumbercosts}
         onEdit={handleEdit}
-        onDelete={() => { }}
+        onDelete={handleDelete}
         onAddNew={handleAddNew}
         isLoading={isLoading}
       />
@@ -257,7 +270,7 @@ export default function TimeManagement() {
               <span className="text-xl font-bold">{editingLumberCost ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
-                  { name: 'date', label: 'Date ', type: 'text' },
+                  { name: 'date', label: 'Date ', type: 'date' },
                   { name: 'quantity', label: 'Quantity', type: 'number' },
                 ].map((field) => (
                   <div key={field.name}>

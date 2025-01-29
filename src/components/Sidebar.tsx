@@ -57,6 +57,11 @@ const data = {
                     icon: GiWoodBeam,
                 },
                 {
+                    title: "Wood Replacement",
+                    url: "/wood-replacement",
+                    icon: GiWoodBeam,
+                },
+                {
                     title: "Labor Codes",
                     url: "/laborcodes",
                     icon: FaFileCode,

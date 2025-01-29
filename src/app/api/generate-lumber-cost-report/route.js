@@ -59,13 +59,16 @@ export async function POST(req) {
     page.drawText(String(text || 'N/A'), { x, y, size, font, color: rgb(0, 0, 0) });
   };
 
-  // Title
-  drawText(`Artistic Doors and Windows Lumber Report As Of ${formattedDate}`, 125, yPosition, 14);
-  yPosition -= 20;
+  const drawHeader = () => {
+    yPosition = 760;
+    drawText(`Artistic Doors and Windows Lumber Report As Of ${formattedDate}`, 125, yPosition, 14);
+    yPosition -= 20;
+    drawText(`Job: ${jobDetails}`, margin, yPosition, 12);
+    yPosition -= 20;
+  };
 
-  // Job Info
-  drawText(`Job: ${jobDetails}`, margin, yPosition, 12);
-  yPosition -= 20;
+  // Draw the initial header
+  drawHeader();
 
   // Generate table
   for (const [woodType, details] of Object.entries(groupedData)) {
@@ -99,7 +102,7 @@ export async function POST(req) {
       const values = [
         row.wood_type,
         row.quantity,
-        row.thickness,
+        `${row.thickness}`,
         row.length,
         row.width,
         row.description,
@@ -121,7 +124,8 @@ export async function POST(req) {
 
       if (yPosition < 50) {
         page = pdfDoc.addPage([700, 800]);
-        yPosition = 760;
+        drawHeader(); // Draw the header on the new page
+        yPosition -= 5; // Add spacing after the header
       }
     });
 
@@ -137,7 +141,7 @@ export async function POST(req) {
   // Grand totals
   drawText(
     `Grand Totals: ${grandTotalTBF.toFixed(2)}      $${grandTotalCost.toFixed(2)}`,
-    margin + 390,
+    margin + 370,
     yPosition
   );
 

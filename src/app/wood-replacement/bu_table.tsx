@@ -24,109 +24,45 @@ import {
     ColumnDef,
     ColumnFiltersState,
     SortingState,
-    getPaginationRowModel,
+    getPaginationRowModel
 } from '@tanstack/react-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPlus, LuSlidersHorizontal, LuPrinter, LuArrowUpDown, LuTrash2, LuPencilLine } from 'react-icons/lu'
+import { LuSlidersHorizontal, LuChevronFirst, LuChevronLast, LuChevronLeft, LuChevronRight, LuLoader, LuPencilLine, LuPlus, LuTrash2, LuArrowUpDown } from 'react-icons/lu'
 
 type ColumnMeta = {
     label: string
 }
 
-// The main data structure used for time sheet entries
-type LumberCost = {
-    id?: number;
-    date: string;
-    job_number: number;
+type WoodReplacement = {
+    replace_cost_id: number;
     wood_id: number;
     wood_type: string;
-    wood_replace_id: number;
-    quantity: number;
-    description: string;
     thickness: number;
-    length: number;
-    width: number;
-    cost_over: number;
-    total_cost: number;
-    ft_per_piece: number;
+    waste_factor: number;
+    unit: string;
+    replacement: number;
     price: number;
-    tbf: number;
-    entered_by: string;
-    entered_date: string;
-    updated_by: string;
-    updated_date: string
-};
+    updated_date: string;
+}
 
-interface JobTableProps {
-    data: LumberCost[];
-    onEdit: (lumbersheet: LumberCost) => void;
-    onDelete: (lumbersheetId: number) => void;
+interface WoodTableProps {
+    data: WoodReplacement[];
+    onEdit: (wood: WoodReplacement) => void;
+    onDelete: (woodId: number) => void;
     onAddNew: () => void;
     isLoading: boolean;
 }
 
-export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
+export function WoodReplacementTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: WoodTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
     const [columnVisibility, setColumnVisibility] = React.useState({})
 
-    const generateLumberCostReport = async () => {
-        try {
-            const response = await fetch('/api/generate-lumber-cost-report', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ data }),
-            });
-
-            if (response.ok) {
-                const { filename, pdf } = await response.json();
-                // Create a Blob and trigger download
-                const pdfBlob = new Blob([Uint8Array.from(atob(pdf), (c) => c.charCodeAt(0))], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(pdfBlob);
-                link.download = filename;
-                link.click();
-            } else {
-                console.error('Failed to generate PDF');
-            }
-        } catch (error) { 
-            console.log(`Error: ${error}`);
-        }
-    };
-
-    const generateTimeSheetReport = async () => {
-        try {
-            const response = await fetch('/api/generate-timesheet-job-report', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ data }),
-            });
-
-            if (response.ok) {
-                const { filename, pdf } = await response.json();
-                // Create a Blob and trigger download
-                const pdfBlob = new Blob([Uint8Array.from(atob(pdf), (c) => c.charCodeAt(0))], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(pdfBlob);
-                link.download = filename;
-                link.click();
-            } else {
-                console.error('Failed to generate PDF');
-            }
-        } catch (error) {
-            console.log(`Error: ${error}`);
-        }
-    };
-
-    const columns: ColumnDef<LumberCost, any>[] = [
+    const columns: ColumnDef<WoodReplacement, any>[] = [
         {
-            accessorFn: (row) => `${row.date}`,
-            id: 'date',
+            accessorFn: (row) => `${row.replace_cost_id}`,
+            id: 'replaceCostId',
             header: ({ column }) => {
                 return (
                     <Button
@@ -134,17 +70,18 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Date
+                        Replace Cost ID
                         <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Date'
+                label: 'Replace Cost ID'
             } as ColumnMeta
         },
         {
-            accessorKey: 'quantity',
+            accessorFn: (row) => `${row.wood_id}`,
+            id: 'woodId',
             header: ({ column }) => {
                 return (
                     <Button
@@ -152,17 +89,18 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Quantity
+                        Wood ID
                         <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Quantity'
+                label: 'Wood ID'
             } as ColumnMeta
         },
         {
-            accessorKey: 'wood_type',
+            accessorFn: (row) => `${row.wood_type}`,
+            id: 'woodType',
             header: ({ column }) => {
                 return (
                     <Button
@@ -175,11 +113,13 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </Button>
                 )
             },
-            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('wood_type') || ''}</span>,
-            meta: { label: 'Wood Type' } as ColumnMeta
+            meta: {
+                label: 'Wood Type'
+            } as ColumnMeta
         },
         {
-            accessorKey: 'thickness',
+            accessorFn: (row) => `${row.thickness}`,
+            id: 'thickness',
             header: ({ column }) => {
                 return (
                     <Button
@@ -197,7 +137,8 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
             } as ColumnMeta
         },
         {
-            accessorKey: 'width',
+            accessorFn: (row) => `${row.waste_factor}`,
+            id: 'wasteFactor',
             header: ({ column }) => {
                 return (
                     <Button
@@ -205,17 +146,18 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Width
+                        Waste Factor
                         <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Width'
+                label: 'Waste Factor'
             } as ColumnMeta
         },
         {
-            accessorKey: 'length',
+            accessorFn: (row) => `${row.unit}`,
+            id: 'unit',
             header: ({ column }) => {
                 return (
                     <Button
@@ -223,17 +165,18 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Length
+                        Unit
                         <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
             meta: {
-                label: 'Length'
+                label: 'Unit'
             } as ColumnMeta
         },
         {
-            accessorKey: 'description',
+            accessorFn: (row) => `${row.replacement}`,
+            id: 'replacement',
             header: ({ column }) => {
                 return (
                     <Button
@@ -241,74 +184,52 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                         className="p-0 hover:bg-transparent"
                     >
-                        Description
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            cell: ({ row }) => <span className="hidden md:inline">{row.getValue('description') || ''}</span>,
-            meta: { label: 'Description' } as ColumnMeta
-        },
-        {
-            accessorKey: 'tbf',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Total Board Feet
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            cell: ({ row }) => {
-                const tbf = row.getValue('tbf');
-                return tbf ? Number(tbf).toFixed(2) : '0.00';
-            },
-            meta: {
-                label: 'Total Board Feet'
-            } as ColumnMeta
-        },
-        {
-            accessorKey: 'ft_per_piece',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        FT/P
+                        Replacement
                         <LuArrowUpDown className="ml-1" />
                     </Button>
                 )
             },
             meta: {
-                label: 'FT/P'
+                label: 'Replacement'
             } as ColumnMeta
         },
         {
-            accessorKey: 'price',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="p-0 hover:bg-transparent"
-                >
-                    Price
-                    <LuArrowUpDown className="ml-1" />
-                </Button>
-            ),
-            cell: ({ row }) => (
-                <span>
-                    {row.getValue('price') !== undefined
-                        ? `$${Number(row.getValue('price')).toFixed(2)}`
-                        : ''}
-                </span>
-            ),
-            meta: { label: 'Price' } as ColumnMeta,
+            accessorFn: (row) => `${row.price}`,
+            id: 'price',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Price
+                        <LuArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Price'
+            } as ColumnMeta
+        },
+        {
+            accessorFn: (row) => `${row.updated_date}`,
+            id: 'updatedDate',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Updated Date
+                        <LuArrowUpDown className="ml-1" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Updated Date'
+            } as ColumnMeta
         },
         {
             id: 'actions',
@@ -317,22 +238,22 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 label: 'Actions'
             } as ColumnMeta,
             cell: ({ row }) => {
-                const lumbercost = row.original
+                const wood = row.original
                 return (
                     <div className="flex justify-center gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => onEdit(lumbercost)}
+                            onClick={() => onEdit(wood)}
                             className="size-8 text-white bg-sky-500 hover:bg-sky-600"
                         >
-                            <LuPencilLine className="h-4 w-4" />
+                            <LuPencilLine />
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => onDelete(lumbercost.id ?? 0)}
+                            onClick={() => onDelete(wood.replace_cost_id ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
-                            <LuTrash2 className="h-4 w-4" />
+                            <LuTrash2 />
                         </Button>
                     </div>
                 )
@@ -399,17 +320,9 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <Button onClick={generateTimeSheetReport} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
-                    <LuPrinter className="mr-1" />
-                    Print Time Sheet Report
-                </Button>
-                <Button onClick={generateLumberCostReport} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
-                    <LuPrinter className="mr-1" />
-                    Print Lumber Cost
-                </Button>
                 <Button onClick={onAddNew} className="bg-neutral-900 text-white hover:bg-neutral-700 w-full sm:w-auto">
                     <LuPlus className="mr-1" />
-                    Add Lumber Cost
+                    Add Wood Type
                 </Button>
             </div>
 
@@ -437,7 +350,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow className="hover:bg-neutral-50 bg-white text-black">
+                            <TableRow className="hover:bg-neutral-50 bg-white">
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
                                         <LuLoader className="h-6 w-6 animate-spin" />
@@ -447,10 +360,16 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                             </TableRow>
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="hover:bg-neutral-50 bg-white text-black">
+                                <TableRow
+                                    key={row.id}
+                                    className="hover:bg-neutral-50 bg-white"
+                                >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="font-medium text-center">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
                                         </TableCell>
                                     ))}
                                 </TableRow>
