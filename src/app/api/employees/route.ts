@@ -20,25 +20,50 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
+    if (!data) {
+      console.error('Request body is null or empty');
+      return NextResponse.json({ error: 'Request body cannot be null or empty' }, { status: 400 });
+    }
+
     // Validate data using Zod
     const validationResult = EmployeeSchema.safeParse(data);
 
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
-      return NextResponse.json({ error: 'Invalid input data', details: validationResult.error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid input data', details: validationResult.error.errors },
+        { status: 400 }
+      );
     }
 
-    // Data is valid, proceed with creation
+    const validData = validationResult.data;
+
+    // Ensure the location exists in the Locations table (if location is provided)
+    if (validData.location) {
+      const locationExists = await prisma.locations.findUnique({
+        where: { location: validData.location },
+      });
+
+      if (!locationExists) {
+        return NextResponse.json(
+          { error: `Location '${validData.location}' does not exist` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create the employee
     const employee = await prisma.employees.create({
       data: {
-        ...validationResult.data,
-        added_by: validationResult.data.added_by || 'system', // Default value
-        updated_by: validationResult.data.updated_by || 'system', // Default value
+        ...validData,
+        added_by: validData.added_by || 'system', // Default value
+        updated_by: validData.updated_by || 'system', // Default value
       },
     });
+
     return NextResponse.json(employee);
-  } catch (error) {
-    console.error('Error creating employee:', error);
-    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error creating employee:', error.message || error);
+    return NextResponse.json({ error: 'Failed to create employee', details: error.message }, { status: 500 });
   }
 }

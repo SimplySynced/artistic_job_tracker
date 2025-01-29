@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Wood, WoodReplacement, WoodReplacementFormData, WoodReplacementSchema } from '@/types';
 import { z } from 'zod';
 import { WoodReplacementTable } from './table';
@@ -23,6 +23,7 @@ const defaultFormData: WoodReplacementFormData = {
 };
 
 export default function TimeManagement() {
+  const { toast } = useToast();
   const { id } = useParams(); // Get employee ID from the route params
   const [WoodReplacement, setWoodReplacement] = useState<WoodReplacement[]>([]);
   const [editingWoodReplacement, setEditingWoodReplacement] = useState<WoodReplacement | null>(null);
@@ -52,15 +53,15 @@ export default function TimeManagement() {
   );
 
   useEffect(() => {
-      const fetchAllData = async () => {
-        try {
-          await fetchData(`/api/woods`, setWoods);
-          await fetchData(`/api/wood-replacement`, setWoodReplacement);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchAllData();
+    const fetchAllData = async () => {
+      try {
+        await fetchData(`/api/woods`, setWoods);
+        await fetchData(`/api/wood-replacement`, setWoodReplacement);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAllData();
   }, [fetchData]);
 
   if (isLoading) {
@@ -242,7 +243,7 @@ export default function TimeManagement() {
                       required
                     />
                     {formErrors[field.name as keyof WoodReplacementFormData] && (
-                      <p className="text-red-500 text-sm">{formErrors[field.name]}</p>
+                      <p className="text-red-500 text-sm">{formErrors[field.name as keyof WoodReplacementFormData]}</p>
                     )}
                   </div>
                 ))}

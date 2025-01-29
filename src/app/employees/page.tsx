@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 import { Employee, EmployeeFormData, EmployeeSchema } from '@/types';
 import { z } from 'zod';
 import { EmployeeTable } from './table';
@@ -22,6 +22,7 @@ const getDefaultFormData = (): EmployeeFormData => ({
 });
 
 export default function EmployeePage() {
+  const { toast } = useToast()
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [locations, setLocations] = useState<{ id: number; location: string }[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,52 +32,33 @@ export default function EmployeePage() {
   const [formData, setFormData] = useState<EmployeeFormData>(getDefaultFormData());
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
 
-  // Fetch Locations
-  const fetchLocations = async (): Promise<void> => {
-    try {
-      const response = await fetch('/api/locations');
-      if (!response.ok) throw new Error('Failed to fetch locations');
-      const data = await response.json();
-      setLocations(data); // Ensure `data` is an array of { id, location }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch locations',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch Employees
-  const fetchEmployees = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/employees');
-      if (!response.ok) throw new Error('Failed to fetch employees');
-      const data = await response.json();
-
-      const validatedData = z
-        .array(EmployeeSchema)
-        .parse(data.map((emp: any) => ({ ...emp, active: Boolean(emp.active) })));
-
-      setEmployees(validatedData);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch employees.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const fetchData = useCallback(
+    async (url: string, setter: (data: any) => void, schema?: z.ZodSchema<any>) => {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to fetch data from ${url}`);
+        const data = await response.json();
+        setter(schema ? schema.parse(data) : data);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error instanceof Error ? error.message : 'An error occurred.',
+          variant: 'destructive',
+        });
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchEmployees();
-    fetchLocations();
-  }, []);
+    setIsLoading(true);
+    try {
+      fetchData(`/api/employees`, setEmployees);
+      fetchData(`/api/locations`, setLocations);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -129,9 +111,10 @@ export default function EmployeePage() {
       toast({
         title: 'Success',
         description: `Employee ${editingEmployee ? 'updated' : 'added'} successfully.`,
+        variant: 'success'
       });
 
-      fetchEmployees();
+      fetchData(`/api/employees`, setEmployees);
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -164,7 +147,7 @@ export default function EmployeePage() {
         onDelete={async (id) => {
           if (confirm('Are you sure you want to delete this employee?')) {
             await fetch(`/api/employees/${id}`, { method: 'DELETE' });
-            fetchEmployees();
+            fetchData(`/api/employees`, setEmployees);;
           }
         }}
         onAddNew={handleAddNew}
@@ -194,7 +177,7 @@ export default function EmployeePage() {
                     <Input
                       name={field}
                       type={field === 'pay_rate' ? 'number' : 'text'}
-                      value={formData[field as keyof EmployeeFormData] || ''}
+                      value={field === 'active' ? (formData.active ? 'true' : 'false') : String(formData[field as keyof EmployeeFormData] || '')}
                       onChange={handleInputChange}
                       required={field !== 'nick_name'}
                     />

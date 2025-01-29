@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Job, LaborCode, LumberCost, LumberCostFormData, LumberCostSchema, WoodReplacement } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
@@ -32,7 +32,8 @@ const defaultFormData: LumberCostFormData = {
   updated_date: ''
 };
 
-export default function TimeManagement(session:any) {
+export default function TimeManagement(session: any) {
+  const { toast } = useToast();
   const { id } = useParams(); // Get employee ID from the route params
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
@@ -59,7 +60,7 @@ export default function TimeManagement(session:any) {
           variant: 'destructive',
         });
       }
-    },[]
+    }, []
   );
 
   useEffect(() => {
@@ -243,7 +244,7 @@ export default function TimeManagement(session:any) {
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
-        Lumber Cost Sheet for Job #{id}
+          Lumber Cost Sheet for Job #{id}
         </h1>
         <h3 className="text-md md:text-lg">Job Name: {jobinfo[0].job_customer}</h3>
       </div>

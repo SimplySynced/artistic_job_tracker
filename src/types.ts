@@ -51,9 +51,9 @@ export const TimeSheetSchema = z.object({
     job_code_description: z.string().optional(),
     begin_time: z.string(),
     end_time: z.string(),
-    hours: z.number(),
-    minutes: z.number(),
-    pay_rate: z.number().nonnegative(),
+    hours: z.number().min(0, "Hours cannot be negative"), // Allow 0 or greater
+    minutes: z.number().min(0, "Minutes cannot be negative"), // Allow 0 or greater
+    pay_rate: z.number().nonnegative("Pay rate must be positive"), // Non-negative values only
     added_by: z.string(),
     added_date: z.string(),
 });

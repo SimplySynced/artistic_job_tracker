@@ -3,13 +3,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 import { Job, JobFormData, JobSchema } from '@/types';
 import { US_STATES } from '@/lib/utils';
 import { z } from 'zod';
 import { JobTable } from './table';
 
 export default function JobsManagement() {
+  const { toast } = useToast();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [locations, setLocations] = useState<{ id: number; location: string }[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -231,6 +232,7 @@ export default function JobsManagement() {
       toast({
         title: 'Success',
         description: `Job ${editingJob ? 'updated' : 'added'} successfully`,
+        variant: 'success'
       });
     } catch (error) {
       toast({

@@ -4,12 +4,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Wood, WoodFormData, WoodSchema } from '@/types';
 import { z } from 'zod';
 import { WoodTable } from "./table"
 
 export default function WoodManagement() {
+  const { toast } = useToast();
   const [woods, setWoods] = useState<Wood[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWood, setEditingWood] = useState<Wood | null>(null);

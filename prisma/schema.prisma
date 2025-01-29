@@ -12,14 +12,13 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
-  password      String
-  emailVerified  DateTime?
+  emailVerified DateTime?
   image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  password      String
   accounts      Account[]
   sessions      Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Account {
@@ -34,11 +33,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
@@ -47,10 +44,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -62,7 +58,7 @@ model VerificationToken {
 }
 
 model Employees {
-  id           Int     @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   first_name   String
   last_name    String?
   nick_name    String?
@@ -99,7 +95,7 @@ model Jobs {
 }
 
 model JobLumberCost {
-  id              Int  @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   date            String
   job_number      Int
   wood_id         Int
@@ -141,13 +137,13 @@ model WoodTypes {
 }
 
 model WoodReplacement {
-  replace_cost_id       Int      @id
-  wood_id               Int?
-  wood_type             String?
-  thickness             Float?
-  waste_factor          Float?
-  unit                  String
-  replacement           Float?
-  price                 Int
-  updated_date          String
+  replace_cost_id Int     @unique
+  wood_id         Int?
+  wood_type       String?
+  thickness       Float?
+  waste_factor    Float?
+  unit            String
+  replacement     Float?
+  price           Int
+  updated_date    String
 }
