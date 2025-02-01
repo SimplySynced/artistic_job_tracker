@@ -17,6 +17,8 @@ export default function LaborCodesManagement() {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<LaborCodeFormData>({
     description: '',
+    job_labor_code: 0,
+    location: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LaborCodeFormData, string>>>({});
 
@@ -83,18 +85,21 @@ export default function LaborCodesManagement() {
     }
   };
 
-  const handleEdit = useCallback((job_labor_code: LaborCode): void => {
-    setEditingLaborCode(job_labor_code);
+  const handleEdit = (labor_code: LaborCode): void => {
+    setEditingLaborCode(labor_code);
     setFormData({
-      ...job_labor_code,
+      ...labor_code,
+      description: labor_code.description.toString(),
     });
     setIsModalOpen(true);
-  }, []);
+  };
 
   const handleAddNew = (): void => {
     setEditingLaborCode(null);
     setFormData({
+      job_labor_code: 0,
       description: '',
+      location: '',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -105,7 +110,9 @@ export default function LaborCodesManagement() {
     setIsModalOpen(false);
     setEditingLaborCode(null);
     setFormData({
+      job_labor_code: 0,
       description: '',
+      location: '',
     });
     setFormErrors({});
   };

@@ -50,7 +50,7 @@ export async function POST(req) {
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([700, 800]);
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontSize = 8;
+  const fontSize = 10;
   const margin = 20;
   const columnWidths = [80, 50, 50, 50, 50, 100, 50, 50, 50, 50, 100];
   let yPosition = 760;

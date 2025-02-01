@@ -143,7 +143,7 @@ export default function TimeManagement() {
         description: `Wood Replacement ${editingWoodReplacement ? 'updated' : 'added'} successfully.`,
       });
 
-      fetchData(`/api/wood-replacement/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
+      fetchData(`/api/wood-replacement/`, setWoodReplacement);
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -160,7 +160,6 @@ export default function TimeManagement() {
     }
   };
 
-
   // Handle delete
   const handleDelete = async (woodreplacementId: number): Promise<void> => {
     if (!confirm('Are you sure you want to delete this wood replacement?')) return;
@@ -169,7 +168,7 @@ export default function TimeManagement() {
       const response = await fetch(`/api/wood-replacement/${woodreplacementId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete wood replacement');
 
-      await fetchData(`/api/wood-replacement/${id}`, setWoodReplacement, z.array(WoodReplacementSchema));
+      await fetchData(`/api/wood-replacement/`, setWoodReplacement);
       toast({
         title: 'Success',
         description: 'Job deleted successfully',
@@ -228,7 +227,7 @@ export default function TimeManagement() {
 
                 {[
                   { name: 'replace_cost_id', label: 'Replace Cost ID', type: 'number' },
-                  { name: 'thickness', label: 'Thickness', type: 'number' },
+                  { name: 'thickness', label: 'Thickness (ft)', type: 'number' },
                   { name: 'waste_factor', label: 'Waste Factor', type: 'number' },
                   { name: 'unit', label: 'Unit', type: 'text' },
                   { name: 'replacement', label: 'Replacement', type: 'number' }

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "lib": [
       "dom",
       "dom.iterable",
@@ -35,8 +35,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "components/ui/logo.js"
-, "src/app/api/generate-lumber-cost/route.js", "src/app/timesheet/[id]/page.js"  ],
+    "components/ui/logo.js" ],
   "exclude": [
     "node_modules"
   ]

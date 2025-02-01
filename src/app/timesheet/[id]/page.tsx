@@ -9,17 +9,16 @@ import { Employee, LaborCode, TimeSheet, TimeSheetFormData, TimeSheetSchema } fr
 import { z } from 'zod';
 import { TimeSheetTable } from './table';
 import { useParams } from 'next/navigation';
-import { LaborCodeFormData } from '../../../types';
 
 const defaultFormData: TimeSheetFormData = {
   employee_id: 0,
   date_worked: '',
   job_number: 0,
   job_code: 0,
-  begin_time: '',
-  end_time: '',
-  hours: 0,
-  minutes: 0,
+  begin_time: '00:00',
+  end_time: '00:00',
+  hours: 0, // Calculated
+  minutes: 0, // Calculated
   pay_rate: 0,
   added_by: '',
   added_date: '',
@@ -171,24 +170,12 @@ export default function TimeManagement() {
       return `${year}-${month}-${day}`;
     };
 
-    // Example usage
     const formattedDate = formatDate(currentDate);
-
-    const finalData = {
-      ...formData,
-      employee_id: employeeInfo?.id || 0,
-      pay_rate: employeeInfo?.pay_rate || 0,
-      job_number: Number(formData.job_number),
-      job_code: Number(formData.job_code),
-      hours: Number(formData.hours),
-      minutes: Number(formData.minutes),
-      added_date: formattedDate,
-    };
 
     try {
       // Calculate hours and minutes from begin_time and end_time
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
-      const laborDescription = laborCodes.find((item) => item.id === Number(formData.job_code));
+      const laborDescription = laborCodes.find((item) => item.id ===  Number(formData.job_code));
       const jcd = laborDescription?.description
 
       // Update the formData with calculated hours and minutes
@@ -196,14 +183,14 @@ export default function TimeManagement() {
         ...formData,
         hours,
         minutes,
-        begin_time: formData.begin_time + ':00',
-        end_time: formData.end_time + ':00',
-        employee_id: employeeInfo?.id || 0,
-        pay_rate: employeeInfo?.pay_rate || 0,
+        begin_time: formData.begin_time,
+        end_time: formData.end_time,
+        employee_id: employeeInfo?.data.id || 0,
+        pay_rate: employeeInfo?.data.pay_rate || 0,
         job_number: Number(formData.job_number),
         job_code: Number(formData.job_code),
         job_code_description: jcd,
-        added_date: new Date().toISOString().split('T')[0], // Set current date
+        added_date: formattedDate, // Set current date
       };
 
       // Validate the updated formData
@@ -273,10 +260,8 @@ export default function TimeManagement() {
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
-          {/* @ts-ignore */}
           Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.last_name}
         </h1>
-        {/* @ts-ignore */}
         <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
       </div>
 
@@ -318,7 +303,7 @@ export default function TimeManagement() {
                       required
                     />
                     {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm">{formErrors[field.name as keyof TimeSheetFormData]}</p>
+                      <p className="text-red-500 text-sm">{formErrors[field.name  as keyof TimeSheetFormData]}</p>
                     )}
                   </div>
                 ))}
@@ -335,7 +320,7 @@ export default function TimeManagement() {
                     <option value="">Select a Labor Code</option>
                     {laborCodes.map((lc) => (
                       <option key={lc.id} value={lc.id}>
-                        {lc.id} - {lc.description}
+                        {lc.job_labor_code} - {lc.location} - {lc.description}
                       </option>
                     ))}
                   </select>

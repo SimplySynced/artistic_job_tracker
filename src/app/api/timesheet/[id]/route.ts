@@ -28,10 +28,25 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
+        console.log(data)
+        // Fetch the pay_rate for the given employee_id
+        const employee = await prisma.employees.findUnique({
+            where: { id: data.employee_id },
+            select: { pay_rate: true },
+        });
 
+        if (!employee || employee.pay_rate === null) {
+            return NextResponse.json(
+                { error: 'Employee not found or pay_rate is null' },
+                { status: 404 }
+            );
+        }
+
+        // Add the fetched pay_rate to the timesheet data
         const newEntry = await prisma.timeSheets.create({
             data: {
                 ...data,
+                pay_rate: employee.pay_rate,
             },
         });
 

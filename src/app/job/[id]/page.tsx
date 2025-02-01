@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Job, LaborCode, LumberCost, LumberCostFormData, LumberCostSchema, WoodReplacement } from '@/types';
+import { Job, LumberCost, LumberCostFormData, LumberCostSchema, WoodReplacement } from '@/types';
 import { z } from 'zod';
 import { JobTable } from './table';
 import { useParams } from 'next/navigation';
@@ -32,9 +33,11 @@ const defaultFormData: LumberCostFormData = {
   updated_date: ''
 };
 
-export default function TimeManagement(session: any) {
+export default function TimeManagement() {
   const { toast } = useToast();
   const { id } = useParams(); // Get employee ID from the route params
+  const { data: session } = useSession();
+  const username = session?.user?.name || 'Unknown User';
   const [lumbercosts, setLumberCost] = useState<LumberCost[]>([]);
   const [editingLumberCost, setEditingLumberCost] = useState<LumberCost | null>(null);
   const [woods, setWoodTypes] = useState<WoodReplacement[]>([]);
@@ -44,7 +47,6 @@ export default function TimeManagement(session: any) {
   const [formData, setFormData] = useState<LumberCostFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof LumberCostFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
-  console.log(session?.user?.name)
 
   const fetchData = useCallback(
     async (url: string, setter: (data: any) => void, schema?: z.ZodSchema<any>) => {
@@ -170,12 +172,12 @@ export default function TimeManagement(session: any) {
       ft_per_piece: Number(fpp),
       price: Number(replaceData[0].replacement),
       tbf: Number(totalboardfoot),
-      entered_by: 'TEST',
+      entered_by: username,
       entered_date: formattedDate,
-      updated_by: 'TEST',
+      updated_by: username,
       updated_date: formattedDate
     };
-    //console.log(finalData)
+
     try {
       LumberCostSchema.parse(finalData);
       setIsSaving(true);

@@ -643,15 +643,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "@prisma/client@npm:6.1.0"
+"@prisma/client@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "@prisma/client@npm:6.3.0"
   peerDependencies:
     prisma: "*"
+    typescript: ">=5.1.0"
   peerDependenciesMeta:
     prisma:
       optional: true
-  checksum: 10c0/6cb3c81ce52e37f4d48598e114ff1f9c46297a3299ddf80701d26794aacb8e46f3726cb20dd4f1528cd7b8a713d38e8e68a1fd2be8c370f0925f92b7a9b6b955
+    typescript:
+      optional: true
+  checksum: 10c0/b26dc188cf904cf29af7bf3b2ff5a92a034d43f813bcbf5a2e0f37d2fe4fedda69fc42afad3ff83ecfa71c7a43c70bef06c0a1fae80efb3659c126f15a2c02f4
   languageName: node
   linkType: hard
 
@@ -2042,7 +2045,7 @@ __metadata:
   dependencies:
     "@auth/prisma-adapter": "npm:^2.7.4"
     "@headlessui/react": "npm:^2.2.0"
-    "@prisma/client": "npm:^6.1.0"
+    "@prisma/client": "npm:^6.3.0"
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-collapsible": "npm:^1.1.2"
     "@radix-ui/react-dialog": "npm:^1.1.4"

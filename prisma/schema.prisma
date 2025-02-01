@@ -71,19 +71,19 @@ model Employees {
 }
 
 model TimeSheets {
-  id                    Int     @id @default(autoincrement())
-  employee_id           Int
-  date_worked           String
-  job_number            Int
-  job_code              Int
-  job_code_description  String?
-  begin_time            String?   @default("")
-  end_time              String?   @default("")
-  hours                 Int       @default(0)
-  minutes               Int       @default(0)
-  pay_rate              Float
-  added_by              String
-  added_date            String
+  id                   Int       @id @default(autoincrement())
+  employee_id          Int
+  date_worked          String
+  job_number           Int
+  job_code             Int
+  begin_time           DateTime? @db.Time(6)
+  end_time             DateTime? @db.Time(6)
+  hours                Int       @default(0)
+  minutes              Int       @default(0)
+  pay_rate             Float
+  added_by             String
+  added_date           String
+  job_code_description String?
 }
 
 model Jobs {
@@ -118,9 +118,11 @@ model JobLumberCost {
 }
 
 model JobLaborCodes {
-  id          Int     @id @default(autoincrement())
-  description String
-  enabled     Boolean @default(true)
+  id             Int     @id @default(autoincrement())
+  description    String
+  enabled        Boolean @default(true)
+  job_labor_code Int     @default(0)
+  location       String? @default("")
 }
 
 model Locations {

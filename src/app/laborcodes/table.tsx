@@ -34,8 +34,10 @@ type ColumnMeta = {
 }
 
 type LaborCode = {
-    id?: number
+    id: number
+    job_labor_code: number
     description: string
+    location: string
 }
 
 interface LaborCodeTableProps {
@@ -54,7 +56,7 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
 
     const columns: ColumnDef<LaborCode, any>[] = [
         {
-            accessorKey: 'id',
+            accessorKey: 'job_labor_code',
             header: ({ column }) => {
                 return (
                     <Button
@@ -88,6 +90,25 @@ export function LaborCodeTable({ data, onEdit, onDelete, onAddNew, isLoading = f
             },
             meta: {
                 label: 'Job Description'
+            } as ColumnMeta
+        },
+        {
+            accessorFn: (row) => `${row.location}`,
+            id: 'location',
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="p-0 hover:bg-transparent"
+                    >
+                        Location
+                        <LuArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                )
+            },
+            meta: {
+                label: 'Location'
             } as ColumnMeta
         },
         {

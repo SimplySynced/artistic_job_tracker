@@ -23,7 +23,6 @@ export async function PUT(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
         const { id } = await params
         const entryid = Number(id)
 
@@ -45,7 +44,6 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
         const newEntry = await prisma.jobLumberCost.create({
             data: {
                 ...data,

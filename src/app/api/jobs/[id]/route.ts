@@ -7,8 +7,9 @@ export async function GET(
 ) {
     try {
         const { id } = await params
+        const jobnum = Number(id)
         const jobinfo = await prisma.jobs.findMany({
-            where: { job_number: parseInt(id) }
+            where: { job_number: jobnum }
         });
         return NextResponse.json(jobinfo);
     } catch (error) {
@@ -16,16 +17,36 @@ export async function GET(
     }
 }
 
-
-
+export async function PUT(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const data = await request.json();
+        const { id } = await params
+        const jobnum = Number(id)
+        const job = await prisma.jobs.update({
+            where: { id: jobnum },
+            data: {
+                ...data,
+            },
+        });
+        return NextResponse.json(job);
+    } catch (error) {
+        console.error("Error updating job:", error);
+        return NextResponse.json({ error: 'Failed to update job' }, { status: 500 });
+    }
+}
 
 export async function DELETE(
     request: Request,
     { params }: { params: { id: string } }
 ) {
     try {
+        const { id } = await params
+        const jobnum = Number(id)
         await prisma.jobs.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: jobnum },
         });
         return NextResponse.json({ message: 'Job deleted successfully' });
     } catch (error) {

@@ -194,25 +194,6 @@ export function WoodReplacementTable({ data, onEdit, onDelete, onAddNew, isLoadi
             } as ColumnMeta
         },
         {
-            accessorFn: (row) => `${row.price}`,
-            id: 'price',
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        className="p-0 hover:bg-transparent"
-                    >
-                        Price
-                        <LuArrowUpDown className="ml-1" />
-                    </Button>
-                )
-            },
-            meta: {
-                label: 'Price'
-            } as ColumnMeta
-        },
-        {
             accessorFn: (row) => `${row.updated_date}`,
             id: 'updatedDate',
             header: ({ column }) => {

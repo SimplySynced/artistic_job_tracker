@@ -49,11 +49,15 @@ export const TimeSheetSchema = z.object({
     job_number: z.number(),
     job_code: z.number(),
     job_code_description: z.string().optional(),
-    begin_time: z.string(),
-    end_time: z.string(),
-    hours: z.number().min(0, "Hours cannot be negative"), // Allow 0 or greater
-    minutes: z.number().min(0, "Minutes cannot be negative"), // Allow 0 or greater
-    pay_rate: z.number().nonnegative("Pay rate must be positive"), // Non-negative values only
+    begin_time: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid Time"), // Expects HH:mm (24-hour)
+    end_time: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid Time"), // Expects HH:mm (24-hour)
+    hours: z.number().min(0, "Hours cannot be negative"),
+    minutes: z.number().min(0, "Minutes cannot be negative"),
+    pay_rate: z.number().nonnegative("Pay rate must be positive"),
     added_by: z.string(),
     added_date: z.string(),
 });
@@ -217,7 +221,9 @@ export type WoodReplacementFormData = {
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
     id: z.number().optional(),
+    job_labor_code: z.number(),
     description: z.string().min(1, "Description is required"),
+    location: z.string(),
 });
 
 // TypeScript types derived from Zod schema
@@ -226,5 +232,7 @@ export type NewLaborCode = Omit<LaborCode, 'id'>;
 
 // Form data type (string values for input fields)
 export type LaborCodeFormData = {
+    job_labor_code: number;
     description: string;
+    location: string;
 };
