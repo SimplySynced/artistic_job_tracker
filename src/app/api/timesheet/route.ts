@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TimeSheetSchema } from '@/types'; // Assume this is the path to your Zod schema
+import { TimeSheetSchema } from '@/types';
 import prisma from '@/lib/prisma';
 
 export async function GET() {
@@ -19,28 +19,33 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    //console.log(data)
+    console.log('Incoming payload:', data);
+
+    if (data === null || typeof data !== 'object') {
+      return NextResponse.json(
+        { error: 'No valid payload provided' },
+        { status: 400 }
+      );
+    }
+
     // Validate data using Zod
     const validationResult = TimeSheetSchema.safeParse(data);
-    console.log(validationResult)
-
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
-      return NextResponse.json({ error: 'Invalid input data', details: validationResult.error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid input data', details: validationResult.error.errors },
+        { status: 400 }
+      );
     }
 
     // Data is valid, proceed with creation
     const timesheet = await prisma.timeSheets.create({
-      data: {
-        ...validationResult.data,
-        begin_time: validationResult.data.begin_time + ':00',
-        end_time: validationResult.data.end_time + ':00',
-      }
+      data: validationResult.data,
     });
-    console.log(timesheet);
+    console.log('Created timesheet:', timesheet);
     return NextResponse.json(timesheet);
   } catch (error) {
-    console.error('Error creating employee:', error);
+    console.error('Error creating timesheet entry:', error);
     return NextResponse.json({ error: 'Failed to insert time' }, { status: 500 });
   }
 }

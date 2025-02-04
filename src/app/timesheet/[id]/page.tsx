@@ -15,6 +15,7 @@ const defaultFormData: TimeSheetFormData = {
   date_worked: '',
   job_number: 0,
   job_code: 0,
+  job_code_description: '',
   begin_time: '00:00',
   end_time: '00:00',
   hours: 0, // Calculated
@@ -175,8 +176,8 @@ export default function TimeManagement() {
     try {
       // Calculate hours and minutes from begin_time and end_time
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
-      const laborDescription = laborCodes.find((item) => item.id ===  Number(formData.job_code));
-      const jcd = laborDescription?.description
+      const laborDescription = laborCodes.find((item) => item.id === Number(formData.job_code));
+      const jcd = laborDescription?.description;
 
       // Update the formData with calculated hours and minutes
       const updatedFormData = {
@@ -193,14 +194,16 @@ export default function TimeManagement() {
         added_date: formattedDate, // Set current date
       };
 
-      // Validate the updated formData
+      console.log(updatedFormData);
+
+      // Validate the updatedFormData
       TimeSheetSchema.parse(updatedFormData);
 
       setIsSaving(true);
 
       const url = editingTimeSheet
         ? `/api/timesheet/${editingTimeSheet.id}`
-        : '/api/timesheet/';
+        : `/api/timesheet/`;
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -232,7 +235,6 @@ export default function TimeManagement() {
       setIsSaving(false);
     }
   };
-
 
   // Handle delete
   const handleDelete = async (timesheetId: number): Promise<void> => {

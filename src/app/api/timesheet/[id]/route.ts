@@ -52,7 +52,7 @@ export async function POST(
 
         return NextResponse.json(newEntry);
     } catch (error) {
-        console.error('Error adding timesheet:', error);
+        console.error('Error adding timesheet: ', error);
         return NextResponse.json({ error: 'Failed to add time' }, { status: 500 });
     }
 }

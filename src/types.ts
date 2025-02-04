@@ -49,12 +49,8 @@ export const TimeSheetSchema = z.object({
     job_number: z.number(),
     job_code: z.number(),
     job_code_description: z.string().optional(),
-    begin_time: z
-        .string()
-        .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid Time"), // Expects HH:mm (24-hour)
-    end_time: z
-        .string()
-        .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid Time"), // Expects HH:mm (24-hour)
+    begin_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid begin time format'),
+    end_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid end time format'),
     hours: z.number().min(0, "Hours cannot be negative"),
     minutes: z.number().min(0, "Minutes cannot be negative"),
     pay_rate: z.number().nonnegative("Pay rate must be positive"),
