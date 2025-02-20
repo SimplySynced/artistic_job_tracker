@@ -179,6 +179,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
             meta: { label: 'Wood Type' } as ColumnMeta
         },
         {
+            accessorFn: (row) => `${row.thickness * 4}/4`,
             accessorKey: 'thickness',
             header: ({ column }) => {
                 return (

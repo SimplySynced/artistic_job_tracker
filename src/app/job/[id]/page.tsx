@@ -221,17 +221,17 @@ export default function TimeManagement() {
 
 
   // Handle delete
-  const handleDelete = async (timesheetId: number): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this job?')) return;
+  const handleDelete = async (lumbercostId: number): Promise<void> => {
+    if (!confirm('Are you sure you want to delete this lumber cost?')) return;
 
     try {
-      const response = await fetch(`/api/timesheet/${timesheetId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete job');
+      const response = await fetch(`/api/job/${lumbercostId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete lumber cost');
 
       //await fetchTimeSheets();
       toast({
         title: 'Success',
-        description: 'Job deleted successfully',
+        description: 'Lumber cost deleted successfully',
       });
     } catch (error) {
       toast({
@@ -270,7 +270,7 @@ export default function TimeManagement() {
               className="bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6 space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="text-xl font-bold">{editingLumberCost ? 'Edit TimeSheet' : 'Add TimeSheet'}</span>
+              <span className="text-xl font-bold">{editingLumberCost ? 'Edit Lumber Cost' : 'Add Lumber Cost'}</span>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {[
                   { name: 'date', label: 'Date ', type: 'date' },
@@ -325,6 +325,7 @@ export default function TimeManagement() {
                     <Input
                       name={field.name}
                       type={field.type}
+                      step='0.25'
                       value={formData[field.name as keyof LumberCostFormData] || ''}
                       onChange={handleInputChange}
                       required

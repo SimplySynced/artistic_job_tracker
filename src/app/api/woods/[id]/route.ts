@@ -25,8 +25,10 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
+        const { id } = await params
+        const entryid = Number(id)
         await prisma.woodTypes.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: entryid },
         });
         return NextResponse.json({ message: 'Wood Type deleted successfully' });
     } catch (error) {

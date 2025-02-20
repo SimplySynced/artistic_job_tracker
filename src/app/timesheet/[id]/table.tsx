@@ -27,13 +27,7 @@ import {
     SortingState,
     getPaginationRowModel,
 } from '@tanstack/react-table';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
     LuChevronFirst,
     LuChevronLast,
@@ -64,241 +58,245 @@ interface TimesheetTableProps {
     isLoading: boolean;
 }
 
-// Helper function to convert 24-hour time to 12-hour time format.
-const formatTime12 = (timeStr: string) => {
-    if (!timeStr) return '';
-        const parts = timeStr.split(':');
-    if (parts.length < 2) return timeStr; // not in a valid time format
-        let hour = parseInt(parts[0], 10);
-        const minute = parts[1];
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        hour = hour % 12;
-    if (hour === 0) hour = 12;
-    return `${hour}:${minute} ${ampm}`;
+/**
+ * Converts an ISO-formatted time string (e.g., "1970-01-01T19:00:00.000Z")
+ * to a 12-hour time string with AM/PM (e.g., "7:00 PM").
+ * This version uses toLocaleTimeString with timeZone set to 'UTC'
+ * so that the time is not adjusted for the local timezone.
+ */
+const formatTime12 = (timeStr: string): string => {
+  if (!timeStr) return '';
+  const date = new Date(timeStr);
+  return date.toLocaleTimeString('en-US', {
+    timeZone: 'UTC',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 };
 
 export function TimeSheetTable({
-        data,
-        onEdit,
-        onDelete,
-        onAddNew,
-        isLoading = false,
-    }: TimesheetTableProps) {
-        const [sorting, setSorting] = useState<SortingState>([]);
-        const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-        const [globalFilter, setGlobalFilter] = useState('');
-        const [columnVisibility, setColumnVisibility] = useState({});
-        const [laborCodes, setLaborCodes] = useState<{ [key: number]: LaborCode }>({});
+  data,
+  onEdit,
+  onDelete,
+  onAddNew,
+  isLoading = false,
+}: TimesheetTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [laborCodes, setLaborCodes] = useState<{ [key: number]: LaborCode }>({});
 
-        useEffect(() => {
-        // Fetch labor code details for each job_code in data
-            const fetchLaborCodes = async () => {
-            const jobCodes = [...new Set(data.map((item) => item.job_code))]; // Get unique job codes
-            const fetchedCodes: { [key: number]: LaborCode } = {};
+  useEffect(() => {
+    // Fetch labor code details for each job_code in data
+    const fetchLaborCodes = async () => {
+      const jobCodes = [...new Set(data.map((item) => item.job_code))]; // Unique job codes
+      const fetchedCodes: { [key: number]: LaborCode } = {};
 
-            await Promise.all(
-                jobCodes.map(async (jobCode) => {
-                try {
-                    const response = await fetch(`/api/laborcodes/${jobCode}`);
-                    if (response.ok) {
-                    const data = await response.json();
-                    fetchedCodes[jobCode] = {
-                        job_labor_code: data.job_labor_code || 'N/A',
-                        description: data.description || 'No Description',
-                    };
-                    }
-                } catch (error) {
-                    console.error(`Error fetching labor code ${jobCode}:`, error);
-                }
-                })
-            );
+      await Promise.all(
+        jobCodes.map(async (jobCode) => {
+          try {
+            const response = await fetch(`/api/laborcodes/${jobCode}`);
+            if (response.ok) {
+              const result = await response.json();
+              fetchedCodes[jobCode] = {
+                job_labor_code: result.job_labor_code || 'N/A',
+                description: result.description || 'No Description',
+              };
+            }
+          } catch (error) {
+            console.error(`Error fetching labor code ${jobCode}:`, error);
+          }
+        })
+      );
 
-            setLaborCodes(fetchedCodes);
-        };
+      setLaborCodes(fetchedCodes);
+    };
 
-        if (data.length > 0) {}
-    }, [data]);
+    if (data.length > 0) {
+      fetchLaborCodes();
+    }
+  }, [data]);
 
-    const columns: ColumnDef<TimeSheet, any>[] = [
-        {
-        accessorFn: (row) => `${row.date_worked}`,
-        id: 'date_worked',
-        header: ({ column }) => (
+  const columns: ColumnDef<TimeSheet, any>[] = [
+    {
+      accessorFn: (row) => `${row.date_worked}`,
+      id: 'date_worked',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Date Worked
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      meta: { label: 'Date Worked' } as ColumnMeta,
+    },
+    {
+      accessorKey: 'job_number',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Job Number
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      meta: { label: 'Job Number' } as ColumnMeta,
+    },
+    {
+      accessorFn: (row) => row.job_code,
+      id: 'jobCode',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Job Code
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const jobCode: any = row.getValue('jobCode');
+        const laborCode = laborCodes[jobCode];
+        return laborCode ? (
+          <span>
+            {laborCode.job_labor_code} - {laborCode.description}
+          </span>
+        ) : (
+          <span>Loading...</span>
+        );
+      },
+      meta: { label: 'Job Code' } as ColumnMeta,
+    },
+    {
+      accessorKey: 'begin_time',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Begin Time
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      cell: ({ getValue }) => {
+        const timeStr = getValue<string>(); // e.g., "1970-01-01T19:00:00.000Z"
+        return formatTime12(timeStr);
+      },
+      meta: { label: 'Begin Time' } as ColumnMeta,
+    },
+    {
+      accessorKey: 'end_time',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          End Time
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      cell: ({ getValue }) => {
+        const timeStr = getValue<string>();
+        return formatTime12(timeStr);
+      },
+      meta: { label: 'End Time' } as ColumnMeta,
+    },
+    {
+      accessorKey: 'pay_rate',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Pay Rate
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      meta: { label: 'Pay Rate' } as ColumnMeta,
+      cell: ({ row }) => {
+        const pay_rate = parseFloat(row.getValue('pay_rate'));
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(pay_rate);
+      },
+    },
+    {
+      accessorKey: 'added_by',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 hover:bg-transparent"
+        >
+          Added By
+          <LuArrowUpDown className="ml-1" />
+        </Button>
+      ),
+      meta: { label: 'Added By' } as ColumnMeta,
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      meta: { label: 'Actions' } as ColumnMeta,
+      cell: ({ row }) => {
+        const timesheet = row.original;
+        return (
+          <div className="flex justify-center gap-2">
             <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
+              variant="outline"
+              onClick={() => onEdit(timesheet)}
+              className="size-8 text-white bg-sky-500 hover:bg-sky-600"
             >
-            Date Worked
-            <LuArrowUpDown className="ml-1" />
+              <LuPencilLine className="h-4 w-4" />
             </Button>
-        ),
-        meta: { label: 'Date Worked' } as ColumnMeta,
-        },
-        {
-        accessorKey: 'job_number',
-        header: ({ column }) => (
             <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
+              variant="outline"
+              onClick={() => onDelete(timesheet.id ?? 0)}
+              className="size-8 text-white bg-red-500 hover:bg-red-600"
             >
-            Job Number
-            <LuArrowUpDown className="ml-1" />
+              <LuTrash2 className="h-4 w-4" />
             </Button>
-        ),
-        meta: { label: 'Job Number' } as ColumnMeta,
-        },
-        {
-        accessorFn: (row) => row.job_code,
-        id: 'jobCode',
-        header: ({ column }) => (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
-            >
-            Job Code
-            <LuArrowUpDown className="ml-1" />
-            </Button>
-        ),
-        cell: ({ row }) => {
-            const jobCode: any = row.getValue('jobCode');
-            const laborCode = laborCodes[jobCode];
-            return laborCode ? (
-            <span>
-                {laborCode.job_labor_code} - {laborCode.description}
-            </span>
-            ) : (
-            <span>Loading...</span>
-            );
-        },
-        meta: { label: 'Job Code' } as ColumnMeta,
-        },
-        {
-        accessorKey: 'begin_time',
-        header: ({ column }) => (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
-            >
-            Begin Time
-            <LuArrowUpDown className="ml-1" />
-            </Button>
-        ),
-        // New cell renderer that formats the time in 12-hour format.
-        cell: ({ getValue }) => {
-            const timeStr = getValue<string>();
-            return formatTime12(timeStr);
-        },
-        meta: { label: 'Begin Time' } as ColumnMeta,
-        },
-        {
-        accessorKey: 'end_time',
-        header: ({ column }) => (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
-            >
-            End Time
-            <LuArrowUpDown className="ml-1" />
-            </Button>
-        ),
-        // New cell renderer that formats the time in 12-hour format.
-        cell: ({ getValue }) => {
-            const timeStr = getValue<string>();
-            return formatTime12(timeStr);
-        },
-        meta: { label: 'End Time' } as ColumnMeta,
-        },
-        {
-        accessorKey: 'pay_rate',
-        header: ({ column }) => (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
-            >
-            Pay Rate
-            <LuArrowUpDown className="ml-1" />
-            </Button>
-        ),
-        meta: { label: 'Pay Rate' } as ColumnMeta,
-        cell: ({ row }) => {
-            const pay_rate = parseFloat(row.getValue('pay_rate'));
-            return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            }).format(pay_rate);
-        },
-        },
-        {
-        accessorKey: 'added_by',
-        header: ({ column }) => (
-            <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="p-0 hover:bg-transparent"
-            >
-            Added By
-            <LuArrowUpDown className="ml-1" />
-            </Button>
-        ),
-        meta: { label: 'Added By' } as ColumnMeta,
-        },
-        {
-        id: 'actions',
-        header: 'Actions',
-        meta: { label: 'Actions' } as ColumnMeta,
-        cell: ({ row }) => {
-            const timesheet = row.original;
-            return (
-            <div className="flex justify-center gap-2">
-                <Button
-                variant="outline"
-                onClick={() => onEdit(timesheet)}
-                className="size-8 text-white bg-sky-500 hover:bg-sky-600"
-                >
-                <LuPencilLine className="h-4 w-4" />
-                </Button>
-                <Button
-                variant="outline"
-                onClick={() => onDelete(timesheet.id ?? 0)}
-                className="size-8 text-white bg-red-500 hover:bg-red-600"
-            >
-                <LuTrash2 className="h-4 w-4" />
-                </Button>
-            </div>
-            );
-        },
-        },
-    ];
+          </div>
+        );
+      },
+    },
+  ];
 
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onGlobalFilterChange: setGlobalFilter,
-        onColumnVisibilityChange: setColumnVisibility,
-        getPaginationRowModel: getPaginationRowModel(),
-        state: {
-            sorting,
-            columnFilters,
-            globalFilter,
-            columnVisibility,
-        },
-        initialState: {
-        pagination: {
-            pageSize: 10,
-        },
-        },
-    });
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: setColumnVisibility,
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      columnVisibility,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
 
     return (
         <div className="space-y-2">

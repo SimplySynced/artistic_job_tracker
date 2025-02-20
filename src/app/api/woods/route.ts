@@ -17,13 +17,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const wood_type = await prisma.woodTypes.create({
+    console.log(data)
+    const addWood = await prisma.woodTypes.create({
       data: {
-        ...data, // Default to pay_rate if not provided
-        wood_type: data.wood_type || 'NEW WOOD'
+        ...data,
+        enabled: true,
       },
     });
-    return NextResponse.json(wood_type);
+    return NextResponse.json(addWood);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create wood type' }, { status: 500 });
   }

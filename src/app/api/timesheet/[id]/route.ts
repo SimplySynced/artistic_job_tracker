@@ -65,6 +65,7 @@ export async function PUT(
         const { id } = await params
         const timesheetid = Number(id)
         const data = await request.json();
+        console.log(data)
         const job = await prisma.timeSheets.update({
             where: { id: timesheetid },
             data: {

@@ -47,26 +47,27 @@ export async function DELETE(
     try {
         const { id } = await params
         const entryid = Number(id)
-        await prisma.employees.delete({
+        await prisma.jobLumberCost.delete({
             where: { id: entryid },
         });
-        return NextResponse.json({ message: 'Employee deleted successfully' });
+        return NextResponse.json({ message: 'Lumber cost deleted successfully' });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to delete employee' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to delete lumber cost' }, { status: 500 });
     }
 }
 
 export async function POST(request: Request) {
     try {
-      const data = await request.json();
-      console.log(data)
-      const job = await prisma.jobLumberCost.create({
-        data: {
-          ...data,
-        },
-      });
-      return NextResponse.json(job);
+        const data = await request.json();
+        console.log(data)
+        const job = await prisma.jobLumberCost.create({
+            data: {
+                ...data,
+            },
+        });
+
+        return NextResponse.json(job);
     } catch (error) {
-      return NextResponse.json({ error: 'Failed to add lumber cost' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to add lumber cost' }, { status: 500 });
     }
-  }
+}

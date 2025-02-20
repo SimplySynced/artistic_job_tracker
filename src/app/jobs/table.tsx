@@ -172,7 +172,7 @@ export function JobTable({
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => onDelete(job.id ?? 0)}
+                            onClick={() => onDelete(job.job_number ?? 0)}
                             className="size-8 text-white bg-red-500 hover:bg-red-600"
                         >
                             <LuTrash2 className="h-4 w-4" />

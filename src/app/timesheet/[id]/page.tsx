@@ -10,6 +10,20 @@ import { z } from 'zod';
 import { TimeSheetTable } from './table';
 import { useParams } from 'next/navigation';
 
+/**
+ * Converts an ISO-formatted time string (e.g., "1970-01-01T19:00:00.000Z")
+ * to a string in "HH:mm" format suitable for an HTML time input.
+ */
+const formatTimeForInput = (timeStr: string): string => {
+  if (!timeStr) return '';
+  const date = new Date(timeStr);
+  // Use the UTC hours/minutes if your ISO string is in UTC.
+  // If you want local time, you can use date.getHours() and date.getMinutes() instead.
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 const defaultFormData: TimeSheetFormData = {
   employee_id: 0,
   date_worked: '',
@@ -141,9 +155,15 @@ export default function TimeManagement() {
     }
   };
 
+  // When editing, pre-populate the form.
   const handleEdit = (timesheet: TimeSheet) => {
     setEditingTimeSheet(timesheet);
-    setFormData(timesheet);
+    setFormData({
+      ...timesheet,
+      // Convert ISO time to "HH:mm" format for the time inputs.
+      begin_time: formatTimeForInput(timesheet.begin_time),
+      end_time: formatTimeForInput(timesheet.end_time),
+    });
     setIsModalOpen(true);
   };
 
@@ -162,48 +182,35 @@ export default function TimeManagement() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const currentDate = new Date().toISOString();
-    const formatDate = (isoDate: string | number | Date) => {
-      const date = new Date(isoDate);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const formattedDate = formatDate(currentDate);
+    const addedDate = new Date().toISOString();
 
     try {
-      // Calculate hours and minutes from begin_time and end_time
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
       const laborDescription = laborCodes.find((item) => item.id === Number(formData.job_code));
       const jcd = laborDescription?.description;
 
-      // Update the formData with calculated hours and minutes
+      const beginDateTime = new Date(`${formData.date_worked}T${formData.begin_time}:00Z`).toISOString();
+      const endDateTime = new Date(`${formData.date_worked}T${formData.end_time}:00Z`).toISOString();
+
       const updatedFormData = {
         ...formData,
         hours,
         minutes,
-        begin_time: formData.begin_time,
-        end_time: formData.end_time,
+        begin_time: beginDateTime,
+        end_time: endDateTime,
         employee_id: employeeInfo?.data.id || 0,
         pay_rate: employeeInfo?.data.pay_rate || 0,
         job_number: Number(formData.job_number),
         job_code: Number(formData.job_code),
         job_code_description: jcd,
-        added_date: formattedDate, // Set current date
+        added_date: addedDate,
       };
 
-      console.log(updatedFormData);
-
-      // Validate the updatedFormData
       TimeSheetSchema.parse(updatedFormData);
-
-      setIsSaving(true);
 
       const url = editingTimeSheet
         ? `/api/timesheet/${editingTimeSheet.id}`
-        : `/api/timesheet/`;
+        : `/api/timesheet/${employeeInfo?.data.id}`;
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -219,7 +226,7 @@ export default function TimeManagement() {
         description: `Timesheet ${editingTimeSheet ? 'updated' : 'added'} successfully.`,
       });
 
-      fetchData(`/api/timesheet/${id}`, setTimeSheets, z.array(TimeSheetSchema));
+      fetchData(`/api/timesheet/${employeeInfo?.data.id}`, setTimeSheets, z.array(TimeSheetSchema));
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -258,11 +265,21 @@ export default function TimeManagement() {
     }
   };
 
+  // Helper: Convert an ISO time string to "HH:mm" format for the time input.
+  const formatTimeForInput = (timeStr: string): string => {
+    if (!timeStr) return '';
+    const date = new Date(timeStr);
+    // Use getUTCHours/getUTCMinutes if the ISO time is in UTC; adjust as needed.
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
-          Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.last_name}
+          Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.nick_name} {employeeInfo.data.last_name}
         </h1>
         <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
       </div>
@@ -293,7 +310,7 @@ export default function TimeManagement() {
                   { name: 'job_number', label: 'Job Number', type: 'number' },
                   { name: 'begin_time', label: 'Begin Time', type: 'time' },
                   { name: 'end_time', label: 'End Time', type: 'time' },
-                  { name: 'added_by', label: 'Added By', type: 'text' }
+                  { name: 'added_by', label: 'Added By', type: 'text' },
                 ].map((field) => (
                   <div key={field.name}>
                     <label className="block text-sm font-medium">{field.label}</label>
@@ -305,7 +322,9 @@ export default function TimeManagement() {
                       required
                     />
                     {formErrors[field.name as keyof TimeSheetFormData] && (
-                      <p className="text-red-500 text-sm">{formErrors[field.name  as keyof TimeSheetFormData]}</p>
+                      <p className="text-red-500 text-sm">
+                        {formErrors[field.name as keyof TimeSheetFormData]}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -337,11 +356,10 @@ export default function TimeManagement() {
                   </Button>
                 </div>
               </form>
-            </div >
-          </div >
+            </div>
+          </div>
         </Dialog>
-      )
-      }
+      )}
     </div>
   );
 }

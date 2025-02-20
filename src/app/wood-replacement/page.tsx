@@ -237,6 +237,7 @@ export default function TimeManagement() {
                     <Input
                       name={field.name}
                       type={field.type}
+                      step='.25'
                       value={formData[field.name as keyof WoodReplacementFormData]?.toString() || ''}
                       onChange={handleInputChange}
                       required

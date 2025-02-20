@@ -45,8 +45,19 @@ export async function DELETE(
     try {
         const { id } = await params
         const jobnum = Number(id)
+        console.log(jobnum)
+        // Delete Lumber Cost
+        await prisma.jobLumberCost.deleteMany({
+            where: { job_number: jobnum },
+        })
+
+        // Delete Time Sheets
+        await prisma.timeSheets.deleteMany({
+            where: { job_number: jobnum },
+        })
+
         await prisma.jobs.delete({
-            where: { id: jobnum },
+            where: { job_number: jobnum },
         });
         return NextResponse.json({ message: 'Job deleted successfully' });
     } catch (error) {

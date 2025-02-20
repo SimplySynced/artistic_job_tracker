@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate data using Zod
+    // Validate the payload using Zod
     const validationResult = TimeSheetSchema.safeParse(data);
     if (!validationResult.success) {
       console.error('Validation Error:', validationResult.error.errors);
@@ -37,6 +37,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Log the validated data before sending it to Prisma
+    console.log('Validated data:', validationResult.data);
 
     // Data is valid, proceed with creation
     const timesheet = await prisma.timeSheets.create({
