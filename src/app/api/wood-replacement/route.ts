@@ -20,7 +20,6 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log(data)
     const wood_type = await prisma.woodReplacement.create({
       data: {
         ...data, // Default to pay_rate if not provided

@@ -28,7 +28,7 @@ export async function POST(
 ) {
     try {
         const data = await request.json();
-        console.log(data)
+
         // Fetch the pay_rate for the given employee_id
         const employee = await prisma.employees.findUnique({
             where: { id: data.employee_id },
@@ -65,7 +65,6 @@ export async function PUT(
         const { id } = await params
         const timesheetid = Number(id)
         const data = await request.json();
-        console.log(data)
         const job = await prisma.timeSheets.update({
             where: { id: timesheetid },
             data: {

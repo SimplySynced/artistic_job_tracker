@@ -81,8 +81,6 @@ export function EmployeeTable({
         return showAll ? data : data.filter((employee) => employee.active);
     }, [data, showAll]);
 
-    console.log(filteredData)
-
     const columns: ColumnDef<Employee, any>[] = [
         {
             accessorFn: (row) => `${row.first_name} ${row.last_name || ''}`,

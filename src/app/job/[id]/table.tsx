@@ -59,17 +59,20 @@ type LumberCost = {
 
 interface JobTableProps {
     data: LumberCost[];
+    jn : number;
     onEdit: (lumbersheet: LumberCost) => void;
     onDelete: (lumbersheetId: number) => void;
     onAddNew: () => void;
     isLoading: boolean;
 }
 
-export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
+export function JobTable({ data, jn, onEdit, onDelete, onAddNew, isLoading = false }: JobTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState('')
     const [columnVisibility, setColumnVisibility] = React.useState({})
+
+    console.log(jn)
 
     const generateLumberCostReport = async () => {
         try {
@@ -78,7 +81,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data }),
+                body: JSON.stringify({ data, jn }),
             });
 
             if (response.ok) {
@@ -92,7 +95,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
             } else {
                 console.error('Failed to generate PDF');
             }
-        } catch (error) { 
+        } catch (error) {
             console.log(`Error: ${error}`);
         }
     };
@@ -104,7 +107,7 @@ export function JobTable({ data, onEdit, onDelete, onAddNew, isLoading = false }
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data }),
+                body: JSON.stringify({ data, jn }),
             });
 
             if (response.ok) {

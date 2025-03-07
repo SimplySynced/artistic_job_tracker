@@ -45,7 +45,6 @@ export async function DELETE(
     try {
         const { id } = await params
         const jobnum = Number(id)
-        console.log(jobnum)
         // Delete Lumber Cost
         await prisma.jobLumberCost.deleteMany({
             where: { job_number: jobnum },

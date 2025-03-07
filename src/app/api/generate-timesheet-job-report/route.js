@@ -1,7 +1,9 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function POST(req) {
+  //console.log(req)
   const body = await req.json();
+  const jn = body.jn;
   const data = body.data;
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -15,37 +17,39 @@ export async function POST(req) {
   const fnTime = `${String(today.getHours()).padStart(2, '0')}-${String(
     today.getMinutes()
   ).padStart(2, '0')}`;
-  const jobnum = body.data[0]?.job_number;
 
   // Fetch job information
   let jobInfo = {};
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jobnum}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jn}`
     );
+    //console.log(response)
     if (response.ok) {
       jobInfo = await response.json();
     } else {
-      console.error(`Failed to fetch job info for job number ${jobnum}`);
+      console.error(`Failed to fetch job info for job number ${jn}`);
     }
   } catch (error) {
     console.error(`Error fetching job info: ${error.message}`);
   }
 
+  //console.log(jobInfo)
+
   const jobDetails = jobInfo
-    ? `${jobInfo[0].job_number || ''} - ${jobInfo[0].job_location || ''} - ${jobInfo[0].job_customer || ''} - ${jobInfo[0].job_address || ''}`
+    ? `${jobInfo[0].job_number || ' '} - ${jobInfo[0].job_location || ' '} - ${jobInfo[0].job_customer || ' '} - ${jobInfo[0].job_address || ' '}`
     : 'Job Information Unavailable';
 
   // Fetch timesheet information
   let timesheetInfo = [];
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobtimesheet/${jobnum}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobtimesheet/${jn}`
     );
     if (response.ok) {
       timesheetInfo = await response.json();
     } else {
-      console.error(`Failed to fetch job timesheet for job ${jobnum}`);
+      console.error(`Failed to fetch job timesheet for job ${jn}`);
     }
   } catch (error) {
     console.error(`Error fetching job timesheet info: ${error.message}`);
@@ -85,8 +89,8 @@ export async function POST(req) {
     grandTotalCost += laborCost;
   }
 
-   // Helper function: Format a number with commas and exactly two decimal places.
-   function formatNumberField(value) {
+  // Helper function: Format a number with commas and exactly two decimal places.
+  function formatNumberField(value) {
     const num = parseFloat(value);
     if (!isNaN(num)) {
       return new Intl.NumberFormat('en-US', {

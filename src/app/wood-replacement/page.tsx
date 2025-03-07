@@ -107,8 +107,6 @@ export default function TimeManagement() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const woodInfo = woods.find((item) => item.id ===  Number(formData.wood_id));
-    console.log(woodInfo)
-    //console.log(formData)
 
     try {
       // Update the formData with calculated hours and minutes

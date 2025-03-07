@@ -17,7 +17,6 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    console.log(data)
     const addWood = await prisma.woodTypes.create({
       data: {
         ...data,

@@ -153,9 +153,6 @@ export default function TimeManagement() {
     const fpp = Math.round(itbf + .5);
     const totalboardfoot = itbf * formData.quantity;
     const total_cost = formData.quantity * fpp * replaceData[0].replacement;
-    console.log(total_cost
-
-    )
 
     const finalData = {
       ...formData,
@@ -192,7 +189,6 @@ export default function TimeManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalData),
       });
-      //console.log(response)
 
       if (!response.ok) throw new Error('Failed to save lumber cost.');
 
@@ -204,7 +200,6 @@ export default function TimeManagement() {
       fetchData(`/api/job/${id}`, setLumberCost, z.array(LumberCostSchema));
       handleModalClose();
     } catch (error) {
-      //console.log(error)
       if (error instanceof z.ZodError) {
         setFormErrors(error.flatten().fieldErrors);
       } else {
@@ -253,6 +248,7 @@ export default function TimeManagement() {
 
       <JobTable
         data={lumbercosts}
+        jn={Number(id)}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onAddNew={handleAddNew}

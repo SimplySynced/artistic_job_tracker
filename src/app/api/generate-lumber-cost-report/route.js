@@ -2,6 +2,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function POST(req) {
   const body = await req.json();
+  const jn = body.jn;
   const data = body.data;
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -15,18 +16,17 @@ export async function POST(req) {
   const fnTime = `${String(today.getHours()).padStart(2, '0')}-${String(
     today.getMinutes()
   ).padStart(2, '0')}`;
-  const jobnum = body.data[0]?.job_number;
 
   // Fetch job information from /api/jobs/[id]
   let jobInfo = {};
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jobnum}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/jobs/${jn}`
     );
     if (response.ok) {
       jobInfo = await response.json();
     } else {
-      console.error(`Failed to fetch job info for job number ${jobnum}`);
+      console.error(`Failed to fetch job info for job number ${jn}`);
     }
   } catch (error) {
     console.error(`Error fetching job info: ${error.message}`);
