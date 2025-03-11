@@ -49,7 +49,7 @@
   },
   "name": "artistic_job_tracker",
   "prisma": {
-    "schema": "./prisma/schema.prisma"
+    "schema": "/prisma/schema.prisma"
   },
   "private": true,
   "scripts": {
