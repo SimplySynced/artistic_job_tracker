@@ -19,6 +19,9 @@ jobs:
     steps:
     - setup
     - run:
+      name: Enable Corepack
+      command: corepack enable --install-directory="/home/circleci/bin"
+    - run:
         name: Get version from package.json
         command: |
           CURR_VER="$(cat package.json | jq -r .version)"
