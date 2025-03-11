@@ -48,7 +48,6 @@
     "typescript": "^5.7.2"
   },
   "name": "artistic_job_tracker",
-  "packageManager": "yarn@4.5.1",
   "prisma": {
     "schema": "prisma/schema.prisma"
   },
