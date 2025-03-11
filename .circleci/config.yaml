@@ -19,8 +19,8 @@ jobs:
     steps:
     - setup
     - run:
-      name: Enable Corepack
-      command: corepack enable --install-directory="/home/circleci/bin"
+        name: Enable Corepack
+        command: corepack enable --install-directory="/home/circleci/bin"
     - run:
         name: Get version from package.json
         command: |
