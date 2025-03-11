@@ -1,10 +1,10 @@
 # Install dependencies only when needed
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
-WORKDIR /app
+# WORKDIR /app
 COPY package.json ./
 RUN yarn config set network-timeout 100000
-RUN yarn install 
+RUN yarn install
 
 # Rebuild the source code only when needed
 FROM node:20-alpine AS builder
