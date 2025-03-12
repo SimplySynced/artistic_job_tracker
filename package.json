@@ -48,9 +48,6 @@
     "typescript": "^5.7.2"
   },
   "name": "artistic_job_tracker",
-  "prisma": {
-    "schema": "prisma/schema.prisma"
-  },
   "private": true,
   "scripts": {
     "build": "next build",
