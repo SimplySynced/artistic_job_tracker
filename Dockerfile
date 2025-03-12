@@ -2,7 +2,7 @@
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /src/app
-COPY package.json ./
+COPY package.json package-lock.json ./
 RUN yarn config set network-timeout 100000
 RUN yarn install
 
