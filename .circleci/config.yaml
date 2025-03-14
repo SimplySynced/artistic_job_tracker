@@ -15,7 +15,7 @@ jobs:
   build-and-deploy:
     machine:
       image: ubuntu-2204:current
-    resource_class: arm.medium
+    resource_class: medium
     steps:
     - setup
     - run:
