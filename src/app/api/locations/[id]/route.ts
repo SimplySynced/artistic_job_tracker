@@ -3,12 +3,14 @@ import prisma from '@/lib/prisma';
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
         const data = await request.json();
+        const { id } = await params
+        const laborcode = Number(id)
         const location = await prisma.locations.update({
-            where: { id: parseInt(params.id) },
+            where: { id: laborcode },
             data: {
                 ...data,
             },
@@ -21,11 +23,13 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
+        const { id } = await params
+        const laborcode = Number(id)
         await prisma.locations.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: laborcode },
         });
         return NextResponse.json({ message: 'Employee deleted successfully' });
     } catch (error) {

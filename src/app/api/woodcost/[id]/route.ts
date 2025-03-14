@@ -3,12 +3,14 @@ import prisma from '@/lib/prisma';
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
         const data = await request.json();
+        const { id } = await params
+        const woodcost = Number(id)
         const wood = await prisma.woodTypes.update({
-            where: { id: parseInt(params.id) },
+            where: { id: woodcost },
             data: {
                 ...data,
                 updated_by: data.updated_by || 'system', // Default value
@@ -22,11 +24,13 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
+        const { id } = await params
+        const woodcost = Number(id)
         await prisma.woodTypes.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: woodcost },
         });
         return NextResponse.json({ message: 'Wood Type deleted successfully' });
     } catch (error) {

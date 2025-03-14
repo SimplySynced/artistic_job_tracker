@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     try {
         // Update the user information in the database
         const updatedUser = await prisma.user.update({
-            where: { email: session?.user?.email },
+            where: { email: session?.user?.email ?? '' },
             data: { name, email },
         });
 

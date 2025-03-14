@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: number } } // Adjust the type to string
+    { params }: {params: Promise<{ id: string }>}// Adjust the type to string
 ) {
     try {
         const { id } = await params
@@ -21,12 +21,14 @@ export async function GET(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
         const data = await request.json();
+        const { id } = await params
+        const laborcode = Number(id)
         const job_labor_code = await prisma.jobLaborCodes.update({
-            where: { id: parseInt(params.id) },
+            where: { id: laborcode },
             data: {
                 ...data,
             },
@@ -39,11 +41,13 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
+        const { id } = await params
+        const laborcode = Number(id)
         await prisma.jobLaborCodes.delete({
-            where: { id: parseInt(params.id) },
+            where: { id: laborcode },
         });
         return NextResponse.json({ message: 'Labor code deleted successfully' });
     } catch (error) {

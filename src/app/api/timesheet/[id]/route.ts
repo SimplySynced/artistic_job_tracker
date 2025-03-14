@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: number } } // Adjust the type to string
+    { params }: { params: Promise<{ id: string }> } // Adjust the type to string
 ) {
     try {
         const { id } = await params
@@ -59,7 +59,7 @@ export async function POST(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
         const { id } = await params
@@ -80,7 +80,7 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }>}
 ) {
     try {
         const { id } = await params

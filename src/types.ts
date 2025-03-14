@@ -216,7 +216,7 @@ export type WoodReplacementFormData = {
 
 // Zod schema for Labor Codes
 export const LaborCodeSchema = z.object({
-    id: z.number().optional(),
+    id: z.number(),
     job_labor_code: z.number(),
     description: z.string().min(1, "Description is required"),
     location: z.string(),
