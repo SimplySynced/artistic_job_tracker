@@ -4,7 +4,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json yarn-lock.json ./
 RUN yarn config set network-timeout 100000
-RUN yarn install 
+RUN yarn install
 
 # Rebuild the source code only when needed
 FROM node:20-alpine AS builder

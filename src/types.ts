@@ -232,3 +232,9 @@ export type LaborCodeFormData = {
     description: string;
     location: string;
 };
+
+export const ForgotPasswordSchema = z.object({
+    email: z.string().email(),
+});
+
+export type ForgotPasswordData = z.infer<typeof ForgotPasswordSchema>;

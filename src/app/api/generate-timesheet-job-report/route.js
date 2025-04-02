@@ -190,9 +190,18 @@ export async function POST(req) {
     } catch (error) {
       console.error(`Error fetching employee info: ${error.message}`);
     }
-    const empDetails = employeeInfo
-      ? `${employeeInfo.data.first_name || ''} ${employeeInfo.data.nick_name || ''} ${employeeInfo.data.last_name || ''}`
-      : 'Employee Information Unavailable';
+    console.log(employeeInfo)
+
+    let empDetails = '';
+    if (!employeeInfo || !employeeInfo.data) {
+      console.log('NO EMPLOYEE INFO');
+      empDetails = 'Employee Information Unavailable';
+
+    } else {
+      empDetails = employeeInfo
+        ? `${employeeInfo.data.first_name || ''} ${employeeInfo.data.nick_name || ''} ${employeeInfo.data.last_name || ''}`
+        : 'Employee Information Unavailable';
+    }
 
     // Draw the employee header in bold.
     drawText(`Employee: ${empDetails || ''}`, margin, yPosition, fontSize, page, boldFont);
@@ -257,7 +266,7 @@ export async function POST(req) {
       boldFont
     );
     yPosition -= 20;
-    
+
     // Add extra vertical padding between employee sections.
     yPosition -= 15;
   }

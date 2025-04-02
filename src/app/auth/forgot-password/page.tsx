@@ -91,7 +91,7 @@ export default function LoginPage() {
                 <CardFooter className="flex justify-center">
                     <div>
                         <p className="text-sm text-gray-500">
-                            Don’t have an account? &nbsp;
+                            Don’t have an account?{" "}
                             <a href="/auth/signup" className="text-blue-500 hover:underline">
                                 Sign up
                             </a>

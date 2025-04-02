@@ -182,7 +182,7 @@ export default function TimeManagement() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const addedDate = new Date().toISOString();
+    const addedDate = new Date().toISOString().split('T')[0]; // => '2025-03-31'
 
     try {
       const { hours, minutes } = calculateTimeDifference(formData.begin_time, formData.end_time);
