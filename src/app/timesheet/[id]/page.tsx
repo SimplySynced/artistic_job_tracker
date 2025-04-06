@@ -89,7 +89,7 @@ export default function TimeManagement() {
           const laborCodesData = await laborCodesResponse.json();
           const timesheetData = await timesheetResponse.json();
 
-          setEmployeeInfo(employeeData);
+          setEmployeeInfo(employeeData.data);
           setLaborCodes(laborCodesData);
           setTimeSheets(timesheetData);
         } catch (error) {
@@ -198,8 +198,8 @@ export default function TimeManagement() {
         minutes,
         begin_time: beginDateTime,
         end_time: endDateTime,
-        employee_id: employeeInfo?.data.id || 0,
-        pay_rate: employeeInfo?.data.pay_rate || 0,
+        employee_id: employeeInfo?.id || 0,
+        pay_rate: employeeInfo?.pay_rate || 0,
         job_number: Number(formData.job_number),
         job_code: Number(formData.job_code),
         job_code_description: jcd,
@@ -210,7 +210,7 @@ export default function TimeManagement() {
 
       const url = editingTimeSheet
         ? `/api/timesheet/${editingTimeSheet.id}`
-        : `/api/timesheet/${employeeInfo?.data.id}`;
+        : `/api/timesheet/${employeeInfo?.id}`;
       const method = editingTimeSheet ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -226,7 +226,7 @@ export default function TimeManagement() {
         description: `Timesheet ${editingTimeSheet ? 'updated' : 'added'} successfully.`,
       });
 
-      fetchData(`/api/timesheet/${employeeInfo?.data.id}`, setTimeSheets, z.array(TimeSheetSchema));
+      fetchData(`/api/timesheet/${employeeInfo?.id}`, setTimeSheets, z.array(TimeSheetSchema));
       handleModalClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -279,9 +279,9 @@ export default function TimeManagement() {
     <div className="max-w-screen-2xl mx-auto py-4 space-y-6">
       <div className="justify-between items-center">
         <h1 className="text-xl md:text-3xl font-bold">
-          Timesheet for {employeeInfo.data.first_name} {employeeInfo.data.nick_name} {employeeInfo.data.last_name}
+          Timesheet for {employeeInfo.first_name} {employeeInfo.nick_name} {employeeInfo.last_name}
         </h1>
-        <h3 className="text-md md:text-lg">Location: {employeeInfo.data.location}</h3>
+        <h3 className="text-md md:text-lg">Location: {employeeInfo.location}</h3>
       </div>
 
       <TimeSheetTable
