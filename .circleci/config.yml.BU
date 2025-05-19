@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-node:
     # Build node project
-    executor: node/default
+    executor: node/defaulta
     steps:
       - checkout
       - node/install-packages:
