@@ -2,8 +2,14 @@
 FROM node:20.11-alpine3.20 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+# copy manifest + schema so `prisma generate` can run
 COPY package.json yarn.lock ./
 COPY prisma ./prisma
+<<<<<<< HEAD
+=======
+
+>>>>>>> 68ff535946c5aba15bbca529890669797faba9c3
 RUN yarn config set network-timeout 100000
 RUN yarn install
 
