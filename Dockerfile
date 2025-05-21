@@ -1,5 +1,5 @@
 # Install dependencies only when needed
-FROM node:20.11-alpine3.20 AS deps
+FROM node:24-alpine3.20 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN yarn config set network-timeout 100000
 RUN yarn install
 
 # Rebuild the source code only when needed
-FROM node:20.11-alpine3.20 AS builder
+FROM node:24-alpine3.20 AS builder
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ COPY . .
 RUN yarn build
 
 # Production image, copy all the files and run next
-FROM node:20.11-alpine3.20 AS runner
+FROM node:24-alpine3.20 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
